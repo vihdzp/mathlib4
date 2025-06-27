@@ -61,6 +61,7 @@ theorem eventuallyEq_zero_nhdsNE_of_eventuallyEq_zero_codiscreteWithin (hf : Mer
   filter_upwards
   intro a
   simp_rw [Pi.zero_apply]
+  -- TODO set application abuse
   rw [(by rfl : ({x | f x = 0} ∪ Uᶜ) a ↔ a ∈ {x | f x = 0} ∪ Uᶜ)]
   simp_all
 
