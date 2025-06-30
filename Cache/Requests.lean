@@ -32,21 +32,24 @@ def extractRepoFromUrl (url : String) : Option String := do
 Helper function to get repository from a remote name
 -/
 def getRepoFromRemote (mathlibDepPath : FilePath) (remoteName : String) (errorContext : String) : IO String := do
+  /-IO.println s!"here in getRepoFromRemote"
+
   let out ← IO.Process.output
     {cmd := "git", args := #["remote", "get-url", remoteName], cwd := mathlibDepPath}
   unless out.exitCode == 0 do
     throw <| IO.userError s!"\
       Failed to run Git to determine Mathlib's repository from {remoteName} remote (exit code: {out.exitCode}).\n\
       {errorContext}\n\
-      Stdout:\n{out.stdout.trim}\nStderr:\n{out.stderr.trim}\n"
+      Stdout:\n{out.stdout.trim}\nStderr:\n{out.stderr.trim}\n"-/
 
-  if let some repo := extractRepoFromUrl out.stdout.trim then
+  if let some repo := extractRepoFromUrl remoteName then
+    IO.println s!"Identified repo {repo}"
     return repo
   else
     throw <| IO.userError s!"\
       Failed to determine Mathlib's repository from {remoteName} remote URL.\n\
       {errorContext}\n\
-      Detected URL: {out.stdout.trim}"
+      Detected URL: {remoteName}"
 
 /--
 Finds the remote name that points to `leanprover-community/mathlib4` repository.
@@ -135,17 +138,20 @@ def getRemoteRepo (mathlibDepPath : FilePath) : IO RepoInfo := do
       IO.println s!"Using cache from nightly-testing remote: {repo}"
       return {repo := repo, useFirst := true}
 
+    IO.println s!"Here"
     -- Only search for PR refs if we're not on a regular branch like master, bump/*, or nightly-testing*
     let isSpecialBranch := branchName == "master" || branchName.startsWith "bump/" ||
                           branchName.startsWith "nightly-testing"
 
     -- Check if the current commit coincides with any PR ref
     if !isSpecialBranch then
+      IO.println s!"not special branch"
       let mathlibRemoteName ← findMathlibRemote mathlibDepPath
       let currentCommit ← IO.Process.output
         {cmd := "git", args := #["rev-parse", "HEAD"], cwd := mathlibDepPath}
 
       if currentCommit.exitCode == 0 then
+        IO.println s!"no exit code"
         let commit := currentCommit.stdout.trim
         -- Get all PR refs that contain this commit
         let prRefPattern := s!"refs/remotes/{mathlibRemoteName}/pr/*"
@@ -169,11 +175,15 @@ def getRemoteRepo (mathlibDepPath : FilePath) : IO RepoInfo := do
                           let repo := s!"{login}/mathlib4"
                           IO.println s!"Using cache from PR #{prNum} source: {login}/{repoName} (commit {commit.take 8} found in PR ref)"
                           let useFirst := if login != "leanprover-community" then true else false
+                          IO.println s!"Identified repo2 {repo}"
                           return {repo := repo, useFirst := useFirst}
 
+  IO.println s!"here again"
   -- Fall back to using the remote that the current branch is tracking
   let trackingRemote ← IO.Process.output
     {cmd := "git", args := #["config", "--get", s!"branch.{currentBranch.stdout.trim}.remote"], cwd := mathlibDepPath}
+
+  IO.println s!"here again 2, with {trackingRemote.stdout}"
 
   let remoteName := if trackingRemote.exitCode == 0 then
     trackingRemote.stdout.trim
@@ -184,6 +194,7 @@ def getRemoteRepo (mathlibDepPath : FilePath) : IO RepoInfo := do
   let repo ← getRepoFromRemote mathlibDepPath remoteName
     s!"Ensure Git is installed and the '{remoteName}' remote points to its GitHub repository."
   IO.println s!"Using cache from {remoteName}: {repo}"
+  IO.println s!"Identified repo2 {repo}"
   return {repo := repo, useFirst := false}
 
 -- FRO cache is flaky so disable until we work out the kinks: https://leanprover.zulipchat.com/#narrow/channel/113488-general/topic/The.20cache.20doesn't.20work/near/411058849
