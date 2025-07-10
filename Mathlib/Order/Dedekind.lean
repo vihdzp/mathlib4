@@ -92,7 +92,7 @@ theorem toElement_ofElement (x : γ) : (ofElement x).toElement = x := by
 /-- The **fundamental theorem of concept lattices**: every complete lattice is order-isomorphic to
 the concept lattice of its `≤` relation. -/
 @[simps!]
-def _root_.dedekindCutEquiv (γ : Type*) [CompleteLattice γ] : γ ≃o DedekindCut γ where
+def _root_.dedekindCutEquiv : γ ≃o DedekindCut γ where
   toFun := ofElement
   invFun := toElement
   map_rel_iff' := by simp
@@ -101,7 +101,7 @@ def _root_.dedekindCutEquiv (γ : Type*) [CompleteLattice γ] : γ ≃o Dedekind
 
 @[simp]
 theorem toElement_le_toElement {A B : DedekindCut γ} : toElement A ≤ toElement B ↔ A ≤ B :=
-  (dedekindCutEquiv γ).symm.le_iff_le
+  dedekindCutEquiv.symm.le_iff_le
 
 @[simp]
 theorem toElement_lt_toElement {A B : DedekindCut γ} : toElement A < toElement B ↔ A < B := by
