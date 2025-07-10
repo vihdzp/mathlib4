@@ -55,7 +55,7 @@ theorem ofElement_le_ofElement {a b : α} : ofElement a ≤ ofElement b ↔ a �
   simp [← fst_subset_fst_iff]
 
 @[simp]
-theorem ofElement_lt_ofElement {a b : β} : ofElement a < ofElement b ↔ a < b := by
+theorem ofElement_lt_ofElement {a b : α} : ofElement a < ofElement b ↔ a < b := by
   simp [lt_iff_le_not_ge]
 
 @[simp]
