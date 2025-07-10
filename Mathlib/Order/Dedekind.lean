@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Violeta Hernández Palacios
 -/
 import Mathlib.Order.Concept
+import Mathlib.Order.ConditionallyCompleteLattice.Basic
 
 /-!
 # Dedekind-MacNeille completion
@@ -69,6 +70,46 @@ def ofElementEmbedding : β ↪o DedekindCut β where
   map_rel_iff' := ofElement_le_ofElement
 
 @[simp] theorem ofElementEmbedding_coe : ⇑(@ofElementEmbedding β _) = ofElement := rfl
+
+/-- In a complete lattice, the map `DedekindCut.toElement` has an inverse. -/
+def toElement (A : DedekindCut γ) : γ := sSup A.fst
+
+theorem toElement_eq_sSup (A : DedekindCut γ) : toElement A = sSup A.fst := rfl
+theorem toElement_eq_sInf (A : DedekindCut γ) : toElement A = sInf A.snd := by
+  apply le_antisymm <;>
+    simpa [toElement, sInf_le_iff, le_sSup_iff] using fun x hx y hy ↦ rel_fst_snd hy hx
+
+@[simp]
+theorem ofElement_toElement (A : DedekindCut γ) : ofElement A.toElement = A := by
+  ext
+  conv_rhs => rw [← lowerBounds_snd, mem_lowerBounds]
+  simp [toElement, le_sSup_iff]
+
+@[simp]
+theorem toElement_ofElement (x : γ) : (ofElement x).toElement = x := by
+  simp [toElement, ofElement]
+
+/-- The **fundamental theorem of concepts**: every complete lattice is order-isomorphic to the
+concept lattice of its `≤` relation. -/
+@[simps!]
+def _root_.dedekindCutEquiv (γ : Type*) [CompleteLattice γ] : γ ≃o DedekindCut γ where
+  toFun := ofElement
+  invFun := toElement
+  map_rel_iff' := by simp
+  left_inv _ := by simp
+  right_inv _ := by simp
+
+@[simp]
+theorem toElement_le_toElement {A B : DedekindCut γ} : toElement A ≤ toElement B ↔ A ≤ B :=
+  (dedekindCutEquiv γ).symm.le_iff_le
+
+@[simp]
+theorem toElement_lt_toElement {A B : DedekindCut γ} : toElement A < toElement B ↔ A < B := by
+  simp [lt_iff_le_not_ge]
+
+@[simp]
+theorem toElement_inj {A B : DedekindCut γ} : toElement A = toElement B ↔ A = B := by
+  simp [le_antisymm_iff]
 
 /-- Any order embedding `β ↪o γ` into a complete lattice factors through `DedekindCut β`.
 
