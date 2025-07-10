@@ -21,10 +21,6 @@ the concept lattice of its `≤`.
 Concept lattices are usually defined from a *context*, that is the triple `(α, β, r)`, but the type
 of `r` determines `α` and `β` already, so we do not define contexts as a separate object.
 
-## TODO
-
-Prove the fundamental theorem of concept lattices.
-
 ## References
 
 * [Davey, Priestley *Introduction to Lattices and Order*][davey_priestley]
