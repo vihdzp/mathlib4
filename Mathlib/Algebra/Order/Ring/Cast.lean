@@ -100,12 +100,9 @@ lemma nneg_mul_add_sq_of_abs_le_one (n : ℤ) (hx : |x| ≤ 1) : (0 : R) ≤ n *
   · simp [le_total 0 x]
   · exact Or.inl ⟨mod_cast h.le, hnx h⟩
 
--- TODO: move to a better place
 omit [LinearOrder R] [IsStrictOrderedRing R] in
-lemma cast_natAbs : (n.natAbs : R) = |n| := by
-  cases n
-  · simp
-  · rw [abs_eq_natAbs, natAbs_negSucc, cast_succ, cast_natCast, cast_succ]
+@[deprecated Nat.cast_natAbs (since := "2025-08-10")]
+lemma cast_natAbs : (n.natAbs : R) = |n| := Nat.cast_natAbs n
 
 end LinearOrderedRing
 end Int
