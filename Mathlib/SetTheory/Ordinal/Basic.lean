@@ -520,6 +520,10 @@ noncomputable def enumIsoToType (o : Ordinal) : Set.Iio o ≃o o.toType where
   right_inv _ := enum_typein _ _
   map_rel_iff' := enum_le_enum' _
 
+@[simp]
+theorem enumIsoToType_symm_lt (o : Ordinal) (a) : (enumIsoToType o).symm a < o :=
+  ((enumIsoToType o).symm a).2
+
 instance small_Iio (o : Ordinal.{u}) : Small.{u} (Iio o) :=
   ⟨_, ⟨(enumIsoToType _).toEquiv⟩⟩
 

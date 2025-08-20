@@ -279,6 +279,9 @@ theorem succ_zero : succ (0 : Cardinal) = 1 := by norm_cast
 -- This works generally to prove inequalities between numeric cardinals.
 theorem one_lt_two : (1 : Cardinal) < 2 := by norm_cast
 
+theorem le_one_iff {x : Cardinal} : x ≤ 1 ↔ x = 0 ∨ x = 1 := by
+  rw [← succ_zero, Order.le_succ_iff_eq_or_le, nonpos_iff_eq_zero, or_comm]
+
 theorem exists_finset_le_card (α : Type*) (n : ℕ) (h : n ≤ #α) :
     ∃ s : Finset α, n ≤ s.card := by
   obtain hα|hα := finite_or_infinite α
