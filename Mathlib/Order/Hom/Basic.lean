@@ -910,6 +910,15 @@ theorem le_symm_apply (e : α ≃o β) {x : α} {y : β} : x ≤ e.symm y ↔ e 
 theorem symm_apply_le (e : α ≃o β) {x : α} {y : β} : e.symm y ≤ x ↔ y ≤ e x :=
   e.symm_apply_rel
 
+/-- `ULift.up` as an `OrderIso`. -/
+@[simps]
+def uLift : α ≃o ULift α where
+  toFun x := ULift.up x
+  invFun x := x.down
+  left_inv _ := rfl
+  right_inv _ := rfl
+  map_rel_iff' := .rfl
+
 end LE
 
 variable [Preorder α] [Preorder β]

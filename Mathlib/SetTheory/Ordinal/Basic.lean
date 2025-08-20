@@ -151,6 +151,18 @@ theorem _root_.RelIso.ordinal_type_eq {α β} {r : α → α → Prop} {s : β �
     [IsWellOrder β s] (h : r ≃r s) : type r = type s :=
   type_eq.2 ⟨h⟩
 
+theorem typeLT_eq {α β} [LinearOrder α] [WellFoundedLT α] [LinearOrder β] [WellFoundedLT β] :
+    typeLT α = typeLT β ↔ Nonempty (α ≃o β) := by
+  rw [type_eq]
+  constructor <;> rintro ⟨e⟩
+  · exact ⟨OrderIso.ofRelIsoLT e⟩
+  · exact ⟨e.toRelIsoLT⟩
+
+theorem _root_.OrderIso.ordinal_type_eq {α β}
+    [LinearOrder α] [WellFoundedLT α] [LinearOrder β] [WellFoundedLT β] (h : α ≃o β) :
+    typeLT α = typeLT β :=
+  typeLT_eq.2 ⟨h⟩
+
 theorem type_eq_zero_of_empty (r) [IsWellOrder α r] [IsEmpty α] : type r = 0 :=
   (RelIso.relIsoOfIsEmpty r _).ordinal_type_eq
 
