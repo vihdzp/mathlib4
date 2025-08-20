@@ -181,7 +181,7 @@ theorem _root_.Order.cof_Iio_ordinal (o : Ordinal.{u}) :
 theorem lift_cof (o) : Cardinal.lift.{u, v} (cof o) = cof (Ordinal.lift.{u, v} o) := by
   refine inductionOnWellOrder o fun α _ _ ↦ ?_
   rw [← typeLT_uLift, cof_type, cof_type, ← Cardinal.lift_id'.{v, u} (Order.cof (ULift _)),
-    ← Cardinal.lift_umax, OrderIso.uLift.cof_eq_lift]
+    ← Cardinal.lift_umax, ← OrderIso.uLift.cof_eq_lift]
 
 theorem cof_le_card (o : Ordinal) : cof o ≤ card o := by
   rw [← cof_toType, ← mk_toType]

@@ -630,6 +630,11 @@ theorem type_lift_preimage (r : α → α → Prop) [IsWellOrder α r]
     (f : β ≃ α) : lift.{u} (type (f ⁻¹'o r)) = lift.{v} (type r) :=
   (RelIso.preimage f r).ordinal_lift_type_eq
 
+theorem _root_.OrderIso.ordinal_lift_type_eq
+    [LinearOrder α] [WellFoundedLT α] [LinearOrder β] [WellFoundedLT β] (f : α ≃o β) :
+    lift.{v} (typeLT α) = lift.{u} (typeLT β) :=
+  f.toRelIsoLT.ordinal_lift_type_eq
+
 /-- `lift.{max u v, u}` equals `lift.{v, u}`.
 
 Unfortunately, the simp lemma doesn't seem to work. -/
@@ -737,6 +742,11 @@ theorem le_lift_iff {a : Ordinal.{u}} {b : Ordinal.{max u v}} :
 theorem lt_lift_iff {a : Ordinal.{u}} {b : Ordinal.{max u v}} :
     b < lift.{v} a ↔ ∃ a' < a, lift.{v} a' = b :=
   liftInitialSeg.lt_apply_iff
+
+@[simp]
+theorem typeLT_uLift [LinearOrder α] [WellFoundedLT α] :
+    typeLT (ULift.{v} α) = lift.{v} (typeLT α) := by
+  rw [← lift_id'.{u, v} (typeLT _), OrderIso.uLift.{u, v}.ordinal_lift_type_eq, lift_umax.{u, v}]
 
 /-! ### The first infinite ordinal ω -/
 
