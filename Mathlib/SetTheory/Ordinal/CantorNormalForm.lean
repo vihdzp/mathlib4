@@ -248,10 +248,25 @@ def eval (f : Ordinal →₀ Ordinal) (b : Ordinal) : Ordinal :=
 theorem eval_zero (b : Ordinal) : eval 0 b = 0 := by
   simp [eval]
 
-@[simp]
-theorem eval_single (e c b : Ordinal) : eval (single e c) b = b ^ e * c := by
+theorem eval_single_add {e c : Ordinal} {f : Ordinal →₀ Ordinal} (b : Ordinal)
+    (h : ∀ e' ∈ f.support, e' < e) : eval (single e c + f) b = b ^ e * c + eval f b := by
+  have he : e ∉ f.support := fun he ↦ (h e he).false
   obtain rfl | hc := eq_or_ne c 0
   · simp
-  · simp [eval, support_single_ne_zero e hc]
+  · rw [eval, Finsupp.support_single_add he hc, Finset.sort_cons _ (fun e he ↦ (h e he).le)]
+    simp_rw [coe_add, Pi.add_apply, map_cons, single_eq_same, notMem_support_iff.1 he,
+      add_zero, sum_cons, add_right_inj]
+    apply congrArg _ (List.map_eq_map_iff.2 _)
+    aesop (add simp [single_apply])
+
+@[simp]
+theorem eval_single (e c b : Ordinal) : eval (single e c) b = b ^ e * c := by
+  rw [← add_zero (single e c), eval_single_add] <;> simp
+
+theorem eval_lt_opow {e b : Ordinal} {f : Ordinal →₀ Ordinal}
+    (h : ∀ e' ∈ f.support, e' < e) (hf : ∀ e', f e' < b) : eval f b < b ^ e := by
+  induction f using Finsupp.induction_on_max generalizing e with
+  | zero =>
+
 
 end Ordinal.CNF
