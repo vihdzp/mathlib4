@@ -272,10 +272,10 @@ lemma induction_on_max₂ (f : ι →₀ M) (zero : p 0)
 /-- A finitely supported function can be built by adding up `single a b` for decreasing `a`.
 
 The lemma `induction_on_min` swaps the argument order in the sum. -/
-lemma induction_on_min₂ (f : ι →₀ M) (h0 : p 0)
-    (ha : ∀ (a b) (f : ι →₀ M), (∀ c ∈ f.support, a < c) → b ≠ 0 → p f → p (f + single a b)) :
+lemma induction_on_min₂ (f : ι →₀ M) (zero : p 0)
+    (add_single : ∀ a b (f : ι →₀ M), (∀ c ∈ f.support, a < c) → b ≠ 0 → p f → p (f + single a b)) :
     p f :=
-  induction_on_max₂ (ι := ιᵒᵈ) f h0 ha
+  induction_on_max₂ (ι := ιᵒᵈ) f zero add_single
 
 end LinearOrder
 
