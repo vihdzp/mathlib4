@@ -259,6 +259,13 @@ theorem eval_single_add {e c : Ordinal} {f : Ordinal →₀ Ordinal} (b : Ordina
     apply congrArg _ (List.map_eq_map_iff.2 _)
     aesop (add simp [single_apply])
 
+theorem eval_add_single {e c : Ordinal} {f : Ordinal →₀ Ordinal} (b : Ordinal)
+    (h : ∀ e' ∈ f.support, e' < e) : eval (f + single e c) b = b ^ e * c + eval f b := by
+  rw [add_comm_of_disjoint, eval_single_add b h]
+  rw [Finset.disjoint_iff_inter_eq_empty, Finset.eq_empty_iff_forall_notMem]
+  have h := fun e he ↦ (h e he).ne
+  aesop (add simp [single_apply, not_imp_not])
+
 @[simp]
 theorem eval_single (e c b : Ordinal) : eval (single e c) b = b ^ e * c := by
   rw [← add_zero (single e c), eval_single_add] <;> simp
@@ -267,6 +274,10 @@ theorem eval_lt_opow {e b : Ordinal} {f : Ordinal →₀ Ordinal}
     (h : ∀ e' ∈ f.support, e' < e) (hf : ∀ e', f e' < b) : eval f b < b ^ e := by
   induction f using Finsupp.induction_on_max generalizing e with
   | zero =>
+    rw [eval_zero]
+    exact opow_pos _ (hf 0)
+  | single_add a =>
+    sorry
 
 
 end Ordinal.CNF
