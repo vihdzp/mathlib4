@@ -3,6 +3,7 @@ Copyright (c) 2018 Mario Carneiro. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Mario Carneiro, Violeta Hernández Palacios
 -/
+import Mathlib.Data.Finset.Sort
 import Mathlib.Data.Finsupp.AList
 import Mathlib.SetTheory.Ordinal.Exponential
 import Mathlib.SetTheory.Ordinal.Family
@@ -236,5 +237,21 @@ theorem coeff_zero_left (o : Ordinal) : coeff 0 o = single 0 o :=
 @[simp]
 theorem coeff_one_left (o : Ordinal) : coeff 1 o = single 0 o :=
   coeff_of_le_one le_rfl o
+
+/-! ### Evaluate a Cantor normal form -/
+
+/-- Evaluate a `Finsupp` as a base-`b` Cantor normal form. -/
+def eval (f : Ordinal →₀ Ordinal) (b : Ordinal) : Ordinal :=
+  ((f.support.sort (· ≥ ·)).map fun e ↦ b ^ e * f e).sum
+
+@[simp]
+theorem eval_zero (b : Ordinal) : eval 0 b = 0 := by
+  simp [eval]
+
+@[simp]
+theorem eval_single (e c b : Ordinal) : eval (single e c) b = b ^ e * c := by
+  obtain rfl | hc := eq_or_ne c 0
+  · simp
+  · simp [eval, support_single_ne_zero e hc]
 
 end Ordinal.CNF
