@@ -261,10 +261,11 @@ theorem eval_single_add {e c : Ordinal} {f : Ordinal →₀ Ordinal} (b : Ordina
 
 theorem eval_add_single {e c : Ordinal} {f : Ordinal →₀ Ordinal} (b : Ordinal)
     (h : ∀ e' ∈ f.support, e' < e) : eval (f + single e c) b = b ^ e * c + eval f b := by
-  rw [add_comm_of_disjoint, eval_single_add b h]
-  rw [Finset.disjoint_iff_inter_eq_empty, Finset.eq_empty_iff_forall_notMem]
-  have h := fun e he ↦ (h e he).ne
-  aesop (add simp [single_apply, not_imp_not])
+  rw [(Finsupp.addCommute_of_disjoint _).eq, eval_single_add _ h]
+  simp_rw [Finset.disjoint_iff_inter_eq_empty, Finset.eq_empty_iff_forall_notMem, Finset.mem_inter]
+  rintro x ⟨hx₁, hx₂⟩
+  rw [mem_support_single] at hx₂
+  exact (h x hx₁).ne hx₂.1
 
 @[simp]
 theorem eval_single (e c b : Ordinal) : eval (single e c) b = b ^ e * c := by
@@ -276,8 +277,20 @@ theorem eval_lt_opow {e b : Ordinal} {f : Ordinal →₀ Ordinal}
   | zero =>
     rw [eval_zero]
     exact opow_pos _ (hf 0)
-  | single_add a =>
-    sorry
+  | single_add e' c f h' k IH =>
+    rw [eval_single_add _ h']
+    apply lt_of_lt_of_le (b := b ^ e' * (c + 1))
+    · rw [mul_add_one]
+      apply add_left_strictMono
+      apply IH h'
+      intro e
+      obtain rfl | he := eq_or_ne e' e
+      · convert (hf e).pos
+        rw [← notMem_support_iff]
+        exact fun he ↦ (h' _ he).false
+      · convert hf e using 1
+        rw [add_apply, single_apply, if_neg he, zero_add]
+    · have : c < b
 
 
 end Ordinal.CNF
