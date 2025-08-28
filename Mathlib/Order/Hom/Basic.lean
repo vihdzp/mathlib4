@@ -1066,20 +1066,16 @@ end Equiv
 namespace StrictMono
 
 variable [LinearOrder α] [Preorder β]
+variable (f : α → β) (h_mono : StrictMono f)
 
 /-- A strictly monotone function with a right inverse is an order isomorphism. -/
 @[simps -fullyApplied]
-def orderIsoOfRightInverse (f : α → β) (h_mono : StrictMono f)
-    (g : β → α) (hg : Function.RightInverse g f) : α ≃o β :=
+def orderIsoOfRightInverse (g : β → α) (hg : Function.RightInverse g f) : α ≃o β :=
   { OrderEmbedding.ofStrictMono f h_mono with
     toFun := f,
     invFun := g,
     left_inv := fun _ => h_mono.injective <| hg _,
     right_inv := hg }
-
-/-- A strictly monotone equivalence is an order isomorphism. -/
-abbrev orderIsoOfEquiv (f : α ≃ β) (h_mono : StrictMono f) : α ≃o β :=
-  orderIsoOfRightInverse f h_mono f.symm f.right_inv
 
 end StrictMono
 

@@ -297,14 +297,32 @@ theorem eval_strictMono {e b : Ordinal} {f g : Ordinal →₀ Ordinal}
     eval f b < eval g b :=
   sorry
 
-theorem eval_inj {e b : Ordinal} (hb : 1 < b) (o : Ordinal) :
+theorem eval_surjective {e b : Ordinal} (hb : 1 < b) (o : Ordinal) :
     ∃ f : Ordinal →₀ Ordinal, (∀ e', f e' < b) ∧ eval f b = o :=
   sorry
 
+/-- The Cantor Normal Form yields an order isomorphism between base-b ordinal expansions and
+the ordinals themselves. -/
 def evalIso {b : Ordinal} (hb : 1 < b) :
     {f : Lex (Ordinalᵒᵈ →₀ Ordinal) // ∀ e, ofLex f e < b} ≃o Ordinal := by
-  refine StrictMono.orderIsoOfRightInverse
-    (fun f ↦ eval (f.1.equivMapDomain OrderDual.ofDual) b) ?_ ?_ ?_
+  refine StrictMono.orderIsoOfRightInverse (fun f ↦ eval (f.1.equivMapDomain OrderDual.ofDual) b)
+    ?_ _ (@Function.rightInverse_invFun _ _ ?_ _ ?_)
+  · sorry
+  · sorry
+  · sorry
 
+@[simp]
+theorem evalIso_apply {b : Ordinal} (hb : 1 < b)
+    (f : {f : Lex (Ordinalᵒᵈ →₀ Ordinal) // ∀ e, ofLex f e < b}) :
+    evalIso hb f = eval (f.1.equivMapDomain OrderDual.ofDual) b :=
+  rfl
+
+private def evalIsoNatAux :
+    {f : Lex (Ordinalᵒᵈ →₀ Ordinal) // ∀ e, ofLex f e < ω} ≃o Lex (Ordinalᵒᵈ →₀ ℕ) where
+  toFun f := f.1.mapRange Ordinal.toNat
+
+/-- The Cantor Normal Form yields an order isomorphism between base-ω ordinal expansions and
+the ordinals themselves. -/
+def evalIsoNat : Lex (Ordinalᵒᵈ →₀ ℕ) ≃o Ordinal
 
 end Ordinal.CNF
