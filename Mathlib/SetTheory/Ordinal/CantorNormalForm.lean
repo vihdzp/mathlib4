@@ -5,6 +5,7 @@ Authors: Mario Carneiro, Violeta Hernández Palacios
 -/
 import Mathlib.Data.Finset.Sort
 import Mathlib.Data.Finsupp.AList
+import Mathlib.Data.Finsupp.WellFounded
 import Mathlib.SetTheory.Ordinal.Exponential
 import Mathlib.SetTheory.Ordinal.Family
 
@@ -262,8 +263,7 @@ theorem eval_single_add {e c : Ordinal} {f : Ordinal →₀ Ordinal} (b : Ordina
 theorem eval_add_single {e c : Ordinal} {f : Ordinal →₀ Ordinal} (b : Ordinal)
     (h : ∀ e' ∈ f.support, e' < e) : eval (f + single e c) b = b ^ e * c + eval f b := by
   rw [(Finsupp.addCommute_of_disjoint _).eq, eval_single_add _ h]
-  simp_rw [
-    , Finset.eq_empty_iff_forall_notMem, Finset.mem_inter]
+  simp_rw [Finset.disjoint_iff_inter_eq_empty, Finset.eq_empty_iff_forall_notMem, Finset.mem_inter]
   rintro x ⟨hx₁, hx₂⟩
   rw [mem_support_single] at hx₂
   exact (h x hx₁).ne hx₂.1
@@ -280,18 +280,31 @@ theorem eval_lt_opow {e b : Ordinal} {f : Ordinal →₀ Ordinal}
     exact opow_pos _ (hf 0)
   | single_add e' c f h' k IH =>
     rw [eval_single_add _ h']
-    apply lt_of_lt_of_le (b := b ^ e' * (c + 1))
-    · rw [mul_add_one]
-      apply add_left_strictMono
-      apply IH h'
-      intro e
-      obtain rfl | he := eq_or_ne e' e
-      · convert (hf e).pos
-        rw [← notMem_support_iff]
-        exact fun he ↦ (h' _ he).false
+    refine opow_mul_add_lt_opow ?_ (IH h' fun e ↦ ?_) ?_
+    · convert hf e'
+      simpa using fun he ↦ (h' _ he).false
+    · by_cases he : e ∈ f.support
       · convert hf e using 1
-        rw [add_apply, single_apply, if_neg he, zero_add]
-    · have : c < b
+        rw [add_apply, single_eq_of_ne, zero_add]
+        exact (h' _ he).ne'
+      · rw [notMem_support_iff.1 he]
+        exact (hf 0).pos
+    · simp_all
+
+theorem eval_strictMono {e b : Ordinal} {f g : Ordinal →₀ Ordinal}
+    (hf : ∀ e', f e' < b) (hg : ∀ e', g e' < b)
+    (h : f.equivMapDomain OrderDual.toDual < g.equivMapDomain OrderDual.toDual) :
+    eval f b < eval g b :=
+  sorry
+
+theorem eval_inj {e b : Ordinal} (hb : 1 < b) (o : Ordinal) :
+    ∃ f : Ordinal →₀ Ordinal, (∀ e', f e' < b) ∧ eval f b = o :=
+  sorry
+
+def evalIso {b : Ordinal} (hb : 1 < b) :
+    {f : Lex (Ordinalᵒᵈ →₀ Ordinal) // ∀ e, ofLex f e < b} ≃o Ordinal := by
+  refine StrictMono.orderIsoOfRightInverse
+    (fun f ↦ eval (f.1.equivMapDomain OrderDual.ofDual) b) ?_ ?_ ?_
 
 
 end Ordinal.CNF
