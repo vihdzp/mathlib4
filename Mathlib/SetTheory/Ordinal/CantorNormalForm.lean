@@ -262,7 +262,8 @@ theorem eval_single_add {e c : Ordinal} {f : Ordinal →₀ Ordinal} (b : Ordina
 theorem eval_add_single {e c : Ordinal} {f : Ordinal →₀ Ordinal} (b : Ordinal)
     (h : ∀ e' ∈ f.support, e' < e) : eval (f + single e c) b = b ^ e * c + eval f b := by
   rw [(Finsupp.addCommute_of_disjoint _).eq, eval_single_add _ h]
-  simp_rw [Finset.disjoint_iff_inter_eq_empty, Finset.eq_empty_iff_forall_notMem, Finset.mem_inter]
+  simp_rw [
+    , Finset.eq_empty_iff_forall_notMem, Finset.mem_inter]
   rintro x ⟨hx₁, hx₂⟩
   rw [mem_support_single] at hx₂
   exact (h x hx₁).ne hx₂.1
