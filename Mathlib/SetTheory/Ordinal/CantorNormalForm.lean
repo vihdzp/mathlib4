@@ -204,13 +204,16 @@ theorem coeff_of_mem_CNF {b o e c : Ordinal} (h : ⟨e, c⟩ ∈ CNF b o) :
   rw [coeff, lookupFinsupp_apply, mem_lookup_iff.2, Option.getD_some]
   simpa
 
-theorem coeff_of_not_mem_CNF {b o e : Ordinal} (h : e ∉ (CNF b o).map Prod.fst) :
+theorem coeff_of_notMem_CNF {b o e : Ordinal} (h : e ∉ (CNF b o).map Prod.fst) :
     coeff b o e = 0 := by
   rw [coeff, lookupFinsupp_apply, lookup_eq_none.2, Option.getD_none]
   simp_all [List.keys]
 
+@[deprecated (since := "2025-08-28")]
+alias coeff_of_not_mem_CNF := coeff_of_notMem_CNF
+
 theorem coeff_zero_apply (b e : Ordinal) : coeff b 0 e = 0 := by
-  apply coeff_of_not_mem_CNF
+  apply coeff_of_notMem_CNF
   simp
 
 @[simp]
@@ -227,7 +230,7 @@ theorem coeff_of_le_one {b : Ordinal} (hb : b ≤ 1) (o : Ordinal) : coeff b o =
       rw [CNF.of_le_one hb ho]
       simp
     · rw [single_eq_of_ne ha.symm]
-      apply coeff_of_not_mem_CNF
+      apply coeff_of_notMem_CNF
       rw [CNF.of_le_one hb ho]
       simpa using ha
 
@@ -238,6 +241,15 @@ theorem coeff_zero_left (o : Ordinal) : coeff 0 o = single 0 o :=
 @[simp]
 theorem coeff_one_left (o : Ordinal) : coeff 1 o = single 0 o :=
   coeff_of_le_one le_rfl o
+
+theorem coeff_lt {b : Ordinal} (hb : b ≠ 0) (o e : Ordinal) : coeff b o e < b := by
+  by_cases he : e ∈ (CNF b o).map Prod.fst
+  · rw [mem_map] at he
+    obtain ⟨⟨e, c⟩, he, rfl⟩ := he
+    rw [coeff_of_mem_CNF he]
+    exact CNF.snd_lt _ he
+  · rw [coeff_of_notMem_CNF he]
+    exact hb.bot_lt
 
 /-! ### Evaluate a Cantor normal form -/
 
@@ -297,19 +309,22 @@ theorem eval_strictMono {e b : Ordinal} {f g : Ordinal →₀ Ordinal}
     eval f b < eval g b :=
   sorry
 
-theorem eval_surjective {e b : Ordinal} (hb : 1 < b) (o : Ordinal) :
-    ∃ f : Ordinal →₀ Ordinal, (∀ e', f e' < b) ∧ eval f b = o :=
+@[simp]
+theorem eval_coeff (b o : Ordinal) : eval (CNF.coeff b o) b = o := by
   sorry
 
 /-- The Cantor Normal Form yields an order isomorphism between base-b ordinal expansions and
 the ordinals themselves. -/
 def evalIso {b : Ordinal} (hb : 1 < b) :
     {f : Lex (Ordinalᵒᵈ →₀ Ordinal) // ∀ e, ofLex f e < b} ≃o Ordinal := by
-  refine StrictMono.orderIsoOfRightInverse (fun f ↦ eval (f.1.equivMapDomain OrderDual.ofDual) b)
-    ?_ _ (@Function.rightInverse_invFun _ _ ?_ _ ?_)
+  refine StrictMono.orderIsoOfRightInverse
+    (fun f ↦ eval ((ofLex f.1).equivMapDomain OrderDual.ofDual) b) ?_
+    (fun o ↦ ⟨toLex <| (CNF.coeff b o).equivMapDomain OrderDual.toDual, coeff_lt hb.ne_bot _⟩) ?_
   · sorry
-  · sorry
-  · sorry
+  · intro o
+    dsimp
+    rw [← Finsupp.equivMapDomain_trans, toDual_trans_ofDual, Finsupp.equivDomain_refl]
+    apply eval_coeff b o
 
 @[simp]
 theorem evalIso_apply {b : Ordinal} (hb : 1 < b)
@@ -317,12 +332,11 @@ theorem evalIso_apply {b : Ordinal} (hb : 1 < b)
     evalIso hb f = eval (f.1.equivMapDomain OrderDual.ofDual) b :=
   rfl
 
-private def evalIsoNatAux :
-    {f : Lex (Ordinalᵒᵈ →₀ Ordinal) // ∀ e, ofLex f e < ω} ≃o Lex (Ordinalᵒᵈ →₀ ℕ) where
-  toFun f := f.1.mapRange Ordinal.toNat
+@[simp]
+theorem evalIso_symm_apply {b : Ordinal} (hb : 1 < b) (o : Ordinal) : (evalIso hb).symm o =
+    ⟨toLex <| (CNF.coeff b o).equivMapDomain OrderDual.toDual, coeff_lt hb.ne_bot _⟩ :=
+  rfl
 
-/-- The Cantor Normal Form yields an order isomorphism between base-ω ordinal expansions and
-the ordinals themselves. -/
-def evalIsoNat : Lex (Ordinalᵒᵈ →₀ ℕ) ≃o Ordinal
+-- TODO: add `evalIsoNat : Lex (Ordinalᵒᵈ →₀ ℕ) ≃o Ordinal`.
 
 end Ordinal.CNF
