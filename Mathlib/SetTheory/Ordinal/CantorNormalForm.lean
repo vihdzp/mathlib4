@@ -242,12 +242,12 @@ theorem coeff_zero_left (o : Ordinal) : coeff 0 o = single 0 o :=
 theorem coeff_one_left (o : Ordinal) : coeff 1 o = single 0 o :=
   coeff_of_le_one le_rfl o
 
-theorem coeff_lt {b : Ordinal} (hb : b ≠ 0) (o e : Ordinal) : coeff b o e < b := by
+theorem coeff_lt {b : Ordinal} (hb : 1 < b) (o e : Ordinal) : coeff b o e < b := by
   by_cases he : e ∈ (CNF b o).map Prod.fst
   · rw [mem_map] at he
     obtain ⟨⟨e, c⟩, he, rfl⟩ := he
     rw [coeff_of_mem_CNF he]
-    exact CNF.snd_lt _ he
+    exact CNF.snd_lt hb he
   · rw [coeff_of_notMem_CNF he]
     exact hb.bot_lt
 
@@ -303,11 +303,17 @@ theorem eval_lt_opow {e b : Ordinal} {f : Ordinal →₀ Ordinal}
         exact (hf 0).pos
     · simp_all
 
-theorem eval_strictMono {e b : Ordinal} {f g : Ordinal →₀ Ordinal}
+theorem eval_strictMono {b : Ordinal} {f g : Ordinal →₀ Ordinal}
     (hf : ∀ e', f e' < b) (hg : ∀ e', g e' < b)
-    (h : f.equivMapDomain OrderDual.toDual < g.equivMapDomain OrderDual.toDual) :
+    (h : toLex (f.equivMapDomain OrderDual.toDual) < toLex (g.equivMapDomain OrderDual.toDual)) :
     eval f b < eval g b :=
   sorry
+
+-- Once we have Colex we won't need both versions.
+theorem eval_strictMono' {b : Ordinal} {f g : Ordinalᵒᵈ →₀ Ordinal}
+    (hf : ∀ e', f e' < b) (hg : ∀ e', g e' < b) (h : toLex f < toLex g) :
+    eval (f.equivMapDomain OrderDual.ofDual) b < eval (g.equivMapDomain OrderDual.ofDual) b :=
+  eval_strictMono hf hg h
 
 @[simp]
 theorem eval_coeff (b o : Ordinal) : eval (CNF.coeff b o) b = o := by
@@ -319,12 +325,14 @@ def evalIso {b : Ordinal} (hb : 1 < b) :
     {f : Lex (Ordinalᵒᵈ →₀ Ordinal) // ∀ e, ofLex f e < b} ≃o Ordinal := by
   refine StrictMono.orderIsoOfRightInverse
     (fun f ↦ eval ((ofLex f.1).equivMapDomain OrderDual.ofDual) b) ?_
-    (fun o ↦ ⟨toLex <| (CNF.coeff b o).equivMapDomain OrderDual.toDual, coeff_lt hb.ne_bot _⟩) ?_
-  · sorry
+    (fun o ↦ ⟨toLex <| (CNF.coeff b o).equivMapDomain OrderDual.toDual, coeff_lt hb _⟩) ?_
+  · rintro ⟨f, hf⟩ ⟨g, hg⟩ h
+    exact eval_strictMono' hf hg h
   · intro o
     dsimp
-    rw [← Finsupp.equivMapDomain_trans, toDual_trans_ofDual, Finsupp.equivDomain_refl]
-    apply eval_coeff b o
+    rw [← equivMapDomain_trans]
+    convert eval_coeff b o
+    exact equivMapDomain_refl _
 
 @[simp]
 theorem evalIso_apply {b : Ordinal} (hb : 1 < b)
@@ -334,7 +342,7 @@ theorem evalIso_apply {b : Ordinal} (hb : 1 < b)
 
 @[simp]
 theorem evalIso_symm_apply {b : Ordinal} (hb : 1 < b) (o : Ordinal) : (evalIso hb).symm o =
-    ⟨toLex <| (CNF.coeff b o).equivMapDomain OrderDual.toDual, coeff_lt hb.ne_bot _⟩ :=
+    ⟨toLex <| (CNF.coeff b o).equivMapDomain OrderDual.toDual, coeff_lt hb _⟩ :=
   rfl
 
 -- TODO: add `evalIsoNat : Lex (Ordinalᵒᵈ →₀ ℕ) ≃o Ordinal`.
