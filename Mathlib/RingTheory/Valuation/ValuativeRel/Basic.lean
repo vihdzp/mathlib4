@@ -115,11 +115,6 @@ namespace ValuativeRel
 
 variable {R : Type*} [CommRing R] [ValuativeRel R] {x y z : R}
 
-/-- The valuation equal-to relation, defined as `x =ᵥ y ↔ x ≤ᵥ y ∧ y ≤ᵥ x`. -/
-def veq : R → R → Prop := AntisymmRel vle
-
-@[inherit_doc] infix:50 " =ᵥ " => ValuativeRel.veq
-
 /-- The valuation less-than relation, defined as `x < y ↔ ¬ y ≤ᵥ x`. -/
 def vlt (x y : R) : Prop := ¬ y ≤ᵥ x
 
@@ -152,12 +147,6 @@ protected alias vle.rfl := vle_rfl
 instance : IsRefl R vle where
   refl _ := vle_rfl
 
-@[simp] lemma veq_refl (x : R) : x =ᵥ x := AntisymmRel.rfl
-lemma veq_rfl {x : R} : x =ᵥ x := veq_refl x
-
-protected alias veq.refl := veq_refl
-protected alias veq.rfl := veq_rfl
-
 @[simp]
 theorem zero_vle (x : R) : 0 ≤ᵥ x := by
   simpa using vle_mul_right x ((vle_total 0 1).resolve_right not_vle_one_zero)
@@ -189,12 +178,6 @@ protected alias vle.trans' := vle_trans'
 @[deprecated (since := "2025-12-20")] protected alias Rel.trans := vle.trans
 @[deprecated (since := "2025-12-20")] alias rel_trans' := vle_trans'
 @[deprecated (since := "2025-12-20")] protected alias Rel.trans' := vle.trans'
-
-instance : Trans (veq (R := R)) (veq (R := R)) (veq (R := R)) where
-  trans := AntisymmRel.trans
-
-lemma veq_trans {x y z : R} (h1 : x =ᵥ y) (h2 : y =ᵥ z) : x =ᵥ z :=
-  AntisymmRel.trans h1 h2
 
 @[gcongr]
 lemma mul_vle_mul {x x' y y' : R} (h1 : x ≤ᵥ y) (h2 : x' ≤ᵥ y') : x * x' ≤ᵥ y * y' :=
