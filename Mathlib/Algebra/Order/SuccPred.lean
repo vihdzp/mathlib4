@@ -18,12 +18,6 @@ public import Mathlib.Order.SuccPred.WithBot
 We define the `SuccAddOrder` and `PredSubOrder` typeclasses, for orders satisfying `succ x = x + 1`
 and `pred x = x - 1` respectively. This allows us to transfer the API for successors and
 predecessors into these common arithmetical forms.
-
-## Todo
-
-In the future, we will make `x + 1` and `x - 1` the `simp`-normal forms for `succ x` and `pred x`
-respectively. This will require a refactor of `Ordinal` first, as the `simp`-normal form is
-currently set the other way around.
 -/
 
 @[expose] public section
@@ -48,6 +42,7 @@ section Add
 
 variable [Add α] [One α] [SuccAddOrder α]
 
+@[simp]
 theorem succ_eq_add_one (x : α) : succ x = x + 1 :=
   SuccAddOrder.succ_eq_add_one x
 
@@ -77,6 +72,7 @@ section Sub
 
 variable [Sub α] [One α] [PredSubOrder α]
 
+@[simp]
 theorem pred_eq_sub_one (x : α) : pred x = x - 1 :=
   PredSubOrder.pred_eq_sub_one x
 
@@ -202,7 +198,7 @@ theorem succ_eq_zero [AddZeroClass α] [OrderBot α] [CanonicallyOrderedAdd α] 
   · rename_i a
     simp only [WithBot.succ_coe, WithBot.coe_ne_bot, iff_false]
     by_contra h
-    simpa [h] using max_of_succ_le (a := a)
+    simpa [h, ← succ_eq_add_one] using max_of_succ_le (a := a)
 
 end PartialOrder
 
