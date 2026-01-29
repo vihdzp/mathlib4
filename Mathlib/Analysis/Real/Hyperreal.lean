@@ -150,6 +150,7 @@ theorem coe_min (x y : ℝ) : ((min x y : ℝ) : ℝ*) = min ↑x ↑y :=
   Germ.const_min _ _
 
 /-- The canonical map `ℝ → ℝ*` as an `OrderRingHom`. -/
+@[simps]
 def coeRingHom : ℝ →+*o ℝ* where
   toFun x := x
   map_zero' := rfl
@@ -168,7 +169,7 @@ theorem archimdeanClassMk_coe {x : ℝ} (hx : x ≠ 0) : mk (x : ℝ*) = 0 :=
 
 @[simp]
 theorem stdPart_coe (x : ℝ) : stdPart (x : ℝ*) = x :=
-  stdPart_of_archimedean coeRingHom x
+  stdPart_map_real coeRingHom x
 
 /-! ### Basic constants -/
 
@@ -182,6 +183,8 @@ theorem ofSeq_lt_ofSeq {f g : ℕ → ℝ} : ofSeq f < ofSeq g ↔ ∀ᶠ n in h
 
 theorem ofSeq_le_ofSeq {f g : ℕ → ℝ} : ofSeq f ≤ ofSeq g ↔ ∀ᶠ n in hyperfilter ℕ, f n ≤ g n :=
   Germ.coe_le
+
+/-! #### ω -/
 
 /-- A sample infinite hyperreal ω = ⟦(0, 1, 2, 3, ⋯)⟧. -/
 def omega : ℝ* := ofSeq Nat.cast
@@ -209,6 +212,13 @@ theorem abs_omega : |ω| = ω :=
 @[simp]
 theorem archimedeanClassMk_omega_neg : mk ω < 0 :=
   fun n ↦ by simpa using coe_lt_omega n
+
+@[simp]
+theorem stdPart_omega : stdPart ω = 0 := by
+  rw [stdPart_eq_zero]
+  exact archimedeanClassMk_omega_neg.ne
+
+/-! #### ε -/
 
 /-- A sample infinitesimal hyperreal ε = ⟦(0, 1, 1/2, 1/3, ⋯)⟧. -/
 def epsilon : ℝ* :=
