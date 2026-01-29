@@ -11,6 +11,7 @@ public import Mathlib.Data.Real.Archimedean
 public import Mathlib.Order.Quotient
 public import Mathlib.RingTheory.Valuation.ValuationSubring
 
+import Mathlib.Data.Int.ConditionallyCompleteOrder
 import Mathlib.Data.Real.CompleteField
 
 /-!
@@ -127,6 +128,19 @@ instance : RatCast (FiniteElement K) where
   ratCast q := .mk q (mk_ratCast_nonneg q)
 
 @[simp] theorem mk_ratCast (q : ℚ) : FiniteElement.mk (q : K) (mk_ratCast_nonneg q) = q := rfl
+
+@[no_expose]
+noncomputable instance : FloorRing (FiniteElement K) :=
+  .ofFloor _ (fun x ↦ sSup {n | n ≤ x}) fun n x ↦ by
+    obtain ⟨m, hm⟩ := x.2
+    simp only [ArchimedeanOrder.val_of, abs_one, nsmul_eq_mul, mul_one] at hm
+    have H : BddAbove {n : ℤ | n ≤ x} := by
+      refine ⟨m, fun k hk ↦ ?_⟩
+      simpa [← Int.cast_le (R := FiniteElement K)] using hk.trans (le_of_abs_le hm)
+    refine ⟨le_csSup H, ?_⟩
+    rw [← Int.cast_le (R := FiniteElement K)]
+    refine le_trans' (Int.csSup_mem ⟨-m, ?_⟩ H)
+    simpa using neg_le_of_abs_le hm
 
 end FiniteElement
 
