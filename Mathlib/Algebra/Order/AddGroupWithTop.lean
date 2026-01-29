@@ -232,10 +232,6 @@ lemma sub_pos : 0 < a - b ↔ b < a ∨ b = ⊤ := by
 lemma neg_pos : 0 < -a ↔ a < 0 ∨ a = ⊤ := by
   simpa using sub_pos (a := 0) (b := a)
 
-@[simp]
-lemma neg_pos {a : α} : 0 < -a ↔ a < 0 ∨ a = ⊤ := by
-  simpa using sub_pos 0 a
-
 end LinearOrderedAddCommGroupWithTop
 
 namespace WithTop

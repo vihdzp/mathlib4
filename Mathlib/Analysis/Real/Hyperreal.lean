@@ -21,7 +21,7 @@ non-archimedean fields. In particular:
 
 - `ArchimedeanClass` can be used to measure whether an element is infinitesimal (`0 < mk x`) or
   infinite (`mk x < 0`).
-- `ArchimedeanClass.stdPart` generalizes the standard part function for a general ordered field.
+- `ArchimedeanClass.stdPart` generalizes the standard part function to a general ordered field.
 
 ## Todo
 
