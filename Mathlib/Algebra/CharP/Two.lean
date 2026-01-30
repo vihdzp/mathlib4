@@ -49,7 +49,7 @@ theorem natCast_eq_ite (n : ℕ) : (n : R) = if Even n then 0 else 1 := by
 
 @[simp]
 theorem range_natCast : Set.range ((↑) : ℕ → R) = {0, 1} := by
-  rw [funext natCast_eq_ite, Set.range_ite]
+  rw [funext natCast_eq_ite, Set.range_ite_const]
   · use 0; simp
   · use 1; simp
 
@@ -118,7 +118,7 @@ theorem intCast_eq_ite (n : ℤ) : (n : R) = if Even n then 0 else 1 := by
 
 @[simp]
 theorem range_intCast : Set.range ((↑) : ℤ → R) = {0, 1} := by
-  rw [funext intCast_eq_ite, Set.range_ite]
+  rw [funext intCast_eq_ite, Set.range_ite_const]
   · use 0; simp
   · use 1; simp
 
@@ -185,7 +185,7 @@ theorem ratCast_eq_ite (q : ℚ) : (q : R) = if Odd q.num ∧ Odd q.den then 1 e
 
 @[simp]
 theorem range_ratCast : Set.range ((↑) : ℚ → R) = {0, 1} := by
-  rw [funext ratCast_eq_ite, Set.range_ite, Set.pair_comm]
+  rw [funext ratCast_eq_ite, Set.range_ite_const, Set.pair_comm]
   · use 1; simp
   · use 0; simp
 
