@@ -11,8 +11,6 @@ public import Mathlib.Algebra.Ring.Commute
 public import Mathlib.Algebra.Ring.Invertible
 public import Mathlib.Order.Synonym
 
-import Mathlib.Tactic.Tauto
-
 /-!
 # Lemmas about division (semi)rings and (semi)fields
 
