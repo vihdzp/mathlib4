@@ -53,6 +53,10 @@ theorem range_natCast : Set.range ((↑) : ℕ → R) = {0, 1} := by
   · use 0; simp
   · use 1; simp
 
+variable (R) in
+theorem natCast_cases (n : ℕ) : (n : R) = 0 ∨ (n : R) = 1 :=
+  (Set.ext_iff.1 range_natCast _).1 (Set.mem_range_self _)
+
 theorem natCast_eq_mod (n : ℕ) : (n : R) = (n % 2 : ℕ) := by
   simp [natCast_eq_if, Nat.even_iff]
 
@@ -118,6 +122,10 @@ theorem range_intCast : Set.range ((↑) : ℤ → R) = {0, 1} := by
   · use 0; simp
   · use 1; simp
 
+variable (R) in
+theorem intCast_cases (n : ℤ) : (n : R) = 0 ∨ (n : R) = 1 :=
+  (Set.ext_iff.1 range_intCast _).1 (Set.mem_range_self _)
+
 theorem intCast_eq_mod (n : ℤ) : (n : R) = (n % 2 : ℤ) := by
   simp [intCast_eq_if, Int.even_iff]
 
@@ -180,6 +188,22 @@ theorem range_ratCast : Set.range ((↑) : ℚ → R) = {0, 1} := by
   rw [funext ratCast_eq_if, Set.range_if, Set.pair_comm]
   · use 1; simp
   · use 0; simp
+
+variable (R) in
+theorem ratCast_cases (q : ℚ) : (q : R) = 0 ∨ (q : R) = 1 :=
+  (Set.ext_iff.1 range_ratCast _).1 (Set.mem_range_self _)
+
+@[scoped simp]
+theorem inv_ratCast (q : ℚ) : (q : R)⁻¹ = q := by
+  obtain hq | hq := ratCast_cases R q <;> simp [hq]
+
+@[scoped simp]
+theorem inv_intCast (n : ℤ) : (n : R)⁻¹ = n :=
+  mod_cast inv_ratCast n
+
+@[scoped simp]
+theorem inv_natCast (n : ℕ) : (n : R)⁻¹ = n :=
+  mod_cast inv_ratCast n
 
 end DivisionRing
 
