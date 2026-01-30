@@ -49,7 +49,7 @@ theorem natCast_eq_ite (n : ℕ) : (n : R) = if Even n then 0 else 1 := by
 
 @[simp]
 theorem range_natCast : Set.range ((↑) : ℕ → R) = {0, 1} := by
-  rw [funext natCast_eq_ite, Set.range_if]
+  rw [funext natCast_eq_ite, Set.range_ite]
   · use 0; simp
   · use 1; simp
 
@@ -92,7 +92,7 @@ variable [Ring R] [CharP R 2]
 
 @[scoped simp]
 theorem neg_eq (x : R) : -x = x := by
-  rw [neg_eq_itef_add_eq_zero, add_self_eq_zero]
+  rw [neg_eq_iff_add_eq_zero, add_self_eq_zero]
 
 theorem neg_eq' : Neg.neg = (id : R → R) :=
   funext neg_eq
@@ -118,7 +118,7 @@ theorem intCast_eq_ite (n : ℤ) : (n : R) = if Even n then 0 else 1 := by
 
 @[simp]
 theorem range_intCast : Set.range ((↑) : ℤ → R) = {0, 1} := by
-  rw [funext intCast_eq_if, Set.range_if]
+  rw [funext intCast_eq_ite, Set.range_ite]
   · use 0; simp
   · use 1; simp
 
@@ -127,7 +127,7 @@ theorem intCast_cases (n : ℤ) : (n : R) = 0 ∨ (n : R) = 1 :=
   (Set.ext_iff.1 range_intCast _).1 (Set.mem_range_self _)
 
 theorem intCast_eq_mod (n : ℤ) : (n : R) = (n % 2 : ℤ) := by
-  simp [intCast_eq_if, Int.even_iff]
+  simp [intCast_eq_ite, Int.even_iff]
 
 end Ring
 
@@ -180,12 +180,12 @@ section DivisionRing
 variable [DivisionRing R] [CharP R 2]
 
 theorem ratCast_eq_ite (q : ℚ) : (q : R) = if Odd q.num ∧ Odd q.den then 1 else 0 := by
-  rw [DivisionRing.ratCast_def, div_eq_mul_inv, natCast_eq_if, intCast_eq_if]
+  rw [DivisionRing.ratCast_def, div_eq_mul_inv, natCast_eq_ite, intCast_eq_ite]
   aesop
 
 @[simp]
 theorem range_ratCast : Set.range ((↑) : ℚ → R) = {0, 1} := by
-  rw [funext ratCast_eq_if, Set.range_if, Set.pair_comm]
+  rw [funext ratCast_eq_ite, Set.range_ite, Set.pair_comm]
   · use 1; simp
   · use 0; simp
 
