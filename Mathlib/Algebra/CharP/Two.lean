@@ -29,9 +29,6 @@ section AddMonoidWithOne
 
 variable [AddMonoidWithOne R]
 
-theorem two_eq_zero [CharP R 2] : (2 : R) = 0 := by
-  rw [← Nat.cast_two, CharP.cast_eq_zero]
-
 /-- The only hypotheses required to build a `CharP R 2` instance are `1 ≠ 0` and `2 = 0`. -/
 theorem of_one_ne_zero_of_two_eq_zero (h₁ : (1 : R) ≠ 0) (h₂ : (2 : R) = 0) : CharP R 2 where
   cast_eq_zero_iff n := by
@@ -40,6 +37,28 @@ theorem of_one_ne_zero_of_two_eq_zero (h₁ : (1 : R) ≠ 0) (h₂ : (2 : R) = 0
       exact natCast_eq_zero_of_even_of_two_eq_zero hn h₂
     · simp_rw [hn.not_two_dvd_nat, iff_false]
       rwa [natCast_eq_one_of_odd_of_two_eq_zero hn h₂]
+
+variable [CharP R 2]
+
+@[scoped simp]
+theorem two_eq_zero : (2 : R) = 0 := by
+  rw [← Nat.cast_two, CharP.cast_eq_zero]
+
+theorem natCast_eq_if (n : ℕ) : (n : R) = if Even n then 0 else 1 := by
+  induction n <;> aesop (add simp [one_add_one_eq_two])
+
+@[simp]
+theorem range_natCast : Set.range ((↑) : ℕ → R) = {0, 1} := by
+  rw [funext natCast_eq_if, Set.range_if]
+  · use 0; simp
+  · use 1; simp
+
+theorem natCast_eq_mod (n : ℕ) : (n : R) = (n % 2 : ℕ) := by
+  simp [natCast_eq_if, Nat.even_iff]
+
+@[scoped simp]
+theorem ofNat_eq_mod (n : ℕ) [n.AtLeastTwo] : (ofNat(n) : R) = (n % 2 : ℕ) :=
+  natCast_eq_mod n
 
 end AddMonoidWithOne
 
@@ -90,6 +109,18 @@ protected theorem two_zsmul (x : R) : (2 : ℤ) • x = 0 := by
 protected theorem add_eq_zero {a b : R} : a + b = 0 ↔ a = b := by
   rw [← CharTwo.sub_eq_add, sub_eq_iff_eq_add, zero_add]
 
+theorem intCast_eq_if (n : ℤ) : (n : R) = if Even n then 0 else 1 := by
+  obtain ⟨n, rfl | rfl⟩ := n.eq_nat_or_neg <;> simpa using natCast_eq_if n
+
+@[simp]
+theorem range_intCast : Set.range ((↑) : ℤ → R) = {0, 1} := by
+  rw [funext intCast_eq_if, Set.range_if]
+  · use 0; simp
+  · use 1; simp
+
+theorem intCast_eq_mod (n : ℤ) : (n : R) = (n % 2 : ℤ) := by
+  simp [intCast_eq_if, Int.even_iff]
+
 end Ring
 
 section CommSemiring
@@ -135,6 +166,22 @@ theorem sq_inj {x y : R} : x ^ 2 = y ^ 2 ↔ x = y :=
   sq_injective.eq_iff
 
 end CommRing
+
+section DivisionRing
+
+variable [DivisionRing R] [CharP R 2]
+
+theorem ratCast_eq_if (q : ℚ) : (q : R) = if Odd q.num ∧ Odd q.den then 1 else 0 := by
+  rw [DivisionRing.ratCast_def, div_eq_mul_inv, natCast_eq_if, intCast_eq_if]
+  aesop
+
+@[simp]
+theorem range_ratCast : Set.range ((↑) : ℚ → R) = {0, 1} := by
+  rw [funext ratCast_eq_if, Set.range_if, Set.pair_comm]
+  · use 1; simp
+  · use 0; simp
+
+end DivisionRing
 
 end CharTwo
 
