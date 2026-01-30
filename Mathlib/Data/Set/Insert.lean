@@ -369,7 +369,7 @@ theorem Nonempty.subset_pair_iff_eq (hs : s.Nonempty) :
     s ⊆ {a, b} ↔ s = {a} ∨ s = {b} ∨ s = {a, b} := by
   rw [Set.subset_pair_iff_eq, or_iff_right]; exact hs.ne_empty
 
-theorem range_ite {p : α → Prop} [DecidablePred p] {x y : β}
+theorem range_ite_const {p : α → Prop} [DecidablePred p] {x y : β}
     (hp : ∃ a, p a) (hn : ∃ a, ¬ p a) :
     Set.range (fun a ↦ if p a then x else y) = {x, y} := by
   grind
