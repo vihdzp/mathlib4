@@ -44,12 +44,12 @@ variable [CharP R 2]
 theorem two_eq_zero : (2 : R) = 0 := by
   rw [← Nat.cast_two, CharP.cast_eq_zero]
 
-theorem natCast_eq_if (n : ℕ) : (n : R) = if Even n then 0 else 1 := by
+theorem natCast_eq_ite (n : ℕ) : (n : R) = if Even n then 0 else 1 := by
   induction n <;> aesop (add simp [one_add_one_eq_two])
 
 @[simp]
 theorem range_natCast : Set.range ((↑) : ℕ → R) = {0, 1} := by
-  rw [funext natCast_eq_if, Set.range_if]
+  rw [funext natCast_eq_ite, Set.range_if]
   · use 0; simp
   · use 1; simp
 
@@ -58,10 +58,10 @@ theorem natCast_cases (n : ℕ) : (n : R) = 0 ∨ (n : R) = 1 :=
   (Set.ext_iff.1 range_natCast _).1 (Set.mem_range_self _)
 
 theorem natCast_eq_mod (n : ℕ) : (n : R) = (n % 2 : ℕ) := by
-  simp [natCast_eq_if, Nat.even_iff]
+  simp [natCast_eq_ite, Nat.even_iff]
 
 @[scoped simp]
-theorem ofNat_eq_mod (n : ℕ) [n.AtLeastTwo] : (ofNat(n) : R) = (n % 2 : ℕ) :=
+theorem ofNat_eq_mod (n : ℕ) [n.AtLeastTwo] : (ofNat(n) : R) = (ofNat(n) % 2 : ℕ) :=
   natCast_eq_mod n
 
 end AddMonoidWithOne
@@ -92,7 +92,7 @@ variable [Ring R] [CharP R 2]
 
 @[scoped simp]
 theorem neg_eq (x : R) : -x = x := by
-  rw [neg_eq_iff_add_eq_zero, add_self_eq_zero]
+  rw [neg_eq_itef_add_eq_zero, add_self_eq_zero]
 
 theorem neg_eq' : Neg.neg = (id : R → R) :=
   funext neg_eq
@@ -113,8 +113,8 @@ protected theorem two_zsmul (x : R) : (2 : ℤ) • x = 0 := by
 protected theorem add_eq_zero {a b : R} : a + b = 0 ↔ a = b := by
   rw [← CharTwo.sub_eq_add, sub_eq_iff_eq_add, zero_add]
 
-theorem intCast_eq_if (n : ℤ) : (n : R) = if Even n then 0 else 1 := by
-  obtain ⟨n, rfl | rfl⟩ := n.eq_nat_or_neg <;> simpa using natCast_eq_if n
+theorem intCast_eq_ite (n : ℤ) : (n : R) = if Even n then 0 else 1 := by
+  obtain ⟨n, rfl | rfl⟩ := n.eq_nat_or_neg <;> simpa using natCast_eq_ite n
 
 @[simp]
 theorem range_intCast : Set.range ((↑) : ℤ → R) = {0, 1} := by
@@ -179,7 +179,7 @@ section DivisionRing
 
 variable [DivisionRing R] [CharP R 2]
 
-theorem ratCast_eq_if (q : ℚ) : (q : R) = if Odd q.num ∧ Odd q.den then 1 else 0 := by
+theorem ratCast_eq_ite (q : ℚ) : (q : R) = if Odd q.num ∧ Odd q.den then 1 else 0 := by
   rw [DivisionRing.ratCast_def, div_eq_mul_inv, natCast_eq_if, intCast_eq_if]
   aesop
 
