@@ -121,16 +121,6 @@ theorem one_div_mul_sub_mul_one_div_eq_one_div_add_one_div (ha : a ≠ 0) (hb : 
     1 / a * (b - a) * (1 / b) = 1 / a - 1 / b := by
   simpa only [one_div] using (inv_sub_inv' ha hb).symm
 
-/-- See `inv_eq_self` for a version on `Group`. -/
-theorem inv_eq_self' {a : K} : a⁻¹ = a ↔ a = -1 ∨ a = 0 ∨ a = 1 := by
-  obtain rfl | ha := eq_or_ne a 0; · simp
-  rw [← mul_eq_one_iff_inv_eq₀ ha, ← pow_two, sq_eq_one_iff]
-  tauto
-
-/-- See `self_eq_inv` for a version on `Group`. -/
-theorem self_eq_inv' {a : K} : a = a⁻¹ ↔ a = -1 ∨ a = 0 ∨ a = 1 := by
-  rw [eq_comm, inv_eq_self']
-
 -- see Note [lower instance priority]
 instance (priority := 100) DivisionRing.isDomain : IsDomain K :=
   NoZeroDivisors.to_isDomain _
