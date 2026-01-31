@@ -585,6 +585,18 @@ theorem Polynomial.isRoot_of_isRoot_iff_dvd_derivative_mul {K : Type*} [Field K]
 namespace Subfield
 variable {s : Subfield k} {k}
 
+/-- Embed a polynomial in the subfield. -/
+private def embed {p : k[X]} (hp : ∀ n, p.coeff n ∈ s) : s[X] :=
+  .ofFinsupp <| .mk p.support (fun k ↦ ⟨p.coeff k, hp k⟩) (by simp [← Subtype.val_inj])
+
+private theorem map_embed {p : k[X]} (hp : ∀ n, p.coeff n ∈ s) :
+    ((s.embed hp).map s.subtype) = p := by
+  ext; simp [embed]
+
+@[simp]
+private theorem embed_eq_zero {p : k[X]} (hp : ∀ n, p.coeff n ∈ s) : s.embed hp = 0 ↔ p = 0 := by
+  simp [ext_iff, embed, ← Subtype.val_inj]
+
 /-- A convenience predicate for an algebraically closed subfield. -/
 protected def IsAlgClosed (s : Subfield k) : Prop := IsAlgClosed s
 
@@ -593,11 +605,14 @@ theorem IsAlgClosed.to_subtype (h : s.IsAlgClosed) : IsAlgClosed s := h
 protected theorem IsAlgClosed.exists_root (h : s.IsAlgClosed) (p : k[X])
     (hp₀ : p.degree ≠ 0) (hp : ∀ n, p.coeff n ∈ s) : ∃ x ∈ s, IsRoot p x := by
   have := h.to_subtype
-  let q : s[X] := .ofFinsupp <| .mk p.support (fun k ↦ ⟨p.coeff k, hp k⟩)
-    (by simp [← Subtype.val_inj])
-  obtain ⟨x, hx⟩ := _root_.IsAlgClosed.exists_root q hp₀
+  obtain ⟨x, hx⟩ := _root_.IsAlgClosed.exists_root (s.embed hp) hp₀
   use x.1, x.2
   simpa [eval_eq_sum, sum, ← Subtype.val_inj] using hx
+
+theorem IsAlgClosed.mem_of_isRoot {x : k} (h : s.IsAlgClosed) (p : k[X])
+    (hp₀ : p ≠ 0) (hp : ∀ n, p.coeff n ∈ s) (hx : IsRoot p x) : x ∈ s := by
+  rw [← map_embed hp] at hx
+  simpa using (h.splits (s.embed hp)).mem_range_of_isRoot (by simpa) hx
 
 /-- We require `p.degree ≠ 0` instead of `p.Irreducible`, as otherwise the hypothesis would be
 satisfied by any subfield of an algebraically closed field. -/
