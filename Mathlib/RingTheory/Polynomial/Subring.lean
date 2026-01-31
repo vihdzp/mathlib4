@@ -69,6 +69,10 @@ variable (hp : ∀ n, p.coeff n ∈ T)
 @[simp] theorem toSubring_one : toSubring 1 T (by aesop) = 1 := by aesop
 
 @[simp]
+theorem toSubring_eq_zero : p.toSubring T hp = 0 ↔ p = 0 := by
+  simp [ext_iff, toSubring, ← Subtype.val_inj]
+
+@[simp]
 theorem monic_toSubring : Monic (p.toSubring T hp) ↔ Monic p := by
   rw [Monic, Monic, ← toSubring_leadingCoeff p T, OneMemClass.coe_eq_one]
 
