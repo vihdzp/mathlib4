@@ -638,11 +638,9 @@ theorem mk_subtype_le_of_subset {α : Type u} {p q : α → Prop} (h : ∀ ⦃x�
 theorem mk_le_mk_of_subset {α} {s t : Set α} (h : s ⊆ t) : #s ≤ #t :=
   ⟨Set.embeddingOfSubset s t h⟩
 
-theorem mk_empty (α : Type u) : #(∅ : Set α) = 0 :=
+@[deprecated mk_eq_zero (since := "2026-01-31")]
+theorem mk_emptyCollection (α : Type u) : #(∅ : Set α) = 0 :=
   mk_eq_zero _
-
-@[deprecated (since := "2026-01-31")]
-alias mk_emptyCollection := mk_empty
 
 theorem mk_set_eq_zero_iff {s : Set α} : #s = 0 ↔ s = ∅ := by
   rw [mk_eq_zero_iff, isEmpty_coe_sort]
