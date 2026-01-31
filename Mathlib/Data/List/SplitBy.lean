@@ -64,7 +64,6 @@ theorem splitBy_eq_nil {r : α → α → Bool} {l : List α} : l.splitBy r = []
 theorem splitBy_ne_nil {r : α → α → Bool} {l : List α} : l.splitBy r ≠ [] ↔ l ≠ [] :=
   splitBy_eq_nil.not
 
-set_option backward.privateInPublic true in
 private theorem nil_notMem_splitByLoop {r : α → α → Bool} {l : List α} {a : α} {g : List α} :
     [] ∉ splitBy.loop r l a g [] := by
   induction l generalizing a g with
