@@ -3,8 +3,9 @@ Copyright (c) 2020 Yury Kudryashov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yury Kudryashov, Patrick Massot, Eric Wieser, Yaël Dillies
 -/
-import Mathlib.Analysis.Normed.Module.Basic
-import Mathlib.LinearAlgebra.Basis.VectorSpace
+module
+
+public import Mathlib.Analysis.Normed.Module.Basic
 
 /-!
 # Basic facts about real (semi)normed spaces
@@ -20,6 +21,8 @@ In this file we prove some theorems about (semi)normed spaces over real numberes
 - `interior_closedBall'`, `frontier_closedBall'`, `interior_sphere'`, `frontier_sphere'`:
   similar lemmas assuming that the ambient space is separated and nontrivial instead of `r ≠ 0`.
 -/
+
+@[expose] public section
 
 open Metric Set Function Filter
 open scoped NNReal Topology
@@ -100,19 +103,13 @@ theorem interior_sphere (x : E) {r : ℝ} (hr : r ≠ 0) : interior (sphere x r)
 theorem frontier_sphere (x : E) {r : ℝ} (hr : r ≠ 0) : frontier (sphere x r) = sphere x r := by
   rw [isClosed_sphere.frontier_eq, interior_sphere x hr, diff_empty]
 
-end Seminormed
-
-section Normed
-
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Nontrivial E]
+variable [NontrivialTopology E]
 
 section Surj
-
 variable (E)
 
 theorem exists_norm_eq {c : ℝ} (hc : 0 ≤ c) : ∃ x : E, ‖x‖ = c := by
-  rcases exists_ne (0 : E) with ⟨x, hx⟩
-  rw [← norm_ne_zero_iff] at hx
+  rcases exists_norm_ne_zero E with ⟨x, hx⟩
   use c • ‖x‖⁻¹ • x
   simp [norm_smul, Real.norm_of_nonneg hc, inv_mul_cancel₀ hx]
 
@@ -137,6 +134,12 @@ theorem NormedSpace.sphere_nonempty {x : E} {r : ℝ} : (sphere x r).Nonempty �
   exact ⟨x + y, by simpa using hy⟩
 
 end Surj
+
+end Seminormed
+
+section Normed
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Nontrivial E]
 
 theorem interior_closedBall' (x : E) (r : ℝ) : interior (closedBall x r) = ball x r := by
   rcases eq_or_ne r 0 with (rfl | hr)

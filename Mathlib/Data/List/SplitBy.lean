@@ -3,8 +3,10 @@ Copyright (c) 2024 Violeta Hernández Palacios. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Violeta Hernández Palacios
 -/
-import Mathlib.Data.List.Chain
-import Mathlib.Data.List.Flatten
+module
+
+public import Mathlib.Data.List.Chain
+public import Mathlib.Data.List.Flatten
 
 /-!
 # Split a list into contiguous runs of elements which pairwise satisfy a relation.
@@ -19,6 +21,8 @@ The main results are the following:
 - `List.isChain_getLast_head_splitBy`: the last element of each list in `List.splitBy` is not
   related to the first element of the next list.
 -/
+
+public section
 
 namespace List
 
@@ -63,8 +67,7 @@ theorem splitBy_ne_nil {r : α → α → Bool} {l : List α} : l.splitBy r ≠ 
 private theorem nil_notMem_splitByLoop {r : α → α → Bool} {l : List α} {a : α} {g : List α} :
     [] ∉ splitBy.loop r l a g [] := by
   induction l generalizing a g with
-  | nil =>
-    simp [splitBy.loop]
+  | nil => simp [splitBy.loop]
   | cons b l IH =>
     rw [splitBy.loop]
     split
@@ -72,29 +75,24 @@ private theorem nil_notMem_splitByLoop {r : α → α → Bool} {l : List α} {a
     · rw [splitByLoop_eq_append, mem_append]
       simpa using IH
 
-@[deprecated (since := "2025-05-23")] alias nil_not_mem_splitByLoop := nil_notMem_splitByLoop
-
 @[simp]
 theorem nil_notMem_splitBy (r : α → α → Bool) (l : List α) : [] ∉ l.splitBy r :=
   match l with
   | nil => not_mem_nil
   | cons _ _ => nil_notMem_splitByLoop
 
-@[deprecated (since := "2025-05-23")] alias nil_not_mem_splitBy := nil_notMem_splitBy
-
-theorem ne_nil_of_mem_splitBy {r : α → α → Bool} {l : List α} (h : m ∈ l.splitBy r) : m ≠ [] := by
-  rintro rfl
-  exact nil_notMem_splitBy r l h
+theorem ne_nil_of_mem_splitBy {r : α → α → Bool} {l : List α} (h : m ∈ l.splitBy r) : m ≠ [] :=
+  fun _ ↦ by simp_all
 
 theorem head_head_splitBy (r : α → α → Bool) {l : List α} (hn : l ≠ []) :
     ((l.splitBy r).head (splitBy_ne_nil.2 hn)).head
       (ne_nil_of_mem_splitBy (head_mem _)) = l.head hn := by
-  simp_rw [← head_flatten_of_head_ne_nil, flatten_splitBy]
+  simp [head_head_eq_head_flatten]
 
 theorem getLast_getLast_splitBy (r : α → α → Bool) {l : List α} (hn : l ≠ []) :
     ((l.splitBy r).getLast (splitBy_ne_nil.2 hn)).getLast
       (ne_nil_of_mem_splitBy (getLast_mem _)) = l.getLast hn := by
-  simp_rw [← getLast_flatten_of_getLast_ne_nil, flatten_splitBy]
+  simp [getLast_getLast_eq_getLast_flatten]
 
 private theorem isChain_of_mem_splitByLoop {r : α → α → Bool} {l : List α} {a : α} {g : List α}
     (hga : ∀ b ∈ g.head?, r b a) (hg : g.IsChain fun y x ↦ r x y)
@@ -103,7 +101,7 @@ private theorem isChain_of_mem_splitByLoop {r : α → α → Bool} {l : List α
   | nil =>
     rw [splitBy.loop, reverse_cons, mem_append, mem_reverse, mem_singleton] at h
     obtain hm | rfl := h
-    · exact (not_mem_nil hm).elim
+    · cases not_mem_nil hm
     · apply List.isChain_reverse.1
       rw [reverse_reverse]
       exact isChain_cons.2 ⟨hga, hg⟩
@@ -111,25 +109,18 @@ private theorem isChain_of_mem_splitByLoop {r : α → α → Bool} {l : List α
     simp only [splitBy.loop, reverse_cons] at h
     split at h
     · apply IH _ (isChain_cons.2 ⟨hga, hg⟩) h
-      intro b hb
-      rw [head?_cons, Option.mem_some_iff] at hb
-      rwa [← hb]
+      grind
     · rw [splitByLoop_eq_append, mem_append, reverse_singleton, mem_singleton] at h
       obtain rfl | hm := h
       · apply List.isChain_reverse.1
         rw [reverse_append, reverse_cons, reverse_nil, nil_append, reverse_reverse]
         exact isChain_cons.2 ⟨hga, hg⟩
-      · apply IH _ isChain_nil hm
-        rintro _ ⟨⟩
+      · grind
 
 theorem isChain_of_mem_splitBy {r : α → α → Bool} {l : List α} (h : m ∈ l.splitBy r) :
     m.IsChain fun x y ↦ r x y := by
-  cases l with
-  | nil => cases h
-  | cons a l =>
-    apply isChain_of_mem_splitByLoop _ _ h
-    · rintro _ ⟨⟩
-    · exact isChain_nil
+  match l, h with
+  | a::l, h => apply isChain_of_mem_splitByLoop _ _ h <;> simp
 
 @[deprecated (since := "2025-09-24")] alias chain'_of_mem_splitBy := isChain_of_mem_splitBy
 
@@ -146,8 +137,7 @@ private theorem isChain_getLast_head_splitByLoop {r : α → α → Bool} (l : L
   | cons b l IH =>
     rw [splitBy.loop]
     split
-    · apply IH hgs' hgs
-      intro m hm
+    · refine IH hgs' hgs fun m hm ↦ ?_
       obtain ⟨ha, _, H⟩ := hga m hm
       refine ⟨ha, append_ne_nil_of_right_ne_nil _ (cons_ne_nil _ _), ?_⟩
       rwa [reverse_cons, head_append_of_ne_nil]
@@ -210,7 +200,7 @@ theorem splitBy_flatten {r : α → α → Bool} {l : List (List α)} (hn : [] �
     rw [isChain_cons] at hc'
     obtain ⟨x, hx, _⟩ := flatten_ne_nil_iff.1 (ne_nil_of_mem (mem_of_mem_head? hy))
     obtain ⟨_, _, H⟩ := hc'.1 (l.head (ne_nil_of_mem hx)) (head_mem_head? _)
-    rwa [head_flatten_of_head_ne_nil]
+    rwa [head_flatten_eq_head_head]
 
 /-- A characterization of `splitBy m r` as the unique list `l` such that:
 
@@ -229,7 +219,7 @@ theorem splitBy_eq_iff {r : α → α → Bool} {l : List (List α)} :
   · rintro ⟨rfl, hn, hc, hc'⟩
     exact splitBy_flatten hn hc hc'
 
-theorem splitBy_append {r : α → α → Bool} {l : List α}
+theorem splitBy_append {r : α → α → Bool} {l m : List α}
     (ha : ∀ x ∈ l.getLast?, ∀ y ∈ m.head?, r x y = false) :
     (l ++ m).splitBy r = l.splitBy r ++ m.splitBy r := by
   obtain rfl | hl := eq_or_ne l []
@@ -237,8 +227,7 @@ theorem splitBy_append {r : α → α → Bool} {l : List α}
   obtain rfl | hm := eq_or_ne m []
   · simp
   rw [splitBy_eq_iff]
-  refine ⟨by simp, by simp, ?_, ?_⟩
-  · aesop (add apply unsafe isChain_of_mem_splitBy)
+  refine ⟨by simp, by simp, ?_, ?_⟩; · aesop (add apply unsafe isChain_of_mem_splitBy)
   rw [isChain_append]
   refine ⟨isChain_getLast_head_splitBy _ _, isChain_getLast_head_splitBy _ _, fun x hx y hy ↦ ?_⟩
   use ne_nil_of_mem_splitBy (mem_of_mem_getLast? hx), ne_nil_of_mem_splitBy (mem_of_mem_head? hy)
