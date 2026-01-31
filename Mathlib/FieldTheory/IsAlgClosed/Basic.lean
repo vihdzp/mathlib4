@@ -619,8 +619,8 @@ satisfied by any subfield of an algebraically closed field. -/
 protected theorem IsAlgClosed.of_exists_root
     (H : ∀ p : k[X], p.Monic → p.degree ≠ 0 → (∀ n, p.coeff n ∈ s) → ∃ x ∈ s, p.eval x = 0) :
     s.IsAlgClosed := by
-  refine _root_.IsAlgClosed.of_exists_root _ fun p hp hp' ↦ ?_
-  obtain ⟨x, hs, hx⟩ := H (p.map s.subtype) (by simpa) (by simpa using hp'.degree_pos.ne') (by simp)
+  refine _root_.IsAlgClosed.of_exists_root _ fun p _ hp ↦ ?_
+  obtain ⟨x, hs, hx⟩ := H (p.map s.subtype) (by simpa) (by simpa using hp.degree_pos.ne') (by simp)
   use ⟨x, hs⟩
   simpa [eval_eq_sum, sum, ← Subtype.val_inj, support_map_of_injective] using hx
 
