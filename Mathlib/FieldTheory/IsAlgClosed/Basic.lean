@@ -344,6 +344,8 @@ variable {S : Type v} [CommRing S] [IsDomain S] [Algebra R S] [Algebra R M]
 
 variable {M}
 
+set_option backward.privateInPublic true in
+set_option backward.privateInPublic.warn false in
 private instance FractionRing.isAlgebraic :
     letI : IsDomain R := (FaithfulSMul.algebraMap_injective R S).isDomain _
     letI : Algebra (FractionRing R) (FractionRing S) := FractionRing.liftAlgebra R _
@@ -357,10 +359,12 @@ private instance FractionRing.isAlgebraic :
   exact (IsFractionRing.isAlgebraic_iff R (FractionRing R) (FractionRing S)).1
       (Algebra.IsAlgebraic.isAlgebraic _)
 
+set_option backward.privateInPublic true in
+set_option backward.privateInPublic.warn false in
 /-- A (random) homomorphism from an algebraic extension of R into an algebraically
   closed extension of R. -/
-@[stacks 09GU, no_expose]
-noncomputable def lift : S →ₐ[R] M := by
+@[stacks 09GU]
+noncomputable irreducible_def lift : S →ₐ[R] M := by
   letI : IsDomain R := (FaithfulSMul.algebraMap_injective R S).isDomain _
   letI := FractionRing.liftAlgebra R M
   letI := FractionRing.liftAlgebra R (FractionRing S)
