@@ -18,57 +18,57 @@ variable [DecidableEq α]
 
 /-- Run-length encoding of a list. Returns a list of pairs `(n, a)` representing consecutive groups
 of `a` of length `n`. -/
-def RunLength (l : List α) : List (ℕ+ × α) :=
+def runLength (l : List α) : List (ℕ+ × α) :=
   (l.splitBy (· == ·)).pmap
     (fun m hm ↦ (⟨m.length, length_pos_of_ne_nil hm⟩, m.head hm))
     (fun _ ↦ ne_nil_of_mem_splitBy)
 
 @[simp]
-theorem runLength_nil : RunLength ([] : List α) = [] :=
+theorem runLength_nil : runLength ([] : List α) = [] :=
   rfl
 
 @[simp]
-theorem runLength_eq_nil {l : List α} : RunLength l = [] ↔ l = [] := by
-  rw [RunLength, pmap_eq_nil_iff, splitBy_eq_nil]
+theorem runLength_eq_nil {l : List α} : runLength l = [] ↔ l = [] := by
+  rw [runLength, pmap_eq_nil_iff, splitBy_eq_nil]
 
 theorem runLength_append {n : ℕ} (hn : 0 < n) {a : α} {l : List α} (ha : a ∉ l.head?) :
-    (replicate n a ++ l).RunLength = (⟨n, hn⟩, a) :: l.RunLength := by
+    (replicate n a ++ l).runLength = (⟨n, hn⟩, a) :: l.runLength := by
   suffices splitBy (· == ·) (replicate n a ++ l) = replicate n a :: l.splitBy (· == ·) by
-    simp [this, RunLength]
+    simp [this, runLength]
   apply (splitBy_append ..).trans
   · rw [splitBy_beq_replicate hn.ne', singleton_append]
   · grind
 
 @[simp]
 theorem runLength_replicate {n : ℕ} (hn : 0 < n) (a : α) :
-    RunLength (replicate n a) = [(⟨n, hn⟩, a)] := by
+    runLength (replicate n a) = [(⟨n, hn⟩, a)] := by
   convert runLength_append hn (a := a) (l := []) _ <;> simp
 
 theorem runLength_append_cons {n : ℕ} (hn : 0 < n) {a b : α} {l : List α} (h : a ≠ b) :
-    RunLength (replicate n a ++ b :: l) = (⟨n, hn⟩, a) :: (b :: l).RunLength := by
+    runLength (replicate n a ++ b :: l) = (⟨n, hn⟩, a) :: (b :: l).runLength := by
   apply runLength_append hn
   rwa [head?_cons, Option.mem_some_iff, eq_comm]
 
 @[simp]
 theorem flatten_map_runLength (l : List α) :
-    (l.RunLength.map fun x ↦ replicate x.1 x.2).flatten = l := by
-  rw [RunLength, map_pmap, pmap_eq_self.2, flatten_splitBy]
+    (l.runLength.map fun x ↦ replicate x.1 x.2).flatten = l := by
+  rw [runLength, map_pmap, pmap_eq_self.2, flatten_splitBy]
   intro m hm
   have := isChain_of_mem_splitBy hm
   simp_rw [beq_iff_eq, isChain_eq_iff_eq_replicate] at this
   exact (this _ (head_mem_head? _)).symm
 
-theorem runLength_injective : Function.Injective (List.RunLength (α := α)) := by
+theorem runLength_injective : Function.Injective (List.runLength (α := α)) := by
   intro l m h
   have := flatten_map_runLength m
   rwa [← h, flatten_map_runLength] at this
 
 @[simp]
-theorem runLength_inj {l m : List α} : l.RunLength = m.RunLength ↔ l = m :=
+theorem runLength_inj {l m : List α} : l.runLength = m.runLength ↔ l = m :=
   runLength_injective.eq_iff
 
 theorem runLength_flatten_map {l : List (ℕ+ × α)} (hl : l.IsChain fun x y ↦ x.2 ≠ y.2) :
-    (l.map fun x ↦ replicate x.1 x.2).flatten.RunLength = l := by
+    (l.map fun x ↦ replicate x.1 x.2).flatten.runLength = l := by
   induction l with
   | nil => rfl
   | cons x l IH =>
@@ -87,8 +87,8 @@ private theorem isChain_runLengthAux {α : Type*} {l : List (List α)} (hn : ∀
   | nil => exact isChain_nil
   | cons a l IH => cases l with grind
 
-theorem isChain_runLength (l : List α) : l.RunLength.IsChain fun x y ↦ x.2 ≠ y.2 := by
-  rw [RunLength]
+theorem isChain_runLength (l : List α) : l.runLength.IsChain fun x y ↦ x.2 ≠ y.2 := by
+  rw [runLength]
   apply (List.isChain_map (β := ℕ+ × α) Prod.snd).1
   rw [map_pmap]
   apply isChain_runLengthAux
@@ -118,7 +118,7 @@ private def runLengthRecOnAux (l : List (ℕ+ × α)) {p : List α → Sort*}
 def runLengthRecOn (l : List α) {p : List α → Sort*} (nil : p [])
     (append : ∀ (n : ℕ+) (a l), a ∉ l.head? → p l → p (replicate n a ++ l)) : p l :=
   cast (congr_arg p (flatten_map_runLength l))
-    (runLengthRecOnAux l.RunLength (isChain_runLength _) nil append)
+    (runLengthRecOnAux l.runLength (isChain_runLength _) nil append)
 
 @[simp]
 theorem runLengthRecOn_nil {p : List α → Sort*} (nil : p [])
@@ -139,7 +139,7 @@ theorem runLengthRecOn_append {p : List α → Sort*} {n : ℕ} (h : 0 < n) {a :
     congr! <;> simp
 
 theorem splitBy_beq (l : List α) :
-    l.splitBy (· == ·) = l.RunLength.map fun x ↦ replicate x.1 x.2 := by
+    l.splitBy (· == ·) = l.runLength.map fun x ↦ replicate x.1 x.2 := by
   induction l using runLengthRecOn with
   | nil => rfl
   | append n a l ha IH =>

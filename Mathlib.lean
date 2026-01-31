@@ -3749,6 +3749,7 @@ public import Mathlib.Data.List.ProdSigma
 public import Mathlib.Data.List.Range
 public import Mathlib.Data.List.ReduceOption
 public import Mathlib.Data.List.Rotate
+public import Mathlib.Data.List.RunLength
 public import Mathlib.Data.List.Sections
 public import Mathlib.Data.List.Shortlex
 public import Mathlib.Data.List.Sigma
