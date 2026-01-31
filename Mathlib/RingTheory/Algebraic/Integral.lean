@@ -10,6 +10,8 @@ public import Mathlib.RingTheory.Algebraic.Basic
 public import Mathlib.RingTheory.IntegralClosure.IsIntegralClosure.Basic
 public import Mathlib.RingTheory.Localization.BaseChange
 
+import Mathlib.RingTheory.Polynomial.Subring
+
 /-!
 # Algebraic elements and integral elements
 
@@ -231,8 +233,9 @@ theorem restrictScalars [Algebra.IsAlgebraic R S]
   have := Algebra.nontrivial_of_isAlgebraic R S
   have : IsDomain R := NoZeroDivisors.to_isDomain _
   classical
-  have ⟨r, hr, int⟩ := Algebra.IsAlgebraic.exists_integral_multiples R (p.support.image (coeff p))
-  let p := (r • p).toSubring (integralClosure R S).toSubring fun s hs ↦ by
+  have ⟨r, hr, int⟩ := Algebra.IsAlgebraic.exists_integral_multiples R p.coeffs
+  let p := (r • p).toSubring (integralClosure R S).toSubring <| by
+    refine coeffs_subset_iff.1 fun s hs ↦ ?_
     obtain ⟨n, hn, rfl⟩ := mem_coeffs_iff.mp hs
     exact int _ (Finset.mem_image_of_mem _ <| support_smul _ _ hn)
   have : IsAlgebraic (integralClosure R S) a := by

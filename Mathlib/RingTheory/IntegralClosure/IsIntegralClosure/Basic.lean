@@ -13,6 +13,8 @@ public import Mathlib.RingTheory.Polynomial.IntegralNormalization
 public import Mathlib.RingTheory.Polynomial.ScaleRoots
 public import Mathlib.RingTheory.TensorProduct.MvPolynomial
 
+import Mathlib.RingTheory.Polynomial.Subring
+
 /-!
 # # Integral closure as a characteristic predicate
 
@@ -467,10 +469,10 @@ and x is an element of an A-algebra that is integral over A, then x is integral 
 theorem isIntegral_trans [Algebra.IsIntegral R A] (x : B) (hx : IsIntegral A x) :
     IsIntegral R x := by
   rcases hx with ⟨p, pmonic, hp⟩
-  let S := adjoin R (p.coeffs : Set A)
+  let S := adjoin R (.range p.coeff)
   have : Module.Finite R S := ⟨(Subalgebra.toSubmodule S).fg_top.mpr <|
-    fg_adjoin_of_finite p.coeffs.finite_toSet fun a _ ↦ Algebra.IsIntegral.isIntegral a⟩
-  let p' : S[X] := p.toSubring S.toSubring subset_adjoin
+    fg_adjoin_of_finite p.finite_range_coeff fun a _ ↦ Algebra.IsIntegral.isIntegral a⟩
+  let p' : S[X] := p.toSubring S.toSubring fun _ ↦ subset_adjoin (Set.mem_range_self _)
   have hSx : IsIntegral S x := ⟨p', (p.monic_toSubring _ _).mpr pmonic, by
     rw [IsScalarTower.algebraMap_eq S A B, ← eval₂_map]
     convert hp; apply p.map_toSubring S.toSubring⟩

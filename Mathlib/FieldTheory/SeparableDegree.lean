@@ -14,6 +14,8 @@ public import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
 public import Mathlib.RingTheory.Polynomial.SeparableDegree
 public import Mathlib.RingTheory.Polynomial.UniqueFactorization
 
+import Mathlib.RingTheory.Polynomial.Subring
+
 /-!
 
 # Separable degree
@@ -804,11 +806,13 @@ variable {E K} in
 theorem IsSeparable.of_algebra_isSeparable_of_isSeparable [Algebra E K] [IsScalarTower F E K]
     [Algebra.IsSeparable F E] {x : K} (hsep : IsSeparable E x) : IsSeparable F x := by
   set f := minpoly E x with hf
-  let E' : IntermediateField F E := adjoin F f.coeffs
+  let E' : IntermediateField F E := adjoin F (.range f.coeff)
+  have := f.finite_range_coeff.to_subtype
   haveI : FiniteDimensional F E' :=
     finiteDimensional_adjoin fun x _ ↦ Algebra.IsSeparable.isIntegral F x
-  let g : E'[X] := f.toSubring E'.toSubring (subset_adjoin F _)
-  have h : g.map (algebraMap E' E) = f := f.map_toSubring E'.toSubring (subset_adjoin F _)
+  have H (n) : f.coeff n ∈ E' := subset_adjoin _ _ (Set.mem_range_self n)
+  let g : E'[X] := f.toSubring E'.toSubring H
+  have h : g.map (algebraMap E' E) = f := f.map_toSubring E'.toSubring H
   clear_value g
   have hx : x ∈ restrictScalars F E'⟮x⟯ := mem_adjoin_simple_self _ x
   have hzero : aeval x g = 0 := by
