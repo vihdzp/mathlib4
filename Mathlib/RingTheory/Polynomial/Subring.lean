@@ -69,12 +69,24 @@ variable (hp : ∀ n, p.coeff n ∈ T)
 @[simp] theorem toSubring_one : toSubring 1 T (by aesop) = 1 := by aesop
 
 @[simp]
+theorem toSubring_C {x} (hx : x ∈ T) : (C x).toSubring T (by aesop) = C ⟨x, hx⟩ := by
+  aesop
+
+@[simp]
 theorem monic_toSubring : Monic (p.toSubring T hp) ↔ Monic p := by
   rw [Monic, Monic, ← leadingCoeff_toSubring p T, OneMemClass.coe_eq_one]
 
 @[simp]
 theorem map_toSubring : (p.toSubring T hp).map (Subring.subtype T) = p := by
   ext; simp
+
+theorem _root_.Subring.eval_mem (hp : ∀ n, p.coeff n ∈ T) {x : R} (h : x ∈ T) : p.eval x ∈ T := by
+  rw [eval_eq_sum]
+  exact T.sum_mem fun n _ ↦ T.mul_mem (hp n) (T.pow_mem h n)
+
+@[simp]
+theorem eval_toSubring (x) : (p.toSubring T hp).eval x = ⟨_, T.eval_mem p hp x.2⟩ := by
+  simp [← Subtype.val_inj, toSubring, sum, eval_eq_sum]
 
 /-! ### `ofSubring`-/
 
