@@ -484,7 +484,8 @@ theorem adjoin_minpoly_coeff_of_exists_primitive_element
     rintro ⟨n, -, rfl⟩
     rw [coeff_map]
     apply Subtype.mem
-  have dvd_g : minpoly K' α ∣ g.toSubring K'.toSubring (subset_adjoin F _) := by
+  have dvd_g : minpoly K' α ∣
+      g.toSubring K'.toSubring (coeffs_subset_iff.1 <| subset_adjoin F _) := by
     apply minpoly.dvd
     rw [aeval_def, eval₂_eq_eval_map]
     erw [g.map_toSubring K'.toSubring]
