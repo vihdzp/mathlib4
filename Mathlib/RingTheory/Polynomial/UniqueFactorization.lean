@@ -67,15 +67,20 @@ instance (priority := 100) wfDvdMonoid : WfDvdMonoid R[X] where
 
 variable [Nontrivial R]
 
-theorem exists_irreducible_of_degree_pos (hf : 0 < f.degree) : ∃ g, Irreducible g ∧ g ∣ f :=
+theorem exists_irreducible_dvd_of_degree_pos (hf : 0 < f.degree) : ∃ g, Irreducible g ∧ g ∣ f :=
   WfDvdMonoid.exists_irreducible_factor (fun huf => ne_of_gt hf <| degree_eq_zero_of_isUnit huf)
     fun hf0 => not_lt_of_gt hf <| hf0.symm ▸ (@degree_zero R _).symm ▸ WithBot.bot_lt_coe _
 
-theorem exists_irreducible_of_natDegree_pos (hf : 0 < f.natDegree) : ∃ g, Irreducible g ∧ g ∣ f :=
-  exists_irreducible_of_degree_pos <| by
-    contrapose! hf
-    exact natDegree_le_of_degree_le hf
+@[deprecated (since := "2026-01-31")]
+alias exists_irreducible_of_degree_pos := exists_irreducible_dvd_of_degree_pos
 
+set_option linter.deprecated false in
+@[deprecated exists_irreducible_dvd_of_degree_pos (since := "2026-01-31")]
+theorem exists_irreducible_of_natDegree_pos (hf : 0 < f.natDegree) : ∃ g, Irreducible g ∧ g ∣ f :=
+  exists_irreducible_of_degree_pos (natDegree_pos_iff_degree_pos.1 hf)
+
+set_option linter.deprecated false in
+@[deprecated exists_irreducible_dvd_of_degree_pos (since := "2026-01-31")]
 theorem exists_irreducible_of_natDegree_ne_zero (hf : f.natDegree ≠ 0) :
     ∃ g, Irreducible g ∧ g ∣ f :=
   exists_irreducible_of_natDegree_pos <| Nat.pos_of_ne_zero hf
