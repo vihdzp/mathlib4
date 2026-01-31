@@ -500,10 +500,13 @@ theorem lt_omega0_opow_succ {a b : Ordinal} : a < ω ^ succ b ↔ ∃ n : ℕ, a
 /-! ### Interaction with `Nat.cast` -/
 
 @[simp, norm_cast]
-theorem natCast_opow (m : ℕ) : ∀ n : ℕ, ↑(m ^ n : ℕ) = (m : Ordinal) ^ (n : Ordinal)
+theorem natCast_pow (m : ℕ) : ∀ n : ℕ, ↑(m ^ n : ℕ) = (m : Ordinal) ^ (n : Ordinal)
   | 0 => by simp
   | n + 1 => by
-    rw [pow_succ, natCast_mul, natCast_opow m n, Nat.cast_succ, add_one_eq_succ, opow_succ]
+    rw [pow_succ, natCast_mul, natCast_pow m n, Nat.cast_succ, add_one_eq_succ, opow_succ]
+
+@[deprecated (since := "2026-01-31")]
+alias natCast_opow := natCast_pow
 
 theorem iSup_pow_natCast {o : Ordinal} (ho : 0 < o) : ⨆ n : ℕ, o ^ n = o ^ ω := by
   simp_rw [← opow_natCast]
