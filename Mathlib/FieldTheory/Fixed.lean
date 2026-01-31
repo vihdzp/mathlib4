@@ -6,6 +6,7 @@ Authors: Kenny Lau
 module
 
 public import Mathlib.Algebra.Polynomial.GroupRingAction
+public import Mathlib.Algebra.Polynomial.Subring
 public import Mathlib.Algebra.Ring.Action.Field
 public import Mathlib.Algebra.Ring.Action.Invariant
 public import Mathlib.FieldTheory.Finiteness

@@ -13,6 +13,8 @@ public import Mathlib.LinearAlgebra.Dual.Lemmas
 public import Mathlib.RingTheory.Adjoin.Dimension
 public import Mathlib.RingTheory.TensorProduct.Finite
 
+import Mathlib.Algebra.Polynomial.Subring
+
 /-!
 # Adjoining Elements to Fields
 
