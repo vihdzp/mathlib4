@@ -48,8 +48,8 @@ variable (hp : ∀ n, p.coeff n ∈ T)
 
 @[simp] theorem toSubring_leadingCoeff : (p.toSubring T hp).leadingCoeff = p.leadingCoeff := rfl
 
-@[simp] theorem toSubring_zero : toSubring (0 : R[X]) T (by simp) = 0 := rfl
-@[simp] theorem toSubring_one : toSubring (1 : R[X]) T (by aesop) = 1 := by aesop
+@[simp] theorem toSubring_zero : toSubring 0 T (by simp) = 0 := rfl
+@[simp] theorem toSubring_one : toSubring 1 T (by aesop) = 1 := by aesop
 
 @[simp]
 theorem monic_toSubring : Monic (p.toSubring T hp) ↔ Monic p := by
