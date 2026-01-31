@@ -214,11 +214,13 @@ theorem splitBy_eq_iff {r : α → α → Bool} {l : List (List α)} :
   · rintro ⟨rfl, hn, hc, hc'⟩
     exact splitBy_flatten hn hc hc'
 
-theorem splitBy_append {r : α → α → Bool} {l : List α}
+theorem splitBy_append {r : α → α → Bool} {l m : List α}
     (ha : ∀ x ∈ l.getLast?, ∀ y ∈ m.head?, r x y = false) :
     (l ++ m).splitBy r = l.splitBy r ++ m.splitBy r := by
-  obtain rfl | hl := eq_or_ne l []; · simp
-  obtain rfl | hm := eq_or_ne m []; · simp
+  obtain rfl | hl := eq_or_ne l []
+  · simp
+  obtain rfl | hm := eq_or_ne m []
+  · simp
   rw [splitBy_eq_iff]
   refine ⟨by simp, by simp, ?_, ?_⟩; · aesop (add apply unsafe isChain_of_mem_splitBy)
   rw [isChain_append]
