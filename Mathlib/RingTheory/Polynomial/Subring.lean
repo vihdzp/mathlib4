@@ -5,7 +5,11 @@ Authors: Kenny Lau, María Inés de Frutos-Fernández
 -/
 module
 
-public import Mathlib.RingTheory.Polynomial.Basic
+public import Mathlib.Algebra.Polynomial.Degree.Defs
+public import Mathlib.Algebra.Polynomial.Eval.Defs
+public import Mathlib.Algebra.Ring.Subring.Defs
+
+import Mathlib.Algebra.Polynomial.Eval.Coeff
 
 /-!
 # Polynomials over subrings
@@ -22,9 +26,22 @@ in `R` to `R[X]`. We provide several lemmas to deal with coefficients, degree, a
 
 @[expose] public section
 
+variable {R S : Type*} [Ring R]
+
 namespace Polynomial
 
-variable {R : Type*} [Ring R] (p : R[X]) (T : Subring R)
+theorem coeffs_subset_iff {p : R[X]} [SetLike S R] [ZeroMemClass S R] {T : S} :
+    (p.coeffs : Set R) ⊆ T ↔ ∀ n, p.coeff n ∈ T where
+  mp hp n := by
+    by_cases hp₀ : p.coeff n = 0
+    · rw [hp₀]
+      exact zero_mem T
+    · exact hp (coeff_mem_coeffs hp₀)
+  mpr := by
+    simp_rw [Set.subset_def, Finset.mem_coe, mem_coeffs_iff]
+    aesop
+
+variable (p : R[X]) (T : Subring R)
 
 /-! ### `toSubring`-/
 
