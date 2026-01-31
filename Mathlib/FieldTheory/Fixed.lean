@@ -6,7 +6,6 @@ Authors: Kenny Lau
 module
 
 public import Mathlib.Algebra.Polynomial.GroupRingAction
-public import Mathlib.Algebra.Polynomial.Subring
 public import Mathlib.Algebra.Ring.Action.Field
 public import Mathlib.Algebra.Ring.Action.Invariant
 public import Mathlib.FieldTheory.Finiteness
@@ -14,6 +13,7 @@ public import Mathlib.FieldTheory.Normal.Defs
 public import Mathlib.FieldTheory.Separable
 public import Mathlib.LinearAlgebra.Dual.Lemmas
 public import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
+public import Mathlib.RingTheory.Polynomial.Subring
 
 /-!
 # Fixed field under a group action.
