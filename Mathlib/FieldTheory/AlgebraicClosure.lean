@@ -188,8 +188,7 @@ theorem isAlgClosed [IsAlgClosed E] : (algebraicClosure F E).toSubfield.IsAlgClo
 /-- If `E` is algebraically closed, then the algebraic closure of `F` in `E` is an absolute
 algebraic closure of `F`. -/
 instance isAlgClosure [IsAlgClosed E] : IsAlgClosure F (algebraicClosure F E) :=
-  ⟨(IsAlgClosed.algebraicClosure_eq_bot_iff _ E).mp (algebraicClosure_eq_bot F E),
-    isAlgebraic F E⟩
+  ⟨isAlgClosed F E, isAlgebraic F E⟩
 
 /-- The algebraic closure of `F` in `E` is equal to `E` if and only if `E / F` is
 algebraic. -/
