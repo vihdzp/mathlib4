@@ -577,3 +577,32 @@ theorem Polynomial.isRoot_of_isRoot_iff_dvd_derivative_mul {K : Type*} [Field K]
       _ ≤ rootMultiplicity a f - 1 + rootMultiplicity a g := add_le_add le_rfl (Nat.succ_le_iff.1
         ((rootMultiplicity_pos hg0).2 (h haf)))
   · simp [haf, rootMultiplicity_eq_zero haf]
+
+namespace Subfield
+variable {s : Subfield k} {k}
+
+/-- A convenience predicate for an algebraically closed subfield. -/
+protected def IsAlgClosed (s : Subfield k) : Prop := IsAlgClosed s
+
+theorem IsAlgClosed.to_subtype (h : s.IsAlgClosed) : IsAlgClosed s := h
+
+protected theorem IsAlgClosed.exists_root (h : s.IsAlgClosed) (p : k[X])
+    (hp₀ : p.degree ≠ 0) (hp : ∀ n, p.coeff n ∈ s) : ∃ x ∈ s, IsRoot p x := by
+  have := h.to_subtype
+  let q : s[X] := .ofFinsupp <| .mk p.support (fun k ↦ ⟨p.coeff k, hp k⟩)
+    (by simp [← Subtype.val_inj])
+  obtain ⟨x, hx⟩ := _root_.IsAlgClosed.exists_root q hp₀
+  use x.1, x.2
+  simpa [eval_eq_sum, sum, ← Subtype.val_inj] using hx
+
+/-- We require `p.degree ≠ 0` instead of `p.Irreducible`, as otherwise the hypothesis would be
+satisfied by any subfield of an algebraically closed field. -/
+protected theorem IsAlgClosed.of_exists_root
+    (H : ∀ p : k[X], p.Monic → p.degree ≠ 0 → (∀ n, p.coeff n ∈ s) → ∃ x ∈ s, p.eval x = 0) :
+    s.IsAlgClosed := by
+  refine _root_.IsAlgClosed.of_exists_root _ fun p hp hp' ↦ ?_
+  obtain ⟨x, hs, hx⟩ := H (p.map s.subtype) (by simpa) (by simpa using hp'.degree_pos.ne') (by simp)
+  use ⟨x, hs⟩
+  simpa [eval_eq_sum, sum, ← Subtype.val_inj, support_map_of_injective] using hx
+
+end Subfield

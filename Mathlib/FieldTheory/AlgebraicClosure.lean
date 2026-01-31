@@ -145,6 +145,7 @@ theorem le_algebraicClosure_iff (L : IntermediateField F E) :
 namespace algebraicClosure
 
 /-- The algebraic closure in `E` of the algebraic closure of `F` in `E` is equal to itself. -/
+@[simp]
 theorem algebraicClosure_eq_bot :
     algebraicClosure (algebraicClosure F E) E = ⊥ :=
   bot_unique fun x hx ↦ mem_bot.2
@@ -178,6 +179,11 @@ theorem IntermediateField.isAlgebraic_adjoin_iff_isAlgebraic {S : Set E} :
     fun _ => Iff.imp Iff.rfl mem_algebraicClosure_iff))
 
 namespace algebraicClosure
+
+/-- If `E / F` is a field extension and `E` is algebraically closed, then the algebraic closure of
+`F` is also algebraically closed. -/
+theorem isAlgClosed [IsAlgClosed E] : (algebraicClosure F E).toSubfield.IsAlgClosed :=
+  (IsAlgClosed.algebraicClosure_eq_bot_iff (algebraicClosure F E).toSubfield E).1 (by simp)
 
 /-- If `E` is algebraically closed, then the algebraic closure of `F` in `E` is an absolute
 algebraic closure of `F`. -/
