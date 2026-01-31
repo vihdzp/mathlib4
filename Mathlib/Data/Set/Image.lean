@@ -908,7 +908,7 @@ theorem preimage_range (f : α → β) : f ⁻¹' range f = univ :=
 
 /-- The range of a function from a `Unique` type contains just the
 function applied to its single value. -/
-theorem range_unique [h : Unique ι] : range f = {f default} := by
+theorem range_unique [Unique ι] : range f = {f default} := by
   aesop (add simp [Unique.eq_default])
 
 @[simp]
