@@ -39,16 +39,14 @@ def toSubring (p : R[X]) (T : Subring R) (hp : ∀ n, p.coeff n ∈ T) : T[X] wh
 variable (hp : ∀ n, p.coeff n ∈ T)
 
 @[simp] theorem coeff_toSubring {n : ℕ} : coeff (p.toSubring T hp) n = coeff p n := rfl
+@[simp] theorem support_toSubring : support (p.toSubring T hp) = support p := rfl
 
 @[deprecated (since := "2026-01-31")] alias coeff_toSubring' := coeff_toSubring
 
-@[simp] theorem support_toSubring : support (p.toSubring T hp) = support p := rfl
+@[simp] theorem degree_toSubring : (p.toSubring T hp).degree = p.degree := rfl
+@[simp] theorem natDegree_toSubring : (p.toSubring T hp).natDegree = p.natDegree := rfl
 
-@[simp] theorem degree_toSubring : (p.toSubring T hp).degree = p.degree := by simp [degree]
-@[simp] theorem natDegree_toSubring : (p.toSubring T hp).natDegree = p.natDegree := by
-  simp [natDegree]
-
-@[simp] theorem toSubring_leadingCoeff : ↑(p.toSubring T hp).leadingCoeff = p.leadingCoeff := rfl
+@[simp] theorem toSubring_leadingCoeff : (p.toSubring T hp).leadingCoeff = p.leadingCoeff := rfl
 
 @[simp] theorem toSubring_zero : toSubring (0 : R[X]) T (by simp) = 0 := rfl
 @[simp] theorem toSubring_one : toSubring (1 : R[X]) T (by aesop) = 1 := by aesop
@@ -64,11 +62,12 @@ theorem map_toSubring : (p.toSubring T hp).map (Subring.subtype T) = p := by
 /-! ### `ofSubring`-/
 
 /-- Given a polynomial whose coefficients are in some subring, return the corresponding polynomial
-  whose coefficients are in the ambient ring. -/
+whose coefficients are in the ambient ring. -/
 noncomputable def ofSubring (p : T[X]) : R[X] :=
   p.map T.subtype
 
-theorem coeff_ofSubring (p : T[X]) (n : ℕ) : coeff (ofSubring T p) n = (coeff p n : T) := by
+@[simp]
+theorem coeff_ofSubring (p : T[X]) (n : ℕ) : coeff (ofSubring T p) n = coeff p n := by
   simp [ofSubring]
 
 @[simp]
