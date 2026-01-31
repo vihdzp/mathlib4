@@ -12,6 +12,8 @@ public import Mathlib.Data.PNat.Defs
 # Run-length encoding
 -/
 
+@[expose] public section
+
 variable {α : Type*}
 
 namespace List
