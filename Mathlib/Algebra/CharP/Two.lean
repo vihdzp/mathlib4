@@ -175,38 +175,6 @@ theorem sq_inj {x y : R} : x ^ 2 = y ^ 2 ↔ x = y :=
 
 end CommRing
 
-section DivisionRing
-
-variable [DivisionRing R] [CharP R 2]
-
-theorem ratCast_eq_ite (q : ℚ) : (q : R) = if Odd q.num ∧ Odd q.den then 1 else 0 := by
-  rw [DivisionRing.ratCast_def, div_eq_mul_inv, natCast_eq_ite, intCast_eq_ite]
-  aesop
-
-@[simp]
-theorem range_ratCast : Set.range ((↑) : ℚ → R) = {0, 1} := by
-  rw [funext ratCast_eq_ite, Set.range_ite_const, Set.pair_comm]
-  · use 1; simp
-  · use 0; simp
-
-variable (R) in
-theorem ratCast_cases (q : ℚ) : (q : R) = 0 ∨ (q : R) = 1 :=
-  (Set.ext_iff.1 range_ratCast _).1 (Set.mem_range_self _)
-
-@[scoped simp]
-theorem inv_ratCast (q : ℚ) : (q : R)⁻¹ = q := by
-  obtain hq | hq := ratCast_cases R q <;> simp [hq]
-
-@[scoped simp]
-theorem inv_intCast (n : ℤ) : (n : R)⁻¹ = n :=
-  mod_cast inv_ratCast n
-
-@[scoped simp]
-theorem inv_natCast (n : ℕ) : (n : R)⁻¹ = n :=
-  mod_cast inv_ratCast n
-
-end DivisionRing
-
 end CharTwo
 
 section ringChar
