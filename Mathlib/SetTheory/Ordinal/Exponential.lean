@@ -15,7 +15,7 @@ related by the lemma `Ordinal.opow_le_iff_le_log : b ^ c ≤ x ↔ c ≤ log b x
 `b`, `c`.
 -/
 
-@[expose] public section
+public section
 
 noncomputable section
 
