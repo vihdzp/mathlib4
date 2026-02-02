@@ -50,7 +50,7 @@ section Northcott
 
 variable (n : ℕ) (B₁ B₂ : Fin (n + 1) → ℝ)
 
-/-- The set of polynomials whose coefficients are bounded between `B₁ i` and `B₂ i`. This
+/-- The set of polynomials whose coefficients are bounded between `B₁` and `B₂`. This
 construction is used as part of our proof of Northcott's theorem. -/
 def boxPoly : Set ℤ[X] := {p : ℤ[X] | p.natDegree ≤ n ∧ ∀ i, B₁ i ≤ p.coeff i ∧ p.coeff i ≤ B₂ i}
 
