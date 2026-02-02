@@ -252,6 +252,9 @@ instance completelyDistribLattice : CompletelyDistribLattice (LowerSet α) :=
 instance : Inhabited (LowerSet α) :=
   ⟨⊥⟩
 
+instance : IsConcreteLE (LowerSet α) α :=
+  ⟨.rfl⟩
+
 @[norm_cast] lemma coe_subset_coe : (s : Set α) ⊆ t ↔ s ≤ t := Iff.rfl
 
 @[norm_cast] lemma coe_ssubset_coe : (s : Set α) ⊂ t ↔ s < t := Iff.rfl
