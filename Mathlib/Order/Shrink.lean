@@ -63,13 +63,11 @@ lemma orderIsoShrink_symm_apply (a : Shrink.{u} α) :
     (orderIsoShrink α).symm a = (equivShrink α).symm a := rfl
 
 @[simp]
-theorem equivShrink_le_equivShrink_iff {x y : α} :
-    equivShrink α x ≤ equivShrink α y ↔ x ≤ y :=
+theorem equivShrink_le_equivShrink {x y : α} : equivShrink α x ≤ equivShrink α y ↔ x ≤ y :=
   (orderIsoShrink α).map_rel_iff
 
 @[simp]
-theorem equivShrink_lt_equivShrink_iff {x y : α} :
-    equivShrink α x < equivShrink α y ↔ x < y :=
+theorem equivShrink_lt_equivShrink {x y : α} : equivShrink α x < equivShrink α y ↔ x < y :=
   (orderIsoShrink α).toRelIsoLT.map_rel_iff
 
 @[to_dual]
@@ -89,8 +87,8 @@ instance [WellFoundedGT α] : WellFoundedGT (Shrink.{u} α) where
 
 end Preorder
 
-instance [PartialOrder α] : PartialOrder (Shrink.{u} α) where
-  le_antisymm _ _ h₁ h₂ := (equivShrink _).symm.injective (le_antisymm h₁ h₂)
+instance [PartialOrder α] : PartialOrder (Shrink.{u} α) :=
+  (equivShrink _).symm.injective.partialOrder _ .rfl .rfl
 
 noncomputable instance [LinearOrder α] : LinearOrder (Shrink.{u} α) where
   le_total _ _ := le_total _ _
