@@ -260,6 +260,18 @@ theorem tendsto_ofSeq {f : ℕ → ℝ} {lb : Filter ℝ} :
     (ofSeq f).Tendsto lb ↔ Tendsto f (hyperfilter ℕ) lb :=
   .rfl
 
+theorem stdPart_map {x : ℝ*} {r : ℝ} {f : ℝ → ℝ} (hf : ContinuousAt f r)
+    (hxr : x.Tendsto (𝓝 r)) : (x.map f).Tendsto (𝓝 (f r)) := by
+  rcases ofSeq_surjective x with ⟨g, rfl⟩
+  exact hf.tendsto.comp hxr
+
+theorem stdPart_map₂ {x y : ℝ*} {r s : ℝ} {f : ℝ → ℝ → ℝ}
+    (hxr : x.Tendsto (𝓝 r)) (hys : y.Tendsto (𝓝 s))
+    (hf : ContinuousAt (Function.uncurry f) (r, s)) : (x.map₂ f y).Tendsto (𝓝 (f r s)) := by
+  rcases ofSeq_surjective x with ⟨x, rfl⟩
+  rcases ofSeq_surjective y with ⟨y, rfl⟩
+  exact hf.tendsto.comp (hxr.prodMk_nhds hys)
+
 theorem tendsto_iff_forall {x : ℝ*} {r : ℝ} :
     x.Tendsto (𝓝 r) ↔ (∀ s < r, s ≤ x) ∧ (∀ s > r, x ≤ s) := by
   rcases ofSeq_surjective x with ⟨f, rfl⟩
@@ -597,14 +609,14 @@ theorem isSt_iff_abs_sub_lt_delta {x : ℝ*} {r : ℝ} : IsSt x r ↔ ∀ δ : �
   simp only [abs_sub_lt_iff, sub_lt_iff_lt_add, IsSt, and_comm, add_comm]
 
 set_option linter.deprecated false in
-@[deprecated "`IsSt` is deprecated" (since := "2026-01-05")]
+@[deprecated stdPart_map (since := "2026-01-05")]
 theorem IsSt.map {x : ℝ*} {r : ℝ} (hxr : IsSt x r) {f : ℝ → ℝ} (hf : ContinuousAt f r) :
     IsSt (x.map f) (f r) := by
   rcases ofSeq_surjective x with ⟨g, rfl⟩
   exact isSt_ofSeq_iff_tendsto.2 <| hf.tendsto.comp (isSt_ofSeq_iff_tendsto.1 hxr)
 
 set_option linter.deprecated false in
-@[deprecated "`IsSt` is deprecated" (since := "2026-01-05")]
+@[deprecated stdPart_map₂ (since := "2026-01-05")]
 theorem IsSt.map₂ {x y : ℝ*} {r s : ℝ} (hxr : IsSt x r) (hys : IsSt y s) {f : ℝ → ℝ → ℝ}
     (hf : ContinuousAt (Function.uncurry f) (r, s)) : IsSt (x.map₂ f y) (f r s) := by
   rcases ofSeq_surjective x with ⟨x, rfl⟩
