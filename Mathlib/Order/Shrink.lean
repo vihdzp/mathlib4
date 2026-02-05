@@ -92,4 +92,4 @@ instance [PartialOrder α] : PartialOrder (Shrink.{u} α) :=
 
 noncomputable instance [LinearOrder α] : LinearOrder (Shrink.{u} α) where
   le_total _ _ := le_total _ _
-  toDecidableLE _ _ := LinearOrder.toDecidableLE _ _
+  toDecidableLE := Classical.decRel _
