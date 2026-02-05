@@ -389,6 +389,7 @@ variable [LinearOrder α] {a b c : α}
 theorem CovBy.Ioi_eq (h : a ⋖ b) : Ioi a = Ici b := by
   rw [← Ioo_union_Ici_eq_Ioi h.lt, h.Ioo_eq, empty_union]
 
+@[to_dual existing]
 theorem CovBy.Iio_eq (h : a ⋖ b) : Iio b = Iic a := by
   rw [← Iic_union_Ioo_eq_Iio h.lt, h.Ioo_eq, union_empty]
 
