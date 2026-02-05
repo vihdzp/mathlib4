@@ -90,6 +90,5 @@ end Preorder
 instance [PartialOrder α] : PartialOrder (Shrink.{u} α) :=
   (equivShrink _).symm.injective.partialOrder _ .rfl .rfl
 
-noncomputable instance [LinearOrder α] : LinearOrder (Shrink.{u} α) where
-  le_total _ _ := le_total _ _
-  toDecidableLE := Classical.decRel _
+noncomputable instance [LinearOrder α] : LinearOrder (Shrink.{u} α) :=
+  .lift' _ (equivShrink _).symm.injective
