@@ -47,7 +47,7 @@ theorem WCovBy.refl (a : α) : a ⩿ a :=
 
 @[simp] lemma WCovBy.rfl : a ⩿ a := WCovBy.refl a
 
-@[to_dual covBy']
+@[to_dual wcovBy']
 protected theorem Eq.wcovBy (h : a = b) : a ⩿ b :=
   h ▸ WCovBy.rfl
 
@@ -86,12 +86,15 @@ theorem wcovBy_congr_right (hab : AntisymmRel (· ≤ ·) a b) : c ⩿ a ↔ c �
 theorem not_wcovBy_iff (h : a ≤ b) : ¬a ⩿ b ↔ ∃ c, a < c ∧ c < b := by
   simp_rw [WCovBy, h, true_and, not_forall, exists_prop, not_not]
 
+@[to_dual stdRefl']
 instance WCovBy.stdRefl : @Std.Refl α (· ⩿ ·) :=
   ⟨WCovBy.refl⟩
 
+@[to_dual self]
 theorem WCovBy.Ioo_eq (h : a ⩿ b) : Ioo a b = ∅ :=
   eq_empty_iff_forall_notMem.2 fun _ hx => h.2 hx.1 hx.2
 
+@[to_dual self]
 theorem wcovBy_iff_Ioo_eq : a ⩿ b ↔ a ≤ b ∧ Ioo a b = ∅ :=
   and_congr_right' <| by simp [eq_empty_iff_forall_notMem]
 
@@ -115,16 +118,16 @@ theorem Set.OrdConnected.apply_wcovBy_apply_iff (f : α ↪o β) (h : (range f).
     f a ⩿ f b ↔ a ⩿ b :=
   ⟨fun h2 => h2.of_image f, fun hab => hab.image f h⟩
 
-@[to_dual self, simp]
+@[simp, to_dual self]
 theorem apply_wcovBy_apply_iff {E : Type*} [EquivLike E α β] [OrderIsoClass E α β] (e : E) :
     e a ⩿ e b ↔ a ⩿ b :=
   (ordConnected_range (e : α ≃o β)).apply_wcovBy_apply_iff ((e : α ≃o β) : α ↪o β)
 
-@[to_dual self, simp]
+@[simp, to_dual self]
 theorem toDual_wcovBy_toDual_iff : toDual b ⩿ toDual a ↔ a ⩿ b :=
   and_congr_right' <| forall_congr' fun _ => forall_swap
 
-@[to_dual self, simp]
+@[simp, to_dual self]
 theorem ofDual_wcovBy_ofDual_iff {a b : αᵒᵈ} : ofDual a ⩿ ofDual b ↔ b ⩿ a :=
   and_congr_right' <| forall_congr' fun _ => forall_swap
 
