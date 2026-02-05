@@ -1167,7 +1167,6 @@ theorem Infinite.mul {x y : ℝ*} : Infinite x → Infinite y → Infinite (x * 
   infinite_mul_of_infinite_not_infinitesimal hx hy.not_infinitesimal
 
 end Hyperreal
-
 end
 
 /-
