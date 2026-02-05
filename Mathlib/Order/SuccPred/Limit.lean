@@ -29,8 +29,7 @@ namespace Order
 
 open Function Set OrderDual
 
-/-! ### Successor limits -/
-
+/-! ### Successor and predecessor limits -/
 
 section LT
 
@@ -88,11 +87,22 @@ Use `IsPredPrelimit` if you want to include the case of a maximal element. -/]
 def IsSuccLimit (a : α) : Prop :=
   ¬ IsMin a ∧ IsSuccPrelimit a
 
+@[to_dual (attr := simp)]
+theorem isSuccLimit_toDual_iff : IsSuccLimit (toDual a) ↔ IsPredLimit a := by
+  simp [IsSuccLimit, IsPredLimit]
+
+@[to_dual]
+alias ⟨_, IsPredLimit.dual⟩ := isSuccLimit_toDual_iff
+
 @[to_dual]
 protected theorem IsSuccLimit.not_isMin (h : IsSuccLimit a) : ¬ IsMin a := h.1
 
 @[to_dual]
 protected theorem IsSuccLimit.isSuccPrelimit (h : IsSuccLimit a) : IsSuccPrelimit a := h.2
+
+@[deprecated IsPredLimit.isPredPrelimit (since := "2026-02-05")]
+theorem not_isPredLimit_of_not_isPredPrelimit : ¬ IsPredPrelimit a → ¬ IsPredLimit a :=
+  mt IsPredLimit.isPredPrelimit
 
 @[to_dual]
 theorem IsSuccPrelimit.isSuccLimit_of_not_isMin (h : IsSuccPrelimit a) (ha : ¬ IsMin a) :
@@ -190,6 +200,7 @@ section IsSuccArchimedean
 
 variable [IsSuccArchimedean α] [NoMaxOrder α]
 
+@[to_dual]
 theorem IsSuccPrelimit.isMin_of_noMax (h : IsSuccPrelimit a) : IsMin a := by
   intro b hb
   rcases hb.exists_succ_iterate with ⟨_ | n, rfl⟩
@@ -197,14 +208,15 @@ theorem IsSuccPrelimit.isMin_of_noMax (h : IsSuccPrelimit a) : IsMin a := by
   · rw [iterate_succ_apply'] at h
     exact (not_isSuccPrelimit_succ _ h).elim
 
-@[simp]
+@[to_dual (attr := simp)]
 theorem isSuccPrelimit_iff_of_noMax : IsSuccPrelimit a ↔ IsMin a :=
   ⟨IsSuccPrelimit.isMin_of_noMax, IsMin.isSuccPrelimit⟩
 
-@[simp]
+@[to_dual (attr := simp)]
 theorem not_isSuccLimit_of_noMax : ¬ IsSuccLimit a :=
   fun h ↦ h.not_isMin h.isSuccPrelimit.isMin_of_noMax
 
+@[to_dual]
 theorem not_isSuccPrelimit_of_noMax [NoMinOrder α] : ¬ IsSuccPrelimit a := by simp
 
 end IsSuccArchimedean
@@ -305,6 +317,7 @@ section IsSuccArchimedean
 
 variable [IsSuccArchimedean α]
 
+@[to_dual]
 protected theorem IsSuccPrelimit.isMin (h : IsSuccPrelimit a) : IsMin a := fun b hb => by
   revert h
   refine Succ.rec (fun _ => le_rfl) (fun c _ H hc => ?_) hb
@@ -312,14 +325,15 @@ protected theorem IsSuccPrelimit.isMin (h : IsSuccPrelimit a) : IsMin a := fun b
   rw [this] at hc ⊢
   exact H hc
 
-@[simp]
+@[to_dual (attr := simp)]
 theorem isSuccPrelimit_iff : IsSuccPrelimit a ↔ IsMin a :=
   ⟨IsSuccPrelimit.isMin, IsMin.isSuccPrelimit⟩
 
-@[simp]
+@[to_dual (attr := simp)]
 theorem not_isSuccLimit : ¬ IsSuccLimit a :=
   fun h ↦ h.not_isMin <| h.isSuccPrelimit.isMin
 
+@[to_dual]
 theorem not_isSuccPrelimit [NoMinOrder α] : ¬ IsSuccPrelimit a := by simp
 
 end IsSuccArchimedean
@@ -406,80 +420,9 @@ theorem IsSuccLimit.le_succ_iff (hb : IsSuccLimit b) : b ≤ succ a ↔ b ≤ a 
 
 end LinearOrder
 
-/-! ### Predecessor limits -/
-
--- TODO: generate all of this through `to_dual`.
-
-section Preorder
-
-variable [Preorder α]
-
-@[simp]
-theorem isSuccLimit_toDual_iff : IsSuccLimit (toDual a) ↔ IsPredLimit a := by
-  simp [IsSuccLimit, IsPredLimit]
-
-@[simp]
-theorem isPredLimit_toDual_iff : IsPredLimit (toDual a) ↔ IsSuccLimit a := by
-  simp [IsSuccLimit, IsPredLimit]
-
-alias ⟨_, IsPredLimit.dual⟩ := isSuccLimit_toDual_iff
-alias ⟨_, IsSuccLimit.dual⟩ := isPredLimit_toDual_iff
-
-theorem not_isPredLimit_of_not_isPredPrelimit (h : ¬ IsPredPrelimit a) : ¬ IsPredLimit a :=
-  not_isPredLimit_iff.2 (Or.inr h)
-
-variable [PredOrder α]
-
-section IsPredArchimedean
-
-variable [IsPredArchimedean α] [NoMinOrder α]
-
-theorem IsPredPrelimit.isMax_of_noMin (h : IsPredPrelimit a) : IsMax a :=
-  h.dual.isMin_of_noMax
-
-@[simp]
-theorem isPredPrelimit_iff_of_noMin : IsPredPrelimit a ↔ IsMax a :=
-  ⟨IsPredPrelimit.isMax_of_noMin, IsMax.isPredPrelimit⟩
-
-theorem not_isPredPrelimit_of_noMin [NoMaxOrder α] : ¬ IsPredPrelimit a := by simp
-
-@[simp]
-theorem not_isPredLimit_of_noMin : ¬ IsPredLimit a :=
-  fun h ↦ h.not_isMax h.isPredPrelimit.isMax_of_noMin
-
-end IsPredArchimedean
-
-end Preorder
-
-section PartialOrder
-
-variable [PartialOrder α] [PredOrder α]
-
-section IsPredArchimedean
-
-variable [IsPredArchimedean α]
-
-protected theorem IsPredPrelimit.isMax (h : IsPredPrelimit a) : IsMax a :=
-  h.dual.isMin
-
-@[simp]
-theorem isPredPrelimit_iff : IsPredPrelimit a ↔ IsMax a :=
-  ⟨IsPredPrelimit.isMax, IsMax.isPredPrelimit⟩
-
-@[simp]
-theorem not_isPredLimit : ¬ IsPredLimit a :=
-  fun h ↦ h.not_isMax <| h.isPredPrelimit.isMax
-
-theorem not_isPredPrelimit [NoMaxOrder α] : ¬ IsPredPrelimit a := by simp
-
-end IsPredArchimedean
-
-end PartialOrder
-
 end Order
 
 /-! ### Induction principles -/
-
 
 variable {motive : α → Sort*}
 
