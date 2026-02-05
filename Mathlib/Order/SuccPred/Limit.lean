@@ -387,6 +387,7 @@ theorem IsSuccPrelimit.isLUB_Iio (ha : IsSuccPrelimit a) : IsLUB (Iio a) a := by
 theorem IsSuccLimit.isLUB_Iio (ha : IsSuccLimit a) : IsLUB (Iio a) a :=
   ha.isSuccPrelimit.isLUB_Iio
 
+@[to_dual]
 theorem isLUB_Iio_iff_isSuccPrelimit : IsLUB (Iio a) a ↔ IsSuccPrelimit a := by
   refine ⟨fun ha b hb ↦ ?_, IsSuccPrelimit.isLUB_Iio⟩
   rw [hb.Iio_eq] at ha
@@ -474,15 +475,6 @@ theorem not_isPredPrelimit [NoMaxOrder α] : ¬ IsPredPrelimit a := by simp
 end IsPredArchimedean
 
 end PartialOrder
-
-section LinearOrder
-
-variable [LinearOrder α]
-
-theorem isGLB_Ioi_iff_isPredPrelimit : IsGLB (Ioi a) a ↔ IsPredPrelimit a := by
-  simpa using isLUB_Iio_iff_isSuccPrelimit (a := toDual a)
-
-end LinearOrder
 
 end Order
 
