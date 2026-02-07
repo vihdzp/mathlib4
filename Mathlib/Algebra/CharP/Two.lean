@@ -55,7 +55,7 @@ theorem range_natCast : Set.range ((↑) : ℕ → R) = {0, 1} := by
 
 variable (R) in
 theorem natCast_cases (n : ℕ) : (n : R) = 0 ∨ (n : R) = 1 :=
-  (Set.ext_iff.1 range_natCast _).1 (Set.mem_range_self _)
+  range_natCast.le (Set.mem_range_self _)
 
 theorem natCast_eq_mod (n : ℕ) : (n : R) = (n % 2 : ℕ) := by
   simp [natCast_eq_ite, Nat.even_iff]
