@@ -388,6 +388,14 @@ section LinearOrder
 
 variable [LinearOrder α] {a b c : α}
 
+@[to_dual ge_of_gt]
+theorem WCovBy.le_of_lt (hab : a ⩿ b) (hcb : c < b) : c ≤ a :=
+  not_lt.1 fun hac => hab.2 hac hcb
+
+@[to_dual ge_of_gt]
+theorem CovBy.le_of_lt (hab : a ⋖ b) : c < b → c ≤ a :=
+  hab.wcovBy.le_of_lt
+
 theorem CovBy.Ioi_eq (h : a ⋖ b) : Ioi a = Ici b := by
   rw [← Ioo_union_Ici_eq_Ioi h.lt, h.Ioo_eq, empty_union]
 
@@ -402,10 +410,7 @@ theorem CovBy.Ioo_eq_Ico (h : a ⋖ b) (c : α) : Ioo a c = Ico b c :=
 theorem CovBy.Ioo_eq_Ioc (h : a ⋖ b) (c : α) : Ioo c b = Ioc c a :=
   subset_antisymm (fun _x hx ↦ ⟨hx.1, h.le_of_lt hx.2⟩) <| Ioc_subset_Ioo_right h.lt
 
-@[to_dual ge_of_gt]
-theorem CovBy.le_of_lt (hab : a ⋖ b) : c < b → c ≤ a :=
-  hab.wcovBy.le_of_lt
-
+@[to_dual unique_right]
 theorem CovBy.unique_left (ha : a ⋖ c) (hb : b ⋖ c) : a = b :=
   (hb.le_of_lt ha.lt).antisymm <| ha.le_of_lt hb.lt
 
