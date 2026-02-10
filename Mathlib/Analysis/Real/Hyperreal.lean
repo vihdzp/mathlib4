@@ -484,7 +484,7 @@ theorem isSt_of_tendsto {f : ℕ → ℝ} {r : ℝ} (hf : Tendsto f atTop (𝓝 
   isSt_ofSeq_iff_tendsto.2 <| hf.mono_left Nat.hyperfilter_le_atTop
 
 set_option linter.deprecated false in
-@[deprecated "Use `stdPart_monotoneOn` and `MonotoneOn.reflect_lt` (since := "2026-01-05")]
+@[deprecated "Use `stdPart_monotoneOn` and `MonotoneOn.reflect_lt`" (since := "2026-01-05")]
 protected theorem IsSt.lt {x y : ℝ*} {r s : ℝ} (hxr : IsSt x r) (hys : IsSt y s) (hrs : r < s) :
     x < y := by
   rcases ofSeq_surjective x with ⟨f, rfl⟩
