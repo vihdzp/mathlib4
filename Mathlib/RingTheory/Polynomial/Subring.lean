@@ -67,7 +67,7 @@ variable (hp : (p.coeffs : Set R) ⊆ T)
 
 @[simp]
 theorem monic_toSubring : Monic (p.toSubring T hp) ↔ Monic p := by
-  rw [Monic, Monic, ← leadingCoeff_toSubring p T, OneMemClass.coe_eq_one]
+  simp [Monic, ← OneMemClass.coe_eq_one]
 
 @[simp] theorem toSubring_zero : toSubring 0 T (by simp) = 0 := rfl
 @[simp] theorem toSubring_one : toSubring 1 T (coeffs_subset_iff.2 <| by aesop) = 1 := by aesop
