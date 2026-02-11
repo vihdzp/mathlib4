@@ -118,7 +118,7 @@ private def runLengthRecOnAux (l : List (ℕ+ × α)) {p : List α → Sort*}
     | cons x l => simpa [head?_replicate] using (hc.1 x head?_cons).symm
 
 /-- Recursion on the run-length encoding of a list. -/
-@[elab_as_elim]
+@[elab_as_elim, no_expose]
 def runLengthRecOn (l : List α) {p : List α → Sort*} (nil : p [])
     (append : ∀ (n : ℕ+) (a l), a ∉ l.head? → p l → p (replicate n a ++ l)) : p l :=
   cast (congr_arg p (flatten_map_runLength l))
@@ -128,7 +128,7 @@ def runLengthRecOn (l : List α) {p : List α → Sort*} (nil : p [])
 theorem runLengthRecOn_nil {p : List α → Sort*} (nil : p [])
     (append : ∀ (n : ℕ+) (a l), a ∉ l.head? → p l → p (replicate n a ++ l)) :
     runLengthRecOn [] nil append = nil :=
-  rfl
+  (rfl)
 
 theorem runLengthRecOn_append {p : List α → Sort*} {n : ℕ} (h : 0 < n) {a : α} {l : List α}
     (hl : a ∉ l.head?) (nil : p [])
