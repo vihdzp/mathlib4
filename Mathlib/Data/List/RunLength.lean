@@ -12,7 +12,7 @@ public import Mathlib.Data.PNat.Defs
 # Run-length encoding
 -/
 
-@[expose] public section
+public section
 
 variable {α : Type*}
 
@@ -22,6 +22,7 @@ variable [DecidableEq α]
 
 /-- Run-length encoding of a list. Returns a list of pairs `(n, a)` representing consecutive groups
 of `a` of length `n`. -/
+@[expose]
 def runLength (l : List α) : List (ℕ+ × α) :=
   (l.splitBy (· == ·)).pmap
     (fun m hm ↦ (⟨m.length, length_pos_of_ne_nil hm⟩, m.head hm))
@@ -118,7 +119,7 @@ private def runLengthRecOnAux (l : List (ℕ+ × α)) {p : List α → Sort*}
     | cons x l => simpa [head?_replicate] using (hc.1 x head?_cons).symm
 
 /-- Recursion on the run-length encoding of a list. -/
-@[elab_as_elim, no_expose]
+@[elab_as_elim]
 def runLengthRecOn (l : List α) {p : List α → Sort*} (nil : p [])
     (append : ∀ (n : ℕ+) (a l), a ∉ l.head? → p l → p (replicate n a ++ l)) : p l :=
   cast (congr_arg p (flatten_map_runLength l))
