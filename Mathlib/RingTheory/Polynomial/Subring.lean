@@ -47,13 +47,13 @@ variable (p : R[X]) (T : Subring R)
 
 /-- Given a polynomial `p` and a subring `T` that contains the coefficients of `p`,
 return the corresponding polynomial whose coefficients are in `T`. -/
-def toSubring (p : R[X]) (T : Subring R) (hp : ∀ n, p.coeff n ∈ T) : T[X] where
+def toSubring (p : R[X]) (T : Subring R) (hp : (p.coeffs : Set R) ⊆ T) : T[X] where
   toFinsupp :=
   { support := p.support
-    toFun n := ⟨p.coeff n, hp n⟩
+    toFun n := ⟨p.coeff n, coeffs_subset_iff.1 hp n⟩
     mem_support_toFun n := by rw [ne_eq, ← Subring.coe_eq_zero_iff, mem_support_iff] }
 
-variable (hp : ∀ n, p.coeff n ∈ T)
+variable (hp : (p.coeffs : Set R) ⊆ T)
 
 @[simp] theorem coeff_toSubring {n : ℕ} : coeff (p.toSubring T hp) n = coeff p n := rfl
 @[simp] theorem support_toSubring : support (p.toSubring T hp) = support p := rfl
@@ -65,12 +65,12 @@ variable (hp : ∀ n, p.coeff n ∈ T)
 
 @[simp] theorem leadingCoeff_toSubring : (p.toSubring T hp).leadingCoeff = p.leadingCoeff := rfl
 
-@[simp] theorem toSubring_zero : toSubring 0 T (by simp) = 0 := rfl
-@[simp] theorem toSubring_one : toSubring 1 T (by aesop) = 1 := by aesop
-
 @[simp]
 theorem monic_toSubring : Monic (p.toSubring T hp) ↔ Monic p := by
   rw [Monic, Monic, ← leadingCoeff_toSubring p T, OneMemClass.coe_eq_one]
+
+@[simp] theorem toSubring_zero : toSubring 0 T (by simp) = 0 := rfl
+@[simp] theorem toSubring_one : toSubring 1 T (coeffs_subset_iff.2 <| by aesop) = 1 := by aesop
 
 @[simp]
 theorem map_toSubring : (p.toSubring T hp).map (Subring.subtype T) = p := by
