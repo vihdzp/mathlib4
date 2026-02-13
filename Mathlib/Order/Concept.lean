@@ -407,6 +407,10 @@ instance : CompleteLattice (Concept α β r) where
   le_sInf _ _ := subset_iInter₂
 
 @[simp]
+theorem extent_top : (⊤ : Concept α β r).extent = univ :=
+  rfl
+
+@[simp]
 theorem intent_top : (⊤ : Concept α β r).intent = upperPolar r univ :=
   rfl
 
