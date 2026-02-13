@@ -67,11 +67,6 @@ structure BoundedLatticeHom (α β : Type*) [Lattice α] [Lattice β] [BoundedOr
   Do not use this directly. Use `map_bot` instead. -/
   map_bot' : toFun ⊥ = ⊥
 
--- TODO: remove this configuration and use the default configuration.
-initialize_simps_projections SupBotHom (+toSupHom, -toFun)
-initialize_simps_projections InfTopHom (+toInfHom, -toFun)
-initialize_simps_projections BoundedLatticeHom (+toLatticeHom, -toFun)
-
 section
 
 /-- `SupBotHomClass F α β` states that `F` is a type of finitary supremum-preserving morphisms.
@@ -263,7 +258,7 @@ theorem copy_eq (f : SupBotHom α β) (f' : α → β) (h : f' = f) : f.copy f' 
 variable (α)
 
 /-- `id` as a `SupBotHom`. -/
-@[simps]
+@[simps!]
 protected def id : SupBotHom α α :=
   ⟨SupHom.id α, rfl⟩
 
@@ -329,7 +324,7 @@ instance : OrderBot (SupBotHom α β) where
   bot_le _ _ := bot_le
 
 @[simp]
-theorem coe_sup (f g : SupBotHom α β) : DFunLike.coe (f ⊔ g) = f ⊔ g :=
+theorem coe_sup (f g : SupBotHom α β) : ⇑(f ⊔ g) = ⇑f ⊔ ⇑g :=
   rfl
 
 @[simp]
@@ -416,7 +411,7 @@ theorem copy_eq (f : InfTopHom α β) (f' : α → β) (h : f' = f) : f.copy f' 
 variable (α)
 
 /-- `id` as an `InfTopHom`. -/
-@[simps]
+@[simps!]
 protected def id : InfTopHom α α :=
   ⟨InfHom.id α, rfl⟩
 
@@ -482,7 +477,7 @@ instance : OrderTop (InfTopHom α β) where
   le_top _ _ := le_top
 
 @[simp]
-theorem coe_inf (f g : InfTopHom α β) : DFunLike.coe (f ⊓ g) = f ⊓ g :=
+theorem coe_inf (f g : InfTopHom α β) : ⇑(f ⊓ g) = ⇑f ⊓ ⇑g :=
   rfl
 
 @[simp]
@@ -716,7 +711,7 @@ variable [Min α] [Top α] [Min β] [Top β] [Min γ] [Top γ]
 
 /-- Reinterpret a finitary infimum homomorphism as a finitary supremum homomorphism between the dual
 lattices. -/
-@[simps]
+@[simps!]
 protected def dual : InfTopHom α β ≃ SupBotHom αᵒᵈ βᵒᵈ where
   toFun f := ⟨InfHom.dual f.toInfHom, f.map_top'⟩
   invFun f := ⟨InfHom.dual.symm f.toSupHom, f.map_bot'⟩
@@ -748,7 +743,7 @@ variable [Lattice α] [BoundedOrder α] [Lattice β] [BoundedOrder β] [Lattice 
 
 /-- Reinterpret a bounded lattice homomorphism as a bounded lattice homomorphism between the dual
 bounded lattices. -/
-@[simps]
+@[simps!]
 protected def dual : BoundedLatticeHom α β ≃ BoundedLatticeHom αᵒᵈ βᵒᵈ where
   toFun f := ⟨LatticeHom.dual f.toLatticeHom, f.map_bot', f.map_top'⟩
   invFun f := ⟨LatticeHom.dual.symm f.toLatticeHom, f.map_bot', f.map_top'⟩
