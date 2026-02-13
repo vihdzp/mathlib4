@@ -328,6 +328,9 @@ theorem compl_extent [IsStrictTotalOrder α r'] (c' : Concept α α r') : c'.ext
 theorem compl_intent [IsStrictTotalOrder α r'] (c' : Concept α α r') : c'.intentᶜ = c'.extent :=
   c'.isCompl_extent_intent.symm.compl_eq
 
+instance : PartialOrder (Concept α β r) :=
+  PartialOrder.lift _ extent_injective
+
 @[simp]
 theorem extent_subset_extent_iff : c.extent ⊆ d.extent ↔ c ≤ d :=
   Iff.rfl
