@@ -38,8 +38,8 @@ relation of `α`.
 For `A : DedekindCut α`, the sets `A.left` and `A.right` are related by
 `upperBounds A.left = A.right` and `lowerBounds A.right = A.left`.
 
-The file `Order.Dedekind` proves that if `α` is a partial order and `β` is a complete lattice, any
-embedding `α ↪o β` factors through `DedekindCut α`. -/
+The theorem `DedekindCut.factorEmbedding_factors` proves that if `α` is a partial order and `β` is a
+complete lattice, any embedding `α ↪o β` factors through `DedekindCut α`. -/
 abbrev DedekindCut [Preorder α] := Concept α α (· ≤ ·)
 
 namespace DedekindCut
