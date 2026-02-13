@@ -163,6 +163,7 @@ theorem WCovBy.le_and_le_iff (h : a ⩿ b) : a ≤ c ∧ c ≤ b ↔ c = a ∨ c
   refine ⟨fun h2 => h.eq_or_eq h2.1 h2.2, ?_⟩; rintro (rfl | rfl)
   exacts [⟨le_rfl, h.le⟩, ⟨h.le, le_rfl⟩]
 
+@[to_dual none]
 theorem WCovBy.Icc_eq (h : a ⩿ b) : Icc a b = {a, b} := by
   ext c
   exact h.le_and_le_iff
@@ -377,6 +378,7 @@ theorem CovBy.Ico_eq (h : a ⋖ b) : Ico a b = {a} := by
 theorem CovBy.Ioc_eq (h : a ⋖ b) : Ioc a b = {b} := by
   rw [← Ioo_union_right h.lt, h.Ioo_eq, empty_union]
 
+@[to_dual none]
 theorem CovBy.Icc_eq (h : a ⋖ b) : Icc a b = {a, b} :=
   h.wcovBy.Icc_eq
 
@@ -386,13 +388,6 @@ section LinearOrder
 
 variable [LinearOrder α] {a b c : α}
 
-theorem CovBy.Ioi_eq (h : a ⋖ b) : Ioi a = Ici b := by
-  rw [← Ioo_union_Ici_eq_Ioi h.lt, h.Ioo_eq, empty_union]
-
-@[to_dual existing]
-theorem CovBy.Iio_eq (h : a ⋖ b) : Iio b = Iic a := by
-  rw [← Iic_union_Ioo_eq_Iio h.lt, h.Ioo_eq, union_empty]
-
 @[to_dual ge_of_gt]
 theorem WCovBy.le_of_lt (hab : a ⩿ b) (hcb : c < b) : c ≤ a :=
   not_lt.1 fun hac => hab.2 hac hcb
@@ -400,6 +395,20 @@ theorem WCovBy.le_of_lt (hab : a ⩿ b) (hcb : c < b) : c ≤ a :=
 @[to_dual ge_of_gt]
 theorem CovBy.le_of_lt (hab : a ⋖ b) : c < b → c ≤ a :=
   hab.wcovBy.le_of_lt
+
+theorem CovBy.Ioi_eq (h : a ⋖ b) : Ioi a = Ici b := by
+  rw [← Ioo_union_Ici_eq_Ioi h.lt, h.Ioo_eq, empty_union]
+
+@[to_dual existing]
+theorem CovBy.Iio_eq (h : a ⋖ b) : Iio b = Iic a := by
+  rw [← Iic_union_Ioo_eq_Iio h.lt, h.Ioo_eq, union_empty]
+
+theorem CovBy.Ioo_eq_Ico (h : a ⋖ b) (c : α) : Ioo a c = Ico b c :=
+  subset_antisymm (fun _x hx ↦ ⟨h.ge_of_gt hx.1, hx.2⟩) <| Ico_subset_Ioo_left h.lt
+
+@[to_dual existing]
+theorem CovBy.Ioo_eq_Ioc (h : a ⋖ b) (c : α) : Ioo c b = Ioc c a :=
+  subset_antisymm (fun _x hx ↦ ⟨hx.1, h.le_of_lt hx.2⟩) <| Ioc_subset_Ioo_right h.lt
 
 @[to_dual unique_right]
 theorem CovBy.unique_left (ha : a ⋖ c) (hb : b ⋖ c) : a = b :=
