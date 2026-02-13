@@ -151,10 +151,12 @@ namespace Order
 
 variable {r}
 
-/-- A set is an extent when either of the following equivalent definitions holds:
+/--
+A set is an extent when either of the following equivalent definitions holds:
 
 - The `lowerPolar` of its `upperPolar` is itself.
-- The set is the `lowerPolar` of some other set. -/
+- The set is the `lowerPolar` of some other set.
+-/
 def IsExtent (r : α → β → Prop) (s : Set α) := lowerPolar r (upperPolar r s) = s
 
 theorem IsExtent.eq (h : IsExtent r s) : lowerPolar r (upperPolar r s) = s := h
@@ -183,10 +185,12 @@ protected theorem IsExtent.iInter₂ (f : ∀ i, κ i → Set α) (hf : ∀ i j,
   rw [isExtent_iff]
   exact ⟨_, (lowerPolar_iUnion₂ ..).trans (iInter₂_congr hf)⟩
 
-/-- A set is an intent when either of the following equivalent definitions holds:
+/--
+A set is an intent when either of the following equivalent definitions holds:
 
 - The `upperPolar` of its `lowerPolar` is itself.
-- The set is the `upperPolar` of some other set. -/
+- The set is the `upperPolar` of some other set.
+-/
 def IsIntent (r : α → β → Prop) (t : Set β) := upperPolar r (lowerPolar r t) = t
 
 theorem IsIntent.eq (h : IsIntent r t) : upperPolar r (lowerPolar r t) = t := h
@@ -376,8 +380,7 @@ instance : SemilatticeInf (Concept α β r) :=
   extent_injective.semilatticeInf _ .rfl .rfl fun _ _ ↦ rfl
 
 instance : SemilatticeSup (Concept α β r) :=
-  show SemilatticeSup (Concept α β r)ᵒᵈ from
-    (toDual.injective.comp intent_injective).semilatticeSup _ (by simp) (by simp) fun _ _ ↦ rfl
+  (toDual.injective.comp intent_injective).semilatticeSup _ (by simp) (by simp) fun _ _ ↦ rfl
 
 instance : Lattice (Concept α β r) where
 
