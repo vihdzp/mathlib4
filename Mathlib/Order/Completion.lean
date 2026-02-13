@@ -3,8 +3,10 @@ Copyright (c) 2025 Violeta Hernández Palacios. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Violeta Hernández Palacios
 -/
-import Mathlib.Order.Concept
-import Mathlib.Order.UpperLower.CompleteLattice
+module
+
+public import Mathlib.Order.Concept
+public import Mathlib.Order.UpperLower.CompleteLattice
 
 /-!
 # Dedekind-MacNeille completion
@@ -22,9 +24,11 @@ lattice factors through it.
 - Build the order isomorphism `DedekindCut ℚ ≃o ℝ`.
 -/
 
+@[expose] public section
+
 open Concept Set
 
-variable {α β γ : Type*} [Preorder α] [PartialOrder β] [CompleteLattice γ]
+variable {α β : Type*}
 
 variable (α) in
 /-- The **Dedekind-MacNeille completion** of a partial order is the smallest complete lattice that
@@ -36,9 +40,12 @@ For `A : DedekindCut α`, the sets `A.left` and `A.right` are related by
 
 The file `Order.Dedekind` proves that if `α` is a partial order and `β` is a complete lattice, any
 embedding `α ↪o β` factors through `DedekindCut α`. -/
-abbrev DedekindCut := Concept α α (· ≤ ·)
+abbrev DedekindCut [Preorder α] := Concept α α (· ≤ ·)
 
 namespace DedekindCut
+
+section Preorder
+variable [Preorder α] [Preorder β]
 
 /-- The left set of a Dedekind cut. This is an alias for `Concept.extent`. -/
 abbrev left (A : DedekindCut α) : Set α := A.extent
@@ -60,12 +67,12 @@ theorem upperBounds_left (A : DedekindCut α) : upperBounds A.left = A.right :=
 theorem lowerBounds_right (A : DedekindCut α) : lowerBounds A.right = A.left :=
   A.lowerPolar_intent
 
-theorem image_left_subset_lowerBounds {β : Type*} [Preorder β] {f : α → β} (hf : Monotone f)
+theorem image_left_subset_lowerBounds {f : α → β} (hf : Monotone f)
     (A : DedekindCut α) : f '' A.left ⊆ lowerBounds (f '' A.right) := by
   rintro _ ⟨x, hx, rfl⟩ _ ⟨y, hy, rfl⟩
   exact hf <| rel_extent_intent hx hy
 
-theorem image_right_subset_upperBounds {β : Type*} [Preorder β] {f : α → β} (hf : Monotone f)
+theorem image_right_subset_upperBounds {f : α → β} (hf : Monotone f)
     (A : DedekindCut α) : f '' A.right ⊆ upperBounds (f '' A.left) := by
   rintro _ ⟨x, hx, rfl⟩ _ ⟨y, hy, rfl⟩
   exact hf <| rel_extent_intent hy hx
@@ -73,9 +80,9 @@ theorem image_right_subset_upperBounds {β : Type*} [Preorder β] {f : α → β
 /-- Convert an element into its Dedekind cut (`Iic a`, `Ici a`). This map is order-preserving,
 though it is injective only on partial orders. -/
 def of (a : α) : DedekindCut α :=
-  (Concept.ofObject _ a).copy
-    (Iic a) (by ext; simpa [mem_lowerPolar_iff] using forall_ge_iff_le.symm)
-    (Ici a) (by ext; simp)
+  (Concept.ofObject _ a).copy (Iic a) (Ici a)
+    (by ext; simpa [mem_lowerPolar_iff] using forall_ge_iff_le.symm)
+    (by ext; simp)
 
 @[simp] theorem left_of (a : α) : (of a).left = Iic a := rfl
 @[simp] theorem right_of (a : α) : (of a).right = Ici a := rfl
@@ -87,31 +94,45 @@ def of (a : α) : DedekindCut α :=
 theorem of_le_of {a b : α} : of a ≤ of b ↔ a ≤ b := by
   simpa using ofObject_le_ofAttribute_iff (r := (· ≤ ·)) (a := a)
 
+/-- We can never have a computable decidable instance, for the same reason we can't on `Set α`. -/
+noncomputable instance : DecidableLE (DedekindCut α) :=
+  Classical.decRel _
+
+end Preorder
+
+section PartialOrder
+variable [PartialOrder α]
+
 @[simp]
-theorem of_lt_of {a b : β} : of a < of b ↔ a < b := by
+theorem of_lt_of {a b : α} : of a < of b ↔ a < b := by
   simp [lt_iff_le_not_ge]
 
 @[simp]
-theorem of_inj {a b : β} : of a = of b ↔ a = b := by
+theorem of_inj {a b : α} : of a = of b ↔ a = b := by
   simp [le_antisymm_iff]
 
 /-- `DedekindCut.of` as an `OrderEmbedding`. -/
 @[simps! apply]
-def ofEmbedding : β ↪o DedekindCut β where
+def ofEmbedding : α ↪o DedekindCut α where
   toFun := of
   inj' _ _ := of_inj.1
   map_rel_iff' := of_le_of
 
-@[simp] theorem ofEmbedding_coe : ⇑(@ofEmbedding β _) = of := rfl
+@[simp] theorem ofEmbedding_coe : ⇑(@ofEmbedding α _) = of := rfl
+
+end PartialOrder
+
+section CompleteLattice
+variable [CompleteLattice α] [PartialOrder β]
 
 @[simp]
-theorem of_sSup (A : DedekindCut γ) : of (sSup A.left) = A := by
+theorem of_sSup (A : DedekindCut α) : of (sSup A.left) = A := by
   apply ext'
   ext
   rw [right_of, mem_Ici, sSup_le_iff, ← upperBounds_left, mem_upperBounds]
 
 @[simp]
-theorem of_sInf (A : DedekindCut γ) : of (sInf A.right) = A := by
+theorem of_sInf (A : DedekindCut α) : of (sInf A.right) = A := by
   ext
   rw [left_of, mem_Iic, le_sInf_iff, ← lowerBounds_right, mem_lowerBounds]
 
@@ -120,7 +141,7 @@ theorem of_sInf (A : DedekindCut γ) : of (sInf A.right) = A := by
 This map is defined so that `factorEmbedding f A = sSup (f '' A.left)`. Although the construction
 `factorEmbedding f A = sInf (f '' A.right)` would also work, these do **not** in general give equal
 embeddings. -/
-def factorEmbedding (f : β ↪o γ) : DedekindCut β ↪o γ :=
+def factorEmbedding (f : β ↪o α) : DedekindCut β ↪o α :=
   .ofMapLEIff (fun A ↦ sSup (f '' A.left)) <| by
     refine fun A B ↦ ⟨fun h x hx ↦ ?_, fun h ↦ sSup_le_sSup (image_mono h)⟩
     simp_rw [← lowerBounds_right]
@@ -129,12 +150,12 @@ def factorEmbedding (f : β ↪o γ) : DedekindCut β ↪o γ :=
     rw [← f.le_iff_le]
     exact h _ (image_right_subset_upperBounds f.monotone _ (mem_image_of_mem _ hy)) hx
 
-theorem factorEmbedding_apply (f : β ↪o γ) (A : DedekindCut β) :
+theorem factorEmbedding_apply (f : β ↪o α) (A : DedekindCut β) :
     factorEmbedding f A = sSup (f '' A.left) :=
   rfl
 
 @[simp]
-theorem factorEmbedding_ofElement (f : β ↪o γ) (x : β) : factorEmbedding f (of x) = f x := by
+theorem factorEmbedding_ofElement (f : β ↪o α) (x : β) : factorEmbedding f (of x) = f x := by
   rw [factorEmbedding_apply]
   apply le_antisymm (by simp)
   rw [le_sSup_iff]
@@ -143,7 +164,7 @@ theorem factorEmbedding_ofElement (f : β ↪o γ) (x : β) : factorEmbedding f 
 
 /-- The Dedekind-MacNeille completion of a partial order is the smallest complete lattice containing
 it, in the sense that any embedding into any complete lattice factors through it. -/
-theorem factorEmbedding_factors (f : β ↪o γ) :
+theorem factorEmbedding_factors (f : β ↪o α) :
     ofEmbedding.trans (factorEmbedding f) = f := by
   ext; simp
 
@@ -152,21 +173,21 @@ theorem factorEmbedding_factors (f : β ↪o γ) :
 This provides the second half of the **fundamental theorem of concept lattices**: every complete
 lattice is isomorphic to a concept lattice (in fact, its own). -/
 @[simps! apply]
-def ofIso : γ ≃o DedekindCut γ where
+def ofIso : α ≃o DedekindCut α where
   invFun := factorEmbedding (OrderIso.refl _).toOrderEmbedding
   left_inv := factorEmbedding_ofElement _
   right_inv x := by simp [factorEmbedding]
   __ := ofEmbedding
 
-theorem ofIso_symm_apply (A : DedekindCut γ) : ofIso.symm A = sSup A.left :=
+theorem ofIso_symm_apply (A : DedekindCut α) : ofIso.symm A = sSup A.left :=
   (factorEmbedding_apply ..).trans <| by simp
 
-noncomputable instance : DecidableLE (DedekindCut α) :=
-  Classical.decRel _
+end CompleteLattice
 
-variable {α : Type*} [LinearOrder α]
+section LinearOrder
+variable [LinearOrder α]
 
-instance : IsTotal (DedekindCut α) (· ≤ ·) where
+instance : @Std.Total (DedekindCut α) (· ≤ ·) where
   total x y := le_total (α := LowerSet α) ⟨_, isLowerSet_extent_le x⟩ ⟨_, isLowerSet_extent_le y⟩
 
 noncomputable instance : LinearOrder (DedekindCut α) where
@@ -180,4 +201,5 @@ noncomputable instance : CompleteLinearOrder (DedekindCut α) where
   __ := inferInstanceAs (CompleteLattice _)
   __ := LinearOrder.toBiheytingAlgebra _
 
+end LinearOrder
 end DedekindCut
