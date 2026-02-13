@@ -53,10 +53,10 @@ abbrev left (A : DedekindCut α) : Set α := A.extent
 /-- The right set of a Dedekind cut. This is an alias for `Concept.intent`. -/
 abbrev right (A : DedekindCut α) : Set α := A.intent
 
-/-- See `DedekindCut.ext'` for a version using the right set. -/
+/-- See `DedekindCut.ext'` for a version using the right set instead. -/
 @[ext] theorem ext {A B : DedekindCut α} (h : A.left = B.left) : A = B := Concept.ext h
 
-/-- See `DedekindCut.ext` for a version using the left set. -/
+/-- See `DedekindCut.ext` for a version using the left set instead. -/
 theorem ext' {A B : DedekindCut α} (h : A.right = B.right) : A = B := Concept.ext' h
 
 @[simp]
