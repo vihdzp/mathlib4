@@ -21,7 +21,7 @@ lattice factors through it.
 
 ## Todo
 
-- Build the order isomorphism `DedekindCut ℚ ≃o ℝ`.
+- Build the order isomorphism `DedekindCut ℚ ≃o EReal`.
 -/
 
 @[expose] public section
@@ -136,7 +136,7 @@ theorem of_sInf (A : DedekindCut α) : of (sInf A.right) = A := by
   ext
   rw [left_of, mem_Iic, le_sInf_iff, ← lowerBounds_right, mem_lowerBounds]
 
-/-- Any order embedding `β ↪o γ` into a complete lattice factors through `DedekindCut β`.
+/-- Any order embedding `β ↪o α` into a complete lattice `α` factors through `DedekindCut β`.
 
 This map is defined so that `factorEmbedding f A = sSup (f '' A.left)`. Although the construction
 `factorEmbedding f A = sInf (f '' A.right)` would also work, these do **not** in general give equal
@@ -155,7 +155,7 @@ theorem factorEmbedding_apply (f : β ↪o α) (A : DedekindCut β) :
   rfl
 
 @[simp]
-theorem factorEmbedding_ofElement (f : β ↪o α) (x : β) : factorEmbedding f (of x) = f x := by
+theorem factorEmbedding_of (f : β ↪o α) (x : β) : factorEmbedding f (of x) = f x := by
   rw [factorEmbedding_apply]
   apply le_antisymm (by simp)
   rw [le_sSup_iff]
@@ -175,7 +175,7 @@ lattice is isomorphic to a concept lattice (in fact, its own). -/
 @[simps! apply]
 def ofIso : α ≃o DedekindCut α where
   invFun := factorEmbedding (OrderIso.refl _).toOrderEmbedding
-  left_inv := factorEmbedding_ofElement _
+  left_inv := factorEmbedding_of _
   right_inv x := by simp [factorEmbedding]
   __ := ofEmbedding
 
