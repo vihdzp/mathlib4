@@ -241,6 +241,9 @@ instance : SupSet (LowerSet α) :=
 instance : InfSet (LowerSet α) :=
   ⟨fun S => ⟨⋂ s ∈ S, ↑s, isLowerSet_iInter₂ fun s _ => s.lower⟩⟩
 
+instance : PartialOrder (LowerSet α) :=
+  PartialOrder.lift _ SetLike.coe_injective
+
 instance completeLattice : CompleteLattice (LowerSet α) :=
   SetLike.coe_injective.completeLattice _
     .rfl .rfl (fun _ _ ↦ rfl) (fun _ _ ↦ rfl) (fun _ ↦ rfl) (fun _ ↦ rfl) rfl rfl
