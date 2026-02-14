@@ -319,8 +319,7 @@ theorem codisjoint_extent_intent [Std.Trichotomous r'] [IsTrans α r'] :
   apply Not.imp_symm <| Std.Trichotomous.trichotomous x y (hx <| mem_extent_of_rel_extent · hy)
   exact (hx <| · ▸ hy)
 
-instance : PartialOrder (Concept α β r) :=
-  PartialOrder.lift _ extent_injective
+instance : PartialOrder (Concept α β r) := .lift _ extent_injective
 
 theorem isCompl_extent_intent [IsStrictTotalOrder α r'] (c' : Concept α α r') :
     IsCompl c'.extent c'.intent :=
@@ -333,9 +332,6 @@ theorem compl_extent [IsStrictTotalOrder α r'] (c' : Concept α α r') : c'.ext
 @[simp]
 theorem compl_intent [IsStrictTotalOrder α r'] (c' : Concept α α r') : c'.intentᶜ = c'.extent :=
   c'.isCompl_extent_intent.symm.compl_eq
-
-instance : PartialOrder (Concept α β r) :=
-  PartialOrder.lift _ extent_injective
 
 @[simp]
 theorem extent_subset_extent_iff : c.extent ⊆ d.extent ↔ c ≤ d :=
