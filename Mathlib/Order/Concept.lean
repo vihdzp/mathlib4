@@ -164,6 +164,7 @@ theorem IsExtent.eq (h : IsExtent r s) : lowerPolar r (upperPolar r s) = s := h
 theorem isExtent_iff_exists : IsExtent r s ↔ ∃ t, lowerPolar r t = s :=
   ⟨fun h ↦ ⟨_, h⟩, fun ⟨t, h⟩ ↦ h ▸ lowerPolar_upperPolar_lowerPolar r t⟩
 
+@[simp]
 theorem isExtent_lowerPolar {t : Set β} : IsExtent r (lowerPolar r t) :=
   isExtent_iff_exists.2 ⟨_, rfl⟩
 
@@ -197,6 +198,7 @@ theorem IsIntent.eq (h : IsIntent r t) : upperPolar r (lowerPolar r t) = t := h
 
 theorem isIntent_iff_exists : IsIntent r t ↔ ∃ s, upperPolar r s = t := isExtent_iff_exists
 
+@[simp]
 theorem isIntent_upperPolar {s : Set α} : IsIntent r (upperPolar r s) := isExtent_lowerPolar
 
 @[simp] protected theorem IsIntent.univ : IsIntent r univ := IsExtent.univ
@@ -391,11 +393,11 @@ instance instBoundedOrderConcept : BoundedOrder (Concept α β r) where
 
 @[simps!]
 instance : InfSet (Concept α β r) where
-  sInf S := ofIsExtent _ _ (IsExtent.iInter₂ _ fun c (_ : c ∈ S) => c.isExtent_extent)
+  sInf S := ofIsExtent _ _ (.iInter₂ _ fun c (_ : c ∈ S) ↦ c.isExtent_extent)
 
 @[simps!]
 instance : SupSet (Concept α β r) where
-  sSup S := ofIsIntent _ _ (IsIntent.iInter₂ _ fun c (_ : c ∈ S) => c.isIntent_intent)
+  sSup S := ofIsIntent _ _ (.iInter₂ _ fun c (_ : c ∈ S) ↦ c.isIntent_intent)
 
 instance : CompleteLattice (Concept α β r) where
   le_sSup _ _ hc := intent_subset_intent_iff.1 <| biInter_subset_of_mem hc
