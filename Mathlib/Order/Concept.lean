@@ -274,6 +274,7 @@ variable (r s) in
 def ofIsExtent (hs : IsExtent r s) : Concept α β r :=
   ⟨s, upperPolar r s, rfl, hs⟩
 
+@[simp]
 theorem isExtent_extent (c : Concept α β r) : IsExtent r c.extent :=
   lowerPolar_intent c ▸ isExtent_lowerPolar
 
@@ -286,6 +287,7 @@ variable (r t) in
 def ofIsIntent (ht : IsIntent r t) : Concept α β r :=
   ⟨lowerPolar r t, t, ht, rfl⟩
 
+@[simp]
 theorem isIntent_intent (c : Concept α β r) : IsIntent r c.intent :=
   upperPolar_extent c ▸ isIntent_upperPolar
 
