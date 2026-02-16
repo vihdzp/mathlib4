@@ -234,6 +234,8 @@ structure Concept where
   /-- The extent consists of all elements related to all elements of the intent. -/
   lowerPolar_intent : lowerPolar r intent = extent
 
+initialize_simps_projections Concept (as_prefix extent, as_prefix intent)
+
 namespace Concept
 
 variable {r r' α β}
@@ -368,15 +370,15 @@ theorem strictAnti_intent : StrictAnti (@intent α β r) := fun _ _ =>
 instance : Max (Concept α β r) where
   max c d := ofIsIntent _ _ (c.isIntent_intent.inter d.isIntent_intent)
 
-alias sup_extent := max_extent
-alias sup_intent := max_intent
+alias extent_sup := extent_max
+alias intent_sup := intent_max
 
 @[simps!]
 instance : Min (Concept α β r) where
   min c d := ofIsExtent _ _ (c.isExtent_extent.inter d.isExtent_extent)
 
-alias inf_extent := min_extent
-alias inf_intent := min_intent
+alias extent_inf := extent_min
+alias intent_inf := intent_min
 
 instance : SemilatticeInf (Concept α β r) :=
   extent_injective.semilatticeInf _ .rfl .rfl fun _ _ ↦ rfl
@@ -407,56 +409,6 @@ instance : CompleteLattice (Concept α β r) where
     subset_iInter₂ (intent_subset_intent_iff.2 <| hc · ·)
   sInf_le _ _ := biInter_subset_of_mem
   le_sInf _ _ := subset_iInter₂
-
-@[simp]
-theorem extent_top : (⊤ : Concept α β r).extent = univ :=
-  rfl
-
-@[simp]
-theorem intent_top : (⊤ : Concept α β r).intent = upperPolar r univ :=
-  rfl
-
-@[simp]
-theorem extent_bot : (⊥ : Concept α β r).extent = lowerPolar r univ :=
-  rfl
-
-@[simp]
-theorem intent_bot : (⊥ : Concept α β r).intent = univ :=
-  rfl
-
-@[simp]
-theorem extent_sup (c d : Concept α β r) : (c ⊔ d).extent = lowerPolar r (c.intent ∩ d.intent) :=
-  rfl
-
-@[simp]
-theorem intent_sup (c d : Concept α β r) : (c ⊔ d).intent = c.intent ∩ d.intent :=
-  rfl
-
-@[simp]
-theorem extent_inf (c d : Concept α β r) : (c ⊓ d).extent = c.extent ∩ d.extent :=
-  rfl
-
-@[simp]
-theorem intent_inf (c d : Concept α β r) : (c ⊓ d).intent = upperPolar r (c.extent ∩ d.extent) :=
-  rfl
-
-@[simp]
-theorem extent_sSup (S : Set (Concept α β r)) :
-    (sSup S).extent = lowerPolar r (⋂ c ∈ S, intent c) :=
-  rfl
-
-@[simp]
-theorem intent_sSup (S : Set (Concept α β r)) : (sSup S).intent = ⋂ c ∈ S, intent c :=
-  rfl
-
-@[simp]
-theorem extent_sInf (S : Set (Concept α β r)) : (sInf S).extent = ⋂ c ∈ S, extent c :=
-  rfl
-
-@[simp]
-theorem intent_sInf (S : Set (Concept α β r)) :
-    (sInf S).intent = upperPolar r (⋂ c ∈ S, extent c) :=
-  rfl
 
 instance : Inhabited (Concept α β r) :=
   ⟨⊥⟩
