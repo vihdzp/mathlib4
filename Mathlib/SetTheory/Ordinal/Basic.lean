@@ -73,6 +73,7 @@ variable {α : Type u} {β : Type v} {γ : Type w}
 
 /-! ### Definition of ordinals -/
 
+
 /-- Bundled structure registering a well order on a type. Ordinals will be defined as a quotient
 of this type. -/
 structure WellOrder : Type (u + 1) where
