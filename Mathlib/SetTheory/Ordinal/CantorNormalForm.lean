@@ -368,14 +368,14 @@ theorem eval_lt {b e : Ordinal} {f : Ordinal →₀ Ordinal}
     have he' : e' ∉ f.support := fun h ↦ (hf _ h).false
     rw [eval_single_add' _ hf]
     apply opow_mul_add_lt_opow _ (IH _ hf)
-    · convert he e' _
+    · apply he e' _
       simp [hx]
-    · convert hb e'
+    · apply (hb e').trans_eq'
       rw [add_apply, single_eq_same, notMem_support_iff.1, add_zero]
       exact fun h ↦ (hf _ h).false
     · intro a
       by_cases ha : a ∈ f.support
-      · convert hb a using 1
+      · apply (hb a).trans_eq'
         rw [add_apply, single_eq_of_ne, zero_add]
         rintro rfl
         contradiction
@@ -399,13 +399,13 @@ theorem coeff_eval {b : Ordinal} (hb : 1 < b) {f : Ordinal →₀ Ordinal} (hf :
   | single_add e x f hf' hx IH =>
     have IH' (e') : f e' < b := by
       by_cases he' : e' ∈ f.support
-      · convert hf e' using 1
+      · apply (hf e').trans_eq'
         rw [add_apply, single_eq_of_ne, zero_add]
         exact (hf' _ he').ne
       · rw [notMem_support_iff.1 he']
         exact hb.pos
     rw [eval_single_add' _ hf', coeff_opow_mul_add hb hx, IH IH']
-    · convert hf e
+    · apply (hf e).trans_eq'
       rw [add_apply, single_eq_same, notMem_support_iff.1, add_zero]
       exact fun h ↦ (hf' _ h).false
     · exact eval_lt IH' hf'
