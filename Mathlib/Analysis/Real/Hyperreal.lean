@@ -235,6 +235,7 @@ theorem inv_omega : ω⁻¹ = ε :=
 theorem inv_epsilon : ε⁻¹ = ω :=
   @inv_inv _ _ ω
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem epsilon_pos : 0 < ε :=
   inv_pos_of_pos omega_pos

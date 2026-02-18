@@ -51,18 +51,21 @@ noncomputable def FiniteElement : Type _ :=
 
 namespace FiniteElement
 
-instance : CommRing (FiniteElement K) := by
+noncomputable instance : CommRing (FiniteElement K) := by
   unfold FiniteElement; infer_instance
 
+set_option backward.isDefEq.respectTransparency false in
 instance : IsDomain (FiniteElement K) := by
   unfold FiniteElement; infer_instance
 
+set_option backward.isDefEq.respectTransparency false in
 instance : ValuationRing (FiniteElement K) := by
   unfold FiniteElement; infer_instance
 
 instance : LinearOrder (FiniteElement K) := by
   unfold FiniteElement; infer_instance
 
+set_option backward.isDefEq.respectTransparency false in
 instance : IsStrictOrderedRing (FiniteElement K) := by
   unfold FiniteElement; infer_instance
 
@@ -157,7 +160,7 @@ noncomputable instance : LinearOrder (FiniteResidueField K) :=
   @Quotient.instLinearOrder _ _ _ (by exact ordConnected_preimage_mk') (Classical.decRel _)
 
 /-- The quotient map from finite elements on the field to the associated residue field. -/
-def mk : FiniteElement K →+*o FiniteResidueField K where
+noncomputable def mk : FiniteElement K →+*o FiniteResidueField K where
   monotone' _ _ h := Quotient.mk_monotone h
   __ := IsLocalRing.residue (FiniteElement K)
 
@@ -169,6 +172,7 @@ instance ordConnected_preimage_mk :
     ∀ x, Set.OrdConnected (mk ⁻¹' ({x} : Set (FiniteResidueField K))) :=
   ordConnected_preimage_mk'
 
+set_option backward.isDefEq.respectTransparency false in
 theorem mk_eq_mk {x y : FiniteElement K} : mk x = mk y ↔ 0 < ArchimedeanClass.mk (x.1 - y.1) := by
   apply Quotient.eq.trans
   rw [Submodule.quotientRel_def, IsLocalRing.mem_maximalIdeal, mem_nonunits_iff,
@@ -242,7 +246,7 @@ theorem mk_ratCast (q : ℚ) : mk (q : FiniteElement K) = q := by
 
 /-- An embedding from an Archimedean field into `K` induces an embedding into
 `FiniteResidueField K`. -/
-def ofArchimedean (f : R →+*o K) : R →+*o FiniteResidueField K where
+noncomputable def ofArchimedean (f : R →+*o K) : R →+*o FiniteResidueField K where
   toFun r := mk <| .mk _ (mk_map_nonneg_of_archimedean f r)
   map_zero' := by simp
   map_one' := by simp
@@ -414,6 +418,7 @@ theorem stdPart_nonneg {x : K} (h : 0 ≤ x) : 0 ≤ stdPart x := by
     exact map_nonneg _ h
   · rw [stdPart_of_mk_ne_zero hx]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem stdPart_nonpos {x : K} (h : x ≤ 0) : stdPart x ≤ 0 := by
   simpa using stdPart_nonneg (neg_nonneg.2 h)
 
