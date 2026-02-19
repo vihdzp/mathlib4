@@ -192,7 +192,7 @@ A set is an intent when either of the following equivalent definitions holds:
 - The `upperPolar` of its `lowerPolar` is itself.
 - The set is the `upperPolar` of some other set.
 
-The latter is used as a definition, but one can rewrite using the former via `IsExtent.eq`.
+The latter is used as a definition, but one can rewrite using the former via `IsIntent.eq`.
 -/
 def IsIntent (r : α → β → Prop) (t : Set β) := t ∈ range (upperPolar r)
 
