@@ -31,9 +31,7 @@ This file contains the definition of cofinality of an order and an ordinal numbe
   If `c` is a cardinal number, its cofinality is `c.ord.cof`.
 -/
 
-public section
-
-noncomputable section
+public noncomputable section
 
 open Function Cardinal Set Order
 open scoped Ordinal
