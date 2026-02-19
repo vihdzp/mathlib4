@@ -173,7 +173,7 @@ lemma isCardinalFiltered_aleph0_iff (J : Type u) [Category.{v} J] :
     have := ((Arrow.finite_iff A).1 hA).some
     exact ⟨IsFiltered.cocone F⟩
 
--- TODO: rewrite the condition using `IsCofinal`
+-- TODO: change `h` to `κ ≤ Order.cof J`
 lemma isCardinalFiltered_preorder (J : Type w) [Preorder J]
     (κ : Cardinal.{w}) [Fact κ.IsRegular]
     (h : ∀ ⦃K : Type w⦄ (s : K → J) (_ : Cardinal.mk K < κ),
@@ -190,14 +190,12 @@ instance (κ : Cardinal.{w}) [hκ : Fact κ.IsRegular] :
     IsCardinalFiltered κ.ord.ToType κ :=
   isCardinalFiltered_preorder _ _ (fun ι f hs ↦ by
     have h : Function.Surjective (fun i ↦ (⟨f i, i, rfl⟩ : Set.range f)) := fun _ ↦ by aesop
+    contrapose! hs
+    rw [← hκ.out.cof_eq, ← Ordinal.cof_toType]
+    refine (Order.cof_le fun j ↦ ?_).trans (Cardinal.mk_le_of_surjective h)
+    obtain ⟨k, hk⟩ := hs j
+    exact ⟨_, Set.mem_range_self k, hk.le⟩)
 
-    obtain ⟨j, hj⟩ := Ordinal.lt_cof_type
-      (α := κ.ord.ToType) (r := (· < ·)) (S := Set.range f)
-      (lt_of_le_of_lt (Cardinal.mk_le_of_surjective h)
-        (lt_of_lt_of_le hs (by simp [hκ.out.cof_eq])))
-    exact ⟨j, fun i ↦ (hj (f i) (by simp)).le⟩)
-
-#exit
 open IsCardinalFiltered
 
 instance isCardinalFiltered_under
