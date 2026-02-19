@@ -953,33 +953,6 @@ instance uniqueToTypeOne : Unique (ToType 1) where
 theorem one_toType_eq (x : ToType 1) : x = enum (· < ·) ⟨0, by simp⟩ :=
   Unique.eq_default x
 
-theorem type_mem_range_succ_iff [LinearOrder α] [WellFoundedLT α] :
-    typeLT α ∈ range succ ↔ ∃ x : α, IsTop x := by
-  constructor <;> intro ⟨a, ha⟩
-  · refine ⟨enum (α := α) (· < ·) ⟨a, ?_⟩, fun b ↦ ?_⟩
-    · rw [mem_Iio, ← ha, lt_succ_iff]
-    · rw [← enum_typein (α := α) (· < ·) b, ← not_lt, enum_le_enum (r := (· < ·)),
-        Subtype.mk_le_mk, ← lt_succ_iff, ha]
-      exact typein_lt_type ..
-  · refine ⟨typein (α := α) (· < ·) a, eq_of_forall_lt_iff fun o ↦ ?_⟩
-    rw [lt_succ_iff]
-    refine ⟨fun h ↦ h.trans_lt (typein_lt_type _ _), fun h ↦ ?_⟩
-    rw [← typein_enum _ h, typein_le_typein, not_lt]
-    apply ha
-
-theorem type_mem_range_succ [LinearOrder α] [WellFoundedLT α] [OrderTop α] :
-    typeLT α ∈ range succ :=
-  type_mem_range_succ_iff.2 ⟨⊤, isTop_top⟩
-
-theorem isSuccPrelimit_type_iff [LinearOrder α] [WellFoundedLT α] :
-    IsSuccPrelimit (typeLT α) ↔ ∀ x : α, ¬ IsTop x := by
-  rw [← not_iff_not, not_isSuccPrelimit_iff', type_mem_range_succ_iff]
-  simp
-
-theorem isSuccPrelimit_type [LinearOrder α] [WellFoundedLT α] [NoMaxOrder α] :
-    IsSuccPrelimit (typeLT α) :=
-  isSuccPrelimit_type_iff.2 fun _ ↦ not_isTop _
-
 /-! ### Extra properties of typein and enum -/
 
 -- TODO: use `ToType.mk` for lemmas on `ToType` rather than `enum` and `typein`.
