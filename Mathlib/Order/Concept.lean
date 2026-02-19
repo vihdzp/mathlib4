@@ -156,49 +156,51 @@ A set is an extent when either of the following equivalent definitions holds:
 
 - The `lowerPolar` of its `upperPolar` is itself.
 - The set is the `lowerPolar` of some other set.
+
+The latter is used as a definition, but one can rewrite using the former via `IsExtent.eq`.
 -/
 def IsExtent (r : α → β → Prop) (s : Set α) := s ∈ range (lowerPolar r)
 
-theorem IsExtent.eq (h : IsExtent r s) : lowerPolar r (upperPolar r s) = s := h
+@[simp] theorem isExtent_lowerPolar : IsExtent r (lowerPolar r t) := ⟨_, rfl⟩
 
-theorem isExtent_iff_exists : IsExtent r s ↔ ∃ t, lowerPolar r t = s :=
-  ⟨fun h ↦ ⟨_, h⟩, fun ⟨t, h⟩ ↦ h ▸ lowerPolar_upperPolar_lowerPolar r t⟩
+theorem isExtent_iff : IsExtent r s ↔ lowerPolar r (upperPolar r s) = s :=
+  ⟨fun ⟨t, h⟩ ↦ h ▸ lowerPolar_upperPolar_lowerPolar r t, fun h ↦ ⟨_, h⟩⟩
+
+alias ⟨IsExtent.eq, _⟩ := isExtent_iff
 
 @[simp]
-theorem isExtent_lowerPolar {t : Set β} : IsExtent r (lowerPolar r t) :=
-  isExtent_iff_exists.2 ⟨_, rfl⟩
-
-@[simp] protected theorem IsExtent.univ : IsExtent r univ := (gc_upperPolar_lowerPolar r).u_l_top
+protected theorem IsExtent.univ : IsExtent r univ :=
+  isExtent_iff.2 (gc_upperPolar_lowerPolar r).u_l_top
 
 protected theorem IsExtent.inter {s' : Set α} :
     IsExtent r s → IsExtent r s' → IsExtent r (s ∩ s') := by
-  simp_rw [IsExtent, forall_exists_index]
+  simp_rw [IsExtent, mem_range, forall_exists_index]
   rintro t rfl t' rfl
   exact ⟨_, lowerPolar_union r t t'⟩
 
 protected theorem IsExtent.iInter (f : ι → Set α) (hf : ∀ i, IsExtent r (f i)) :
-    IsExtent r (⋂ i, f i) := by
-  ⟨_, (lowerPolar_iUnion ..).trans (iInter_congr hf)⟩
+    IsExtent r (⋂ i, f i) :=
+  ⟨_, (lowerPolar_iUnion ..).trans (iInter_congr fun i ↦ (hf i).eq)⟩
 
 protected theorem IsExtent.iInter₂ (f : ∀ i, κ i → Set α) (hf : ∀ i j, IsExtent r (f i j)) :
     IsExtent r (⋂ (i) (j), f i j) :=
-  ⟨_, (lowerPolar_iUnion₂ ..).trans (iInter₂_congr hf)⟩
+  ⟨_, (lowerPolar_iUnion₂ ..).trans (iInter₂_congr fun i j ↦ (hf i j).eq)⟩
 
-#exit
 /--
 A set is an intent when either of the following equivalent definitions holds:
 
 - The `upperPolar` of its `lowerPolar` is itself.
 - The set is the `upperPolar` of some other set.
+
+The latter is used as a definition, but one can rewrite using the former via `IsExtent.eq`.
 -/
-def IsIntent (r : α → β → Prop) (t : Set β) := upperPolar r (lowerPolar r t) = t
+def IsIntent (r : α → β → Prop) (t : Set β) := t ∈ range (upperPolar r)
 
-theorem IsIntent.eq (h : IsIntent r t) : upperPolar r (lowerPolar r t) = t := h
+@[simp] theorem isIntent_upperPolar : IsIntent r (upperPolar r s) := ⟨_, rfl⟩
 
-theorem isIntent_iff_exists : IsIntent r t ↔ ∃ s, upperPolar r s = t := isExtent_iff_exists
+theorem isIntent_iff : IsIntent r t ↔ upperPolar r (lowerPolar r t) = t := isExtent_iff
 
-@[simp]
-theorem isIntent_upperPolar {s : Set α} : IsIntent r (upperPolar r s) := isExtent_lowerPolar
+alias ⟨IsIntent.eq, _⟩ := isIntent_iff
 
 @[simp] protected theorem IsIntent.univ : IsIntent r univ := IsExtent.univ
 
@@ -277,7 +279,7 @@ variable (r s) in
 /-- Define a concept from an extent, by setting the intent to its upper polar. -/
 @[simps]
 def ofIsExtent (hs : IsExtent r s) : Concept α β r :=
-  ⟨s, upperPolar r s, rfl, hs⟩
+  ⟨s, upperPolar r s, rfl, hs.eq⟩
 
 @[simp]
 theorem isExtent_extent (c : Concept α β r) : IsExtent r c.extent :=
@@ -290,7 +292,7 @@ variable (r t) in
 /-- Define a concept from an intent, by setting the extent to its lower polar. -/
 @[simps]
 def ofIsIntent (ht : IsIntent r t) : Concept α β r :=
-  ⟨lowerPolar r t, t, ht, rfl⟩
+  ⟨lowerPolar r t, t, ht.eq, rfl⟩
 
 @[simp]
 theorem isIntent_intent (c : Concept α β r) : IsIntent r c.intent :=
@@ -303,7 +305,6 @@ theorem rel_extent_intent {x y} (hx : x ∈ c.extent) (hy : y ∈ c.intent) : r 
   rw [← c.upperPolar_extent] at hy
   exact hy hx
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Note that if `r'` is the `≤` relation, this theorem will often not be true! -/
 theorem disjoint_extent_intent [Std.Irrefl r'] : Disjoint c'.extent c'.intent := by
   rw [disjoint_iff_forall_ne]
