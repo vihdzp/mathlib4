@@ -5,6 +5,7 @@ Authors: Mario Carneiro, Floris van Doorn, Violeta Hernández Palacios
 -/
 module
 
+public import Mathlib.Order.Cofinal
 public import Mathlib.SetTheory.Cardinal.Arithmetic
 public import Mathlib.SetTheory.Ordinal.FixedPoint
 
@@ -15,8 +16,8 @@ This file contains the definition of cofinality of an order and an ordinal numbe
 
 ## Main Definitions
 
-* `Order.cof r` is the cofinality of a reflexive order. This is the smallest cardinality of a subset
-  `s` that is *cofinal*, i.e. `∀ x, ∃ y ∈ s, r x y`.
+* `Order.cof α` is the cofinality of a preorder. This is the smallest cardinality of an `IsCofinal`
+  subset.
 * `Ordinal.cof o` is the cofinality of the ordinal `o` when viewed as a linear order.
 
 ## Main Statements
@@ -39,131 +40,169 @@ open scoped Ordinal
 
 universe u v w
 
-variable {α : Type u} {β : Type v} {r : α → α → Prop} {s : β → β → Prop}
+variable {α γ : Type u} {β : Type v}
 
 /-! ### Cofinality of orders -/
 
-attribute [local instance] Std.Refl.swap
-
 namespace Order
+variable [Preorder α]
 
-/-- Cofinality of a reflexive order `≼`. This is the smallest cardinality
-  of a subset `S : Set α` such that `∀ a, ∃ b ∈ S, a ≼ b`. -/
-def cof (r : α → α → Prop) : Cardinal :=
-  sInf { c | ∃ S : Set α, (∀ a, ∃ b ∈ S, r a b) ∧ #S = c }
+variable (α) in
+/-- The cofinality of a preorder is the smallest cardinality of a cofinal subset. -/
+def cof : Cardinal :=
+  ⨅ s : {s : Set α // IsCofinal s}, #s
 
-/-- The set in the definition of `Order.cof` is nonempty. -/
-private theorem cof_nonempty (r : α → α → Prop) [Std.Refl r] :
-    { c | ∃ S : Set α, (∀ a, ∃ b ∈ S, r a b) ∧ #S = c }.Nonempty :=
-  ⟨_, Set.univ, fun a => ⟨a, ⟨⟩, refl _⟩, rfl⟩
+theorem cof_le {s : Set α} (h : IsCofinal s) : cof α ≤ #s :=
+  ciInf_le' (ι := {s : Set α // IsCofinal s}) _ ⟨s, h⟩
 
-theorem cof_le (r : α → α → Prop) {S : Set α} (h : ∀ a, ∃ b ∈ S, r a b) : cof r ≤ #S :=
-  csInf_le' ⟨S, h, rfl⟩
+theorem le_cof_iff {c : Cardinal} : c ≤ cof α ↔ ∀ s : Set α, IsCofinal s → c ≤ #s :=
+  le_ciInf_iff'.trans (by simp)
 
-theorem le_cof [Std.Refl r] (c : Cardinal) :
-    c ≤ cof r ↔ ∀ {S : Set α}, (∀ a, ∃ b ∈ S, r a b) → c ≤ #S := by
-  rw [cof, le_csInf_iff'' (cof_nonempty r)]
-  use fun H S h => H _ ⟨S, h, rfl⟩
-  rintro H d ⟨S, h, rfl⟩
-  exact H h
+@[deprecated (since := "2026-02-18")] alias le_cof := le_cof_iff
+
+variable (α) in
+theorem cof_eq : ∃ s : Set α, IsCofinal s ∧ #s = cof α := by
+  obtain ⟨s, hs⟩ := ciInf_mem fun s : {s : Set α // IsCofinal s} ↦ #s
+  exact ⟨s.1, s.2, hs⟩
+
+theorem cof_eq_zero_iff : cof α = 0 ↔ IsEmpty α := by
+  refine ⟨fun _ ↦ ?_, fun _ ↦ by simp [cof]⟩
+  obtain ⟨s, hs, hs'⟩ := cof_eq α
+  simp_all [mk_eq_zero_iff, isCofinal_empty_iff]
+
+@[simp]
+theorem cof_eq_zero [h : IsEmpty α] : cof α = 0 :=
+  cof_eq_zero_iff.2 h
+
+theorem cof_ne_zero_iff : cof α ≠ 0 ↔ Nonempty α := by
+  simpa using cof_eq_zero_iff.not
+
+@[simp]
+theorem cof_ne_zero [h : Nonempty α] : cof α ≠ 0 :=
+  cof_ne_zero_iff.2 h
+
+theorem cof_eq_one_iff : cof α = 1 ↔ ∃ x : α, IsTop x := by
+  refine ⟨fun h ↦ ?_, fun ⟨t, ht⟩ ↦ ?_⟩
+  · obtain ⟨s, hs, hs'⟩ := cof_eq α
+    rw [h, mk_set_eq_one_iff] at hs'
+    obtain ⟨t, rfl⟩ := hs'
+    use t
+    rwa [isCofinal_singleton_iff] at hs
+  · apply le_antisymm
+    · apply (cof_le (s := {t}) _).trans_eq (mk_singleton _)
+      rwa [isCofinal_singleton_iff]
+    · rw [one_le_iff_ne_zero, cof_ne_zero_iff]
+      use t
+
+@[simp]
+theorem cof_eq_one [OrderTop α] : cof α = 1 :=
+  cof_eq_one_iff.2 ⟨⊤, isTop_top⟩
+
+variable (α) in
+theorem cof_le_cardinalMk : cof α ≤ #α := by
+  obtain ⟨s, -, hs⟩ := cof_eq α
+  rw [← hs]
+  exact mk_set_le s
 
 end Order
 
-namespace RelIso
+section Congr
+variable [Preorder α] [Preorder β] [Preorder γ]
 
-private theorem cof_le_lift [Std.Refl s] (f : r ≃r s) :
-    Cardinal.lift.{v} (Order.cof r) ≤ Cardinal.lift.{u} (Order.cof s) := by
-  rw [Order.cof, Order.cof, lift_sInf, lift_sInf, le_csInf_iff'' ((Order.cof_nonempty s).image _)]
-  rintro - ⟨-, ⟨u, H, rfl⟩, rfl⟩
-  apply csInf_le'
-  refine ⟨_, ⟨f.symm '' u, fun a => ?_, rfl⟩, lift_mk_eq'.2 ⟨(f.symm.toEquiv.image u).symm⟩⟩
-  rcases H (f a) with ⟨b, hb, hb'⟩
-  refine ⟨f.symm b, mem_image_of_mem _ hb, f.map_rel_iff.1 ?_⟩
-  rwa [RelIso.apply_symm_apply]
+theorem GaloisConnection.cof_le_lift {f : β → α} {g : α → β} (h : GaloisConnection f g) :
+    Cardinal.lift.{u} (Order.cof β) ≤ Cardinal.lift.{v} (Order.cof α) := by
+  simp_rw [Order.cof, lift_iInf, le_ciInf_iff']
+  rintro ⟨s, hs⟩
+  apply (csInf_le' _).trans (mk_image_le_lift (f := g))
+  exact ⟨⟨g '' s, h.map_cofinal hs⟩, rfl⟩
 
-theorem cof_eq_lift [Std.Refl s] (f : r ≃r s) :
-    Cardinal.lift.{v} (Order.cof r) = Cardinal.lift.{u} (Order.cof s) :=
-  have := f.toRelEmbedding.stdRefl
-  (f.cof_le_lift).antisymm (f.symm.cof_le_lift)
+theorem GaloisConnection.cof_le {f : γ → α} {g : α → γ} (h : GaloisConnection f g) :
+    Order.cof γ ≤ Order.cof α := by
+  simpa using h.cof_le_lift
 
-theorem cof_eq {α β : Type u} {r : α → α → Prop} {s : β → β → Prop} [Std.Refl s] (f : r ≃r s) :
-    Order.cof r = Order.cof s :=
-  lift_inj.1 (f.cof_eq_lift)
+theorem OrderIso.cof_eq_lift (f : α ≃o β) :
+    Cardinal.lift.{v} (Order.cof α) = Cardinal.lift.{u} (Order.cof β) :=
+  f.to_galoisConnection.cof_le_lift.antisymm (f.symm.to_galoisConnection.cof_le_lift)
 
-end RelIso
+theorem OrderIso.cof_eq (f : α ≃o γ) : Order.cof α = Order.cof γ := by
+  simpa using f.cof_eq_lift
+
+@[deprecated (since := "2026-02-18")] alias RelIso.cof_eq_lift := OrderIso.cof_eq_lift
+@[deprecated (since := "2026-02-18")] alias RelIso.cof_eq := OrderIso.cof_eq
+
+end Congr
 
 /-! ### Cofinality of ordinals -/
 
 namespace Ordinal
 
-/-- Cofinality of an ordinal. This is the smallest cardinal of a subset `S` of the ordinal which is
-unbounded, in the sense `∀ a, ∃ b ∈ S, a ≤ b`.
+/-- The cofinality on an ordinal is the `Order.cof` of any isomorphic linear order.
 
-In particular, `cof 0 = 0` and `cof (succ o) = 1`. -/
+In particular, `cof 0 = 0` and `cof (o + 1) = 1`. -/
 def cof (o : Ordinal.{u}) : Cardinal.{u} :=
-  o.liftOn (fun a ↦ Order.cof (swap a.rᶜ)) fun _ _ ⟨f⟩ ↦ f.compl.swap.cof_eq
+  o.liftOnWellOrder (fun α _ _ ↦ Order.cof α) (fun _ _ _ _ _ _ h ↦
+    let ⟨f⟩ := type_eq.1 h
+    (OrderIso.ofRelIsoLT f).cof_eq
+  )
 
-theorem cof_type (r : α → α → Prop) [IsWellOrder α r] : (type r).cof = Order.cof (swap rᶜ) :=
-  rfl
+@[simp]
+theorem cof_type (α : Type*) [LinearOrder α] [WellFoundedLT α] :
+    (typeLT α).cof = Order.cof α :=
+  liftOnWellOrder_type ..
 
-theorem cof_type_lt [LinearOrder α] [IsWellOrder α (· < ·)] :
-    (@type α (· < ·) _).cof = @Order.cof α (· ≤ ·) := by
-  rw [cof_type, compl_lt, swap_ge]
+@[deprecated (since := "2026-02-18")] alias cof_type_lt := cof_type
 
-theorem cof_eq_cof_toType (o : Ordinal) : o.cof = @Order.cof o.ToType (· ≤ ·) := by
-  conv_lhs => rw [← type_toType o, cof_type_lt]
+@[simp]
+theorem cof_toType (o : Ordinal) : Order.cof o.ToType = o.cof := by
+  conv_rhs => rw [← type_toType o, cof_type]
 
-theorem le_cof_type [IsWellOrder α r] {c} : c ≤ cof (type r) ↔ ∀ S, Unbounded r S → c ≤ #S :=
-  (le_csInf_iff'' (Order.cof_nonempty _)).trans
-    ⟨fun H S h => H _ ⟨S, h, rfl⟩, by
-      rintro H d ⟨S, h, rfl⟩
-      exact H _ h⟩
+@[deprecated (since := "2026-02-18")] alias cof_eq_cof_toType := cof_toType
+@[deprecated (since := "2026-02-18")] alias le_cof_type := le_cof_iff
+@[deprecated (since := "2026-02-18")] alias cof_type_le := cof_le
+@[deprecated (since := "2026-02-18")] alias lt_cof_type := cof_le
+@[deprecated (since := "2026-02-18")] alias cof_eq := Order.cof_eq
 
-theorem cof_type_le [IsWellOrder α r] {S : Set α} (h : Unbounded r S) : cof (type r) ≤ #S :=
-  le_cof_type.1 le_rfl S h
+@[simp]
+theorem lift_cof (o : Ordinal.{u}) : Cardinal.lift.{v} (cof o) = cof (Ordinal.lift.{v} o) := by
+  induction o using inductionOnWellOrder with | H α
+  rw [cof_type, ← type_lt_uLift, cof_type, ← Cardinal.lift_id'.{u, v} (Order.cof (ULift _)),
+    ← Cardinal.lift_umax, ← ULift.orderIso.cof_eq_lift]
 
-theorem lt_cof_type [IsWellOrder α r] {S : Set α} : #S < cof (type r) → Bounded r S := by
-  simpa using not_imp_not.2 cof_type_le
+theorem cof_le_card (o : Ordinal) : cof o ≤ card o := by
+  induction o using inductionOnWellOrder with | H α
+  simpa using cof_le_cardinalMk α
 
-theorem cof_eq (r : α → α → Prop) [IsWellOrder α r] : ∃ S, Unbounded r S ∧ #S = cof (type r) :=
-  csInf_mem (Order.cof_nonempty (swap rᶜ))
+theorem cof_ord_le (c : Cardinal) : c.ord.cof ≤ c := by simpa using cof_le_card c.ord
 
-theorem ord_cof_eq (r : α → α → Prop) [IsWellOrder α r] :
-    ∃ S, Unbounded r S ∧ type (Subrel r (· ∈ S)) = (cof (type r)).ord := by
-  let ⟨S, hS, e⟩ := cof_eq r
-  let ⟨s, _, e'⟩ := Cardinal.ord_eq S
-  let T : Set α := { a | ∃ aS : a ∈ S, ∀ b : S, s b ⟨_, aS⟩ → r b a }
-  suffices Unbounded r T by
-    refine ⟨T, this, le_antisymm ?_ (Cardinal.ord_le.2 <| cof_type_le this)⟩
-    rw [← e, e']
-    refine
-      (RelEmbedding.ofMonotone
-          (fun a : T =>
-            (⟨a,
-                let ⟨aS, _⟩ := a.2
-                aS⟩ :
-              S))
-          fun a b h => ?_).ordinal_type_le
-    rcases a with ⟨a, aS, ha⟩
-    rcases b with ⟨b, bS, hb⟩
-    change s ⟨a, _⟩ ⟨b, _⟩
-    refine ((trichotomous_of s _ _).resolve_left fun hn => ?_).resolve_left ?_
-    · exact asymm h (ha _ hn)
-    · intro e
-      injection e with e
-      subst b
-      exact irrefl _ h
+theorem ord_cof_le (o : Ordinal) : o.cof.ord ≤ o :=
+  (ord_le_ord.2 (cof_le_card o)).trans (ord_card_le o)
+
+theorem ord_cof_eq (α : Type*) [LinearOrder α] [WellFoundedLT α] :
+    ∃ s : Set α, IsCofinal s ∧ typeLT s = (Order.cof α).ord := by
+  obtain ⟨s, hs, hs'⟩ := Order.cof_eq α
+  obtain ⟨r, hr, hr'⟩ := ord_eq s
+  let t : Set α := {a | ∃ ha : a ∈ s, ∀ b : s, r b ⟨a, ha⟩ → b < a}
+  suffices ht : IsCofinal t by
+    refine ⟨_, ht, (ord_le.2 (cof_le ht)).antisymm' ?_⟩
+    rw [← hs', hr', type_le_iff']
+    refine ⟨.ofMonotone (fun x ↦ ⟨x.1, ?_⟩) fun x y hxy ↦ ?_⟩
+    · obtain ⟨h, _⟩ := x.2
+      exact h
+    · apply (trichotomous_of r _ _).resolve_right
+      rintro (_ | hxy')
+      · simp_all [Subtype.coe_inj]
+      · obtain ⟨_, h⟩ := x.2
+        exact (h _ hxy').asymm hxy
   intro a
-  have : { b : S | ¬r b a }.Nonempty :=
-    let ⟨b, bS, ba⟩ := hS a
-    ⟨⟨b, bS⟩, ba⟩
-  let b := (IsWellFounded.wf : WellFounded s).min _ this
-  have ba : ¬r b a := IsWellFounded.wf.min_mem _ this
-  refine ⟨b, ⟨b.2, fun c => not_imp_not.1 fun h => ?_⟩, ba⟩
-  rw [show ∀ b : S, (⟨b, b.2⟩ : S) = b by intro b; cases b; rfl]
-  exact IsWellFounded.wf.not_lt_min _ this (IsOrderConnected.neg_trans h ba)
+  obtain ⟨b, hb, hb'⟩ := hs a
+  obtain ⟨c, hc, hc'⟩ := WellFounded.has_min hr.wf {c : s | a ≤ c} ⟨⟨b, hb⟩, hb'⟩
+  refine ⟨c, ⟨c.2, fun d hd ↦ ?_⟩, hc⟩
+  contrapose! hd
+  exact hc' d (hc.trans hd)
 
 /-! ### Cofinality of suprema and least strict upper bounds -/
+
+-- TODO: use `⨆ i, succ (f i)` instead of `lsub`
 
 private theorem card_mem_cof {o} : ∃ (ι : _) (f : ι → Ordinal), lsub.{u, u} f = o ∧ #ι = o.card :=
   ⟨_, _, lsub_typein o, mk_toType o⟩
@@ -204,23 +243,6 @@ theorem cof_eq_sInf_lsub (o : Ordinal.{u}) : cof o =
     rcases hS (enum (· < ·) ⟨a, ha⟩) with ⟨b, hb, hb'⟩
     rw [← typein_le_typein, typein_enum] at hb'
     exact hb'.trans_lt (lt_lsub.{u, u} f ⟨b, hb⟩)
-
-@[simp]
-theorem lift_cof (o) : Cardinal.lift.{u, v} (cof o) = cof (Ordinal.lift.{u, v} o) := by
-  refine inductionOn o fun α r _ ↦ ?_
-  rw [← type_uLift, cof_type, cof_type, ← Cardinal.lift_id'.{v, u} (Order.cof _),
-    ← Cardinal.lift_umax]
-  apply RelIso.cof_eq_lift ⟨Equiv.ulift.symm, _⟩
-  simp [swap]
-
-theorem cof_le_card (o) : cof o ≤ card o := by
-  rw [cof_eq_sInf_lsub]
-  exact csInf_le' card_mem_cof
-
-theorem cof_ord_le (c : Cardinal) : c.ord.cof ≤ c := by simpa using cof_le_card c.ord
-
-theorem ord_cof_le (o : Ordinal.{u}) : o.cof.ord ≤ o :=
-  (ord_le_ord.2 (cof_le_card o)).trans (ord_card_le o)
 
 theorem exists_lsub_cof (o : Ordinal) :
     ∃ (ι : _) (f : ι → Ordinal), lsub.{u, u} f = o ∧ #ι = cof o := by
@@ -365,23 +387,16 @@ theorem bsup_lt_ord {o : Ordinal} {f : ∀ a < o, Ordinal} {c : Ordinal} (ho : o
 /-! ### Basic results -/
 
 @[simp]
-theorem cof_zero : cof 0 = 0 := by
-  refine LE.le.antisymm ?_ (Cardinal.zero_le _)
-  rw [← card_zero]
-  exact cof_le_card 0
+theorem cof_eq_zero {o} : cof o = 0 ↔ o = 0 := by
+  rw [← cof_toType, cof_eq_zero_iff, isEmpty_toType_iff]
 
-@[simp]
-theorem cof_eq_zero {o} : cof o = 0 ↔ o = 0 :=
-  ⟨inductionOn o fun _ r _ z =>
-      let ⟨_, hl, e⟩ := cof_eq r
-      type_eq_zero_iff_isEmpty.2 <|
-        ⟨fun a =>
-          let ⟨_, h, _⟩ := hl a
-          (mk_eq_zero_iff.1 (e.trans z)).elim' ⟨_, h⟩⟩,
-    fun e => by simp [e]⟩
-
+@[deprecated cof_eq_zero (since := "2026-02-18")]
 theorem cof_ne_zero {o} : cof o ≠ 0 ↔ o ≠ 0 :=
   cof_eq_zero.not
+
+@[simp]
+theorem cof_zero : cof 0 = 0 :=
+  cof_eq_zero.2 rfl
 
 @[simp]
 theorem cof_succ (o) : cof (succ o) = 1 := by
@@ -573,7 +588,7 @@ theorem cof_le_of_isNormal {f} (hf : IsNormal f) (a) : cof a ≤ cof (f a) := by
   rcases zero_or_succ_or_isSuccLimit a with (rfl | ⟨b, rfl⟩ | ha)
   · rw [cof_zero]
     exact zero_le _
-  · rw [cof_succ, Cardinal.one_le_iff_ne_zero, cof_ne_zero, ← pos_iff_ne_zero]
+  · rw [cof_succ, Cardinal.one_le_iff_ne_zero, cof_eq_zero.ne, ← pos_iff_ne_zero]
     exact (zero_le (f b)).trans_lt (hf.strictMono (lt_succ b))
   · rw [cof_eq_of_isNormal hf ha]
 
