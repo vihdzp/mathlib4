@@ -278,8 +278,11 @@ theorem copy_eq (c : Concept α β r) (e : Set α) (i : Set β) (he hi) : c.copy
 variable (r s) in
 /-- Define a concept from an extent, by setting the intent to its upper polar. -/
 @[simps]
-def ofIsExtent (hs : IsExtent r s) : Concept α β r :=
-  ⟨s, upperPolar r s, rfl, hs.eq⟩
+def ofIsExtent (hs : IsExtent r s) : Concept α β r where
+  extent := s
+  intent := upperPolar r s
+  upperPolar_extent := rfl
+  lowerPolar_intent := hs.eq
 
 @[simp]
 theorem isExtent_extent (c : Concept α β r) : IsExtent r c.extent :=
@@ -291,8 +294,11 @@ theorem isExtent_iff_exists_concept : IsExtent r s ↔ ∃ c : Concept α β r, 
 variable (r t) in
 /-- Define a concept from an intent, by setting the extent to its lower polar. -/
 @[simps]
-def ofIsIntent (ht : IsIntent r t) : Concept α β r :=
-  ⟨lowerPolar r t, t, ht.eq, rfl⟩
+def ofIsIntent (ht : IsIntent r t) : Concept α β r where
+  extent := lowerPolar r t
+  intent := t
+  upperPolar_extent := ht.eq
+  lowerPolar_intent := rfl
 
 @[simp]
 theorem isIntent_intent (c : Concept α β r) : IsIntent r c.intent :=
