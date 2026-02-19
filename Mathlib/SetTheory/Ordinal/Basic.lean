@@ -203,15 +203,19 @@ theorem type_unit : type (@emptyRelation Unit) = 1 :=
   rfl
 
 @[simp]
-theorem toType_empty_iff_eq_zero {o : Ordinal} : IsEmpty o.ToType ↔ o = 0 := by
+theorem isEmpty_toType_iff {o : Ordinal} : IsEmpty o.ToType ↔ o = 0 := by
   rw [← @type_eq_zero_iff_isEmpty o.ToType (· < ·), type_toType]
 
+@[deprecated (since := "2026-02-18")] alias toType_empty_iff_eq_zero := isEmpty_toType_iff
+
 instance isEmpty_toType_zero : IsEmpty (ToType 0) :=
-  toType_empty_iff_eq_zero.2 rfl
+  isEmpty_toType_iff.2 rfl
 
 @[simp]
-theorem toType_nonempty_iff_ne_zero {o : Ordinal} : Nonempty o.ToType ↔ o ≠ 0 := by
+theorem nonempty_toType_iff {o : Ordinal} : Nonempty o.ToType ↔ o ≠ 0 := by
   rw [← @type_ne_zero_iff_nonempty o.ToType (· < ·), type_toType]
+
+@[deprecated (since := "2026-02-18")] alias toType_nonempty_iff_ne_zero := nonempty_toType_iff
 
 protected theorem one_ne_zero : (1 : Ordinal) ≠ 0 :=
   type_ne_zero_of_nonempty _
@@ -635,6 +639,10 @@ theorem type_uLift (r : α → α → Prop) [IsWellOrder α r] :
     type (ULift.down ⁻¹'o r) = lift.{v} (type r) :=
   rfl
 
+theorem type_lt_uLift [LinearOrder α] [WellFoundedLT α] :
+    typeLT (ULift α) = lift.{v} (typeLT α) :=
+  rfl
+
 theorem _root_.RelIso.ordinal_lift_type_eq {r : α → α → Prop} {s : β → β → Prop}
     [IsWellOrder α r] [IsWellOrder β s] (f : r ≃r s) : lift.{v} (type r) = lift.{u} (type s) :=
   ((RelIso.preimage Equiv.ulift r).trans <|
@@ -944,6 +952,33 @@ instance uniqueToTypeOne : Unique (ToType 1) where
 
 theorem one_toType_eq (x : ToType 1) : x = enum (· < ·) ⟨0, by simp⟩ :=
   Unique.eq_default x
+
+theorem type_mem_range_succ_iff [LinearOrder α] [WellFoundedLT α] :
+    typeLT α ∈ range succ ↔ ∃ x : α, IsTop x := by
+  constructor <;> intro ⟨a, ha⟩
+  · refine ⟨enum (α := α) (· < ·) ⟨a, ?_⟩, fun b ↦ ?_⟩
+    · rw [mem_Iio, ← ha, lt_succ_iff]
+    · rw [← enum_typein (α := α) (· < ·) b, ← not_lt, enum_le_enum (r := (· < ·)),
+        Subtype.mk_le_mk, ← lt_succ_iff, ha]
+      exact typein_lt_type ..
+  · refine ⟨typein (α := α) (· < ·) a, eq_of_forall_lt_iff fun o ↦ ?_⟩
+    rw [lt_succ_iff]
+    refine ⟨fun h ↦ h.trans_lt (typein_lt_type _ _), fun h ↦ ?_⟩
+    rw [← typein_enum _ h, typein_le_typein, not_lt]
+    apply ha
+
+theorem type_mem_range_succ [LinearOrder α] [WellFoundedLT α] [OrderTop α] :
+    typeLT α ∈ range succ :=
+  type_mem_range_succ_iff.2 ⟨⊤, isTop_top⟩
+
+theorem isSuccPrelimit_type_iff [LinearOrder α] [WellFoundedLT α] :
+    IsSuccPrelimit (typeLT α) ↔ ∀ x : α, ¬ IsTop x := by
+  rw [← not_iff_not, not_isSuccPrelimit_iff', type_mem_range_succ_iff]
+  simp
+
+theorem isSuccPrelimit_type [LinearOrder α] [WellFoundedLT α] [NoMaxOrder α] :
+    IsSuccPrelimit (typeLT α) :=
+  isSuccPrelimit_type_iff.2 fun _ ↦ not_isTop _
 
 /-! ### Extra properties of typein and enum -/
 
