@@ -970,13 +970,13 @@ theorem type_lt_mem_range_succ [LinearOrder α] [WellFoundedLT α] [OrderTop α]
   type_lt_mem_range_succ_iff.2 ⟨⊤, isMax_top⟩
 
 theorem isSuccPrelimit_type_lt_iff [LinearOrder α] [WellFoundedLT α] :
-    IsSuccPrelimit (typeLT α) ↔ NoMinOrder α := by
-  rw [← not_iff_not, noMinOrder_iff, not_isSuccPrelimit_iff', type_lt_mem_range_succ_iff]
+    IsSuccPrelimit (typeLT α) ↔ NoMaxOrder α := by
+  rw [← not_iff_not, noMaxOrder_iff, not_isSuccPrelimit_iff', type_lt_mem_range_succ_iff]
   simp [IsMax]
 
-theorem isSuccPrelimit_type_lt [LinearOrder α] [WellFoundedLT α] [NoMaxOrder α] :
+theorem isSuccPrelimit_type_lt [LinearOrder α] [WellFoundedLT α] [h : NoMaxOrder α] :
     IsSuccPrelimit (typeLT α) :=
-  isSuccPrelimit_type_lt_iff.2 fun _ ↦ not_isMax _
+  isSuccPrelimit_type_lt_iff.2 h
 
 /-! ### Extra properties of typein and enum -/
 
