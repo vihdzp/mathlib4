@@ -967,14 +967,18 @@ theorem type_mem_range_succ_iff [LinearOrder α] [WellFoundedLT α] :
     rw [← typein_enum _ h, typein_le_typein, not_lt]
     apply ha
 
+theorem type_mem_range_succ [LinearOrder α] [WellFoundedLT α] [OrderTop α] :
+    typeLT α ∈ range succ :=
+  type_mem_range_succ_iff.2 ⟨⊤, isTop_top⟩
+
 theorem isSuccPrelimit_type_iff [LinearOrder α] [WellFoundedLT α] :
     IsSuccPrelimit (typeLT α) ↔ ∀ x : α, ¬ IsTop x := by
   rw [← not_iff_not, not_isSuccPrelimit_iff', type_mem_range_succ_iff]
   simp
 
-theorem type_mem_range_succ [LinearOrder α] [WellFoundedLT α] [OrderTop α] :
-    typeLT α ∈ range succ :=
-  type_mem_range_succ_iff.2 ⟨⊤, isTop_top⟩
+theorem isSuccPrelimit_type [LinearOrder α] [WellFoundedLT α] [NoMaxOrder α] :
+    IsSuccPrelimit (typeLT α) :=
+  isSuccPrelimit_type_iff.2 fun _ ↦ not_isTop _
 
 /-! ### Extra properties of typein and enum -/
 

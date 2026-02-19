@@ -597,22 +597,19 @@ theorem cof_omega0 : cof ω = ℵ₀ :=
     rw [← card_omega0]
     apply cof_le_card
 
-theorem cof_eq' (r : α → α → Prop) [IsWellOrder α r] (h : IsSuccLimit (type r)) :
-    ∃ S : Set α, (∀ a, ∃ b ∈ S, r a b) ∧ #S = cof (type r) :=
-  sorry
-/-  let ⟨S, H, e⟩ := cof_eq r
-  ⟨S, fun a =>
-    let a' := enum r ⟨_, h.succ_lt (typein_lt_type r a)⟩
-    let ⟨b, h, ab⟩ := H a'
-    ⟨b, h,
-      (IsOrderConnected.conn a b a' <|
-            (typein_lt_typein r).1
-              (by
-                rw [typein_enum]
-                exact lt_succ (typein _ _))).resolve_right
-        ab⟩,
-    e⟩
--/
+-- TODO: deprecate in favor of `Order.cof_eq`
+theorem cof_eq' (r : α → α → Prop) [H : IsWellOrder α r] (h : IsSuccLimit (type r)) :
+    ∃ S : Set α, (∀ a, ∃ b ∈ S, r a b) ∧ #S = cof (type r) := by
+  classical
+  let := linearOrderOfSTO r
+  have : WellFoundedLT α := H.toIsWellFounded
+  have : NoMaxOrder α := by
+    rw [← noTopOrder_iff_noMaxOrder]
+    constructor
+    simpa [IsTop] using isSuccPrelimit_type_iff.1 h.isSuccPrelimit
+  obtain ⟨s, hs, hs'⟩ := Order.cof_eq α
+  refine ⟨s, ?_, hs'⟩
+  rwa [← not_bddAbove_iff_isCofinal, not_bddAbove_iff] at hs
 
 @[simp]
 theorem cof_univ : cof univ.{u, v} = Cardinal.univ.{u, v} :=
@@ -641,6 +638,7 @@ open Ordinal
 
 /-! ### Results on sets -/
 
+-- TODO: re-state this for a bundled well-order
 theorem mk_bounded_subset {α : Type*} (h : ∀ x < #α, 2 ^ x < #α) {r : α → α → Prop}
     [IsWellOrder α r] (hr : (#α).ord = type r) : #{ s : Set α // Bounded r s } = #α := by
   rcases eq_or_ne #α 0 with (ha | ha)
@@ -671,25 +669,31 @@ theorem mk_bounded_subset {α : Type*} (h : ∀ x < #α, 2 ^ x < #α) {r : α �
     · intro a b hab
       simpa [singleton_eq_singleton_iff] using hab
 
-/-
 theorem mk_subset_mk_lt_cof {α : Type*} (h : ∀ x < #α, 2 ^ x < #α) :
     #{ s : Set α // #s < cof (#α).ord } = #α := by
   rcases eq_or_ne #α 0 with (ha | ha)
   · simp [ha]
   have h' : IsStrongLimit #α := ⟨ha, @h⟩
   rcases ord_eq α with ⟨r, wo, hr⟩
+  classical
+  letI := linearOrderOfSTO r
   apply le_antisymm
   · conv_rhs => rw [← mk_bounded_subset h hr]
-    apply mk_le_mk_of_subset
+    apply mk_subtype_le_of_subset
     intro s hs
     rw [hr] at hs
-    exact lt_cof_type hs
+    contrapose! hs
+    rw [not_bounded_iff] at hs
+    apply cof_le
+    simp_rw [IsCofinal, ← not_lt]
+    exact hs
   · refine @mk_le_of_injective α _ (fun x => Subtype.mk {x} ?_) ?_
     · rw [mk_singleton]
       exact one_lt_aleph0.trans_le (aleph0_le_cof.2 (isSuccLimit_ord h'.aleph0_le))
     · intro a b hab
       simpa [singleton_eq_singleton_iff] using hab
 
+/-
 /-- If the union of s is unbounded and s is smaller than the cofinality,
   then s has an unbounded member -/
 theorem unbounded_of_unbounded_sUnion (r : α → α → Prop) [wo : IsWellOrder α r] {s : Set (Set α)}
