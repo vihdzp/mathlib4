@@ -157,7 +157,7 @@ A set is an extent when either of the following equivalent definitions holds:
 - The `lowerPolar` of its `upperPolar` is itself.
 - The set is the `lowerPolar` of some other set.
 -/
-def IsExtent (r : α → β → Prop) (s : Set α) := lowerPolar r (upperPolar r s) = s
+def IsExtent (r : α → β → Prop) (s : Set α) := s ∈ range (lowerPolar r)
 
 theorem IsExtent.eq (h : IsExtent r s) : lowerPolar r (upperPolar r s) = s := h
 
@@ -172,20 +172,19 @@ theorem isExtent_lowerPolar {t : Set β} : IsExtent r (lowerPolar r t) :=
 
 protected theorem IsExtent.inter {s' : Set α} :
     IsExtent r s → IsExtent r s' → IsExtent r (s ∩ s') := by
-  simp_rw [isExtent_iff_exists, forall_exists_index]
+  simp_rw [IsExtent, forall_exists_index]
   rintro t rfl t' rfl
   exact ⟨_, lowerPolar_union r t t'⟩
 
 protected theorem IsExtent.iInter (f : ι → Set α) (hf : ∀ i, IsExtent r (f i)) :
     IsExtent r (⋂ i, f i) := by
-  rw [isExtent_iff_exists]
-  exact ⟨_, (lowerPolar_iUnion ..).trans (iInter_congr hf)⟩
+  ⟨_, (lowerPolar_iUnion ..).trans (iInter_congr hf)⟩
 
 protected theorem IsExtent.iInter₂ (f : ∀ i, κ i → Set α) (hf : ∀ i j, IsExtent r (f i j)) :
-    IsExtent r (⋂ (i) (j), f i j) := by
-  rw [isExtent_iff_exists]
-  exact ⟨_, (lowerPolar_iUnion₂ ..).trans (iInter₂_congr hf)⟩
+    IsExtent r (⋂ (i) (j), f i j) :=
+  ⟨_, (lowerPolar_iUnion₂ ..).trans (iInter₂_congr hf)⟩
 
+#exit
 /--
 A set is an intent when either of the following equivalent definitions holds:
 
