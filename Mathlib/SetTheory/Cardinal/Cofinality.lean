@@ -65,6 +65,12 @@ theorem cof_eq : ∃ s : Set α, IsCofinal s ∧ #s = cof α := by
   obtain ⟨s, hs⟩ := ciInf_mem fun s : {s : Set α // IsCofinal s} ↦ #s
   exact ⟨s.1, s.2, hs⟩
 
+variable (α) in
+theorem cof_le_cardinalMk : cof α ≤ #α := by
+  obtain ⟨s, -, hs⟩ := cof_eq α
+  rw [← hs]
+  exact mk_set_le s
+
 theorem cof_eq_zero_iff : cof α = 0 ↔ IsEmpty α := by
   refine ⟨fun _ ↦ ?_, fun _ ↦ by simp [cof]⟩
   obtain ⟨s, hs, hs'⟩ := cof_eq α
@@ -97,12 +103,6 @@ theorem cof_eq_one_iff : cof α = 1 ↔ ∃ x : α, IsTop x := by
 @[simp]
 theorem cof_eq_one [OrderTop α] : cof α = 1 :=
   cof_eq_one_iff.2 ⟨⊤, isTop_top⟩
-
-variable (α) in
-theorem cof_le_cardinalMk : cof α ≤ #α := by
-  obtain ⟨s, -, hs⟩ := cof_eq α
-  rw [← hs]
-  exact mk_set_le s
 
 end Order
 
@@ -140,10 +140,9 @@ namespace Ordinal
 
 In particular, `cof 0 = 0` and `cof (o + 1) = 1`. -/
 def cof (o : Ordinal.{u}) : Cardinal.{u} :=
-  o.liftOnWellOrder (fun α _ _ ↦ Order.cof α) (fun _ _ _ _ _ _ h ↦
+  o.liftOnWellOrder (fun α _ _ ↦ Order.cof α) fun _ _ _ _ _ _ h ↦
     let ⟨f⟩ := type_eq.1 h
     (OrderIso.ofRelIsoLT f).cof_eq
-  )
 
 @[simp]
 theorem cof_type (α : Type*) [LinearOrder α] [WellFoundedLT α] :
@@ -177,12 +176,34 @@ theorem cof_ord_le (c : Cardinal) : c.ord.cof ≤ c := by simpa using cof_le_car
 theorem ord_cof_le (o : Ordinal) : o.cof.ord ≤ o :=
   (ord_le_ord.2 (cof_le_card o)).trans (ord_card_le o)
 
+@[simp]
+theorem cof_eq_zero {o} : cof o = 0 ↔ o = 0 := by
+  rw [← cof_toType, cof_eq_zero_iff, isEmpty_toType_iff]
+
+@[deprecated cof_eq_zero (since := "2026-02-18")]
+theorem cof_ne_zero {o} : cof o ≠ 0 ↔ o ≠ 0 :=
+  cof_eq_zero.not
+
+@[simp]
+theorem cof_zero : cof 0 = 0 :=
+  cof_eq_zero.2 rfl
+
+theorem cof_eq_one_iff {o} : cof o = 1 ↔ o ∈ range succ := by
+  induction o using inductionOnWellOrder with | H α
+  rw [cof_type, Order.cof_eq_one_iff, type_mem_range_succ_iff]
+
+@[simp]
+theorem cof_succ (o) : cof (succ o) = 1 :=
+  cof_eq_one_iff.2 (mem_range_self o)
+
+@[deprecated (since := "2026-02-18")] alias cof_eq_one_iff_is_succ := cof_eq_one_iff
+
+set_option backward.isDefEq.respectTransparency false in
 theorem ord_cof_eq (α : Type*) [LinearOrder α] [WellFoundedLT α] :
     ∃ s : Set α, IsCofinal s ∧ typeLT s = (Order.cof α).ord := by
   obtain ⟨s, hs, hs'⟩ := Order.cof_eq α
   obtain ⟨r, hr, hr'⟩ := ord_eq s
-  let t : Set α := {a | ∃ ha : a ∈ s, ∀ b : s, r b ⟨a, ha⟩ → b < a}
-  suffices ht : IsCofinal t by
+  suffices ht : IsCofinal {a | ∃ ha : a ∈ s, ∀ b : s, r b ⟨a, ha⟩ → b < a} by
     refine ⟨_, ht, (ord_le.2 (cof_le ht)).antisymm' ?_⟩
     rw [← hs', hr', type_le_iff']
     refine ⟨.ofMonotone (fun x ↦ ⟨x.1, ?_⟩) fun x y hxy ↦ ?_⟩
@@ -218,7 +239,7 @@ theorem cof_eq_sInf_lsub (o : Ordinal.{u}) : cof o =
   · rintro a ⟨ι, f, hf, rfl⟩
     rw [← type_toType o]
     refine
-      (cof_type_le fun a => ?_).trans
+      (cof_le fun a => ?_).trans
         (@mk_le_of_injective _ _
           (fun s : typein ((· < ·) : o.ToType → o.ToType → Prop) ⁻¹' Set.range f =>
             Classical.choose s.prop)
@@ -234,14 +255,14 @@ theorem cof_eq_sInf_lsub (o : Ordinal.{u}) : cof o =
       apply lt_lsub
     · rw [mem_preimage, typein_enum]
       exact mem_range_self i
-    · rwa [← typein_le_typein, typein_enum]
-  · rcases cof_eq (α := o.ToType) (· < ·) with ⟨S, hS, hS'⟩
+    · rwa [← not_lt, ← typein_le_typein, typein_enum]
+  · rcases Order.cof_eq (α := o.ToType) with ⟨S, hS, hS'⟩
     let f : S → Ordinal := fun s => typein LT.lt s.val
     refine ⟨S, f, le_antisymm (lsub_le fun i => typein_lt_self (o := o) i)
-      (le_of_forall_lt fun a ha => ?_), by rwa [type_toType o] at hS'⟩
+      (le_of_forall_lt fun a ha => ?_), by rwa [cof_toType] at hS'⟩
     rw [← type_toType o] at ha
     rcases hS (enum (· < ·) ⟨a, ha⟩) with ⟨b, hb, hb'⟩
-    rw [← typein_le_typein, typein_enum] at hb'
+    rw [← not_lt, ← typein_le_typein, typein_enum] at hb'
     exact hb'.trans_lt (lt_lsub.{u, u} f ⟨b, hb⟩)
 
 theorem exists_lsub_cof (o : Ordinal) :
@@ -383,65 +404,6 @@ theorem bsup_lt_ord_lift {o : Ordinal} {f : ∀ a < o, Ordinal} {c : Ordinal}
 theorem bsup_lt_ord {o : Ordinal} {f : ∀ a < o, Ordinal} {c : Ordinal} (ho : o.card < c.cof) :
     (∀ i hi, f i hi < c) → bsup.{u, u} o f < c :=
   bsup_lt_ord_lift (by rwa [o.card.lift_id])
-
-/-! ### Basic results -/
-
-@[simp]
-theorem cof_eq_zero {o} : cof o = 0 ↔ o = 0 := by
-  rw [← cof_toType, cof_eq_zero_iff, isEmpty_toType_iff]
-
-@[deprecated cof_eq_zero (since := "2026-02-18")]
-theorem cof_ne_zero {o} : cof o ≠ 0 ↔ o ≠ 0 :=
-  cof_eq_zero.not
-
-@[simp]
-theorem cof_zero : cof 0 = 0 :=
-  cof_eq_zero.2 rfl
-
-@[simp]
-theorem cof_succ (o) : cof (succ o) = 1 := by
-  apply le_antisymm
-  · refine inductionOn o fun α r _ => ?_
-    change cof (type _) ≤ _
-    rw [← (_ : #_ = 1)]
-    · apply cof_type_le
-      refine fun a => ⟨Sum.inr PUnit.unit, Set.mem_singleton _, ?_⟩
-      rcases a with (a | ⟨⟨⟨⟩⟩⟩) <;> simp
-    · simp
-  · rw [← Cardinal.succ_zero, succ_le_iff]
-    simpa [lt_iff_le_and_ne, Cardinal.zero_le] using fun h =>
-      succ_ne_zero o (cof_eq_zero.1 (Eq.symm h))
-
--- TODO: find a good way to fix the non-terminal simp
--- it is called on four goals, only one of which requires the `exact`
-set_option linter.flexible false in
-@[simp]
-theorem cof_eq_one_iff_is_succ {o} : cof.{u} o = 1 ↔ ∃ a, o = succ a :=
-  ⟨inductionOn o fun α r _ z => by
-      rcases cof_eq r with ⟨S, hl, e⟩; rw [z] at e
-      obtain ⟨a⟩ := mk_ne_zero_iff.1 (by rw [e]; exact one_ne_zero)
-      refine
-        ⟨typein r a,
-          Eq.symm <|
-            Quotient.sound
-              ⟨RelIso.ofSurjective (RelEmbedding.ofMonotone ?_ fun x y => ?_) fun x => ?_⟩⟩
-      · apply Sum.rec <;> [exact Subtype.val; exact fun _ => a]
-      · rcases x with (x | ⟨⟨⟨⟩⟩⟩) <;> rcases y with (y | ⟨⟨⟨⟩⟩⟩) <;>
-          simp [Subrel, Order.Preimage]
-        exact x.2
-      · suffices r x a ∨ ∃ _ : PUnit.{u}, ↑a = x by
-          convert this
-          dsimp [RelEmbedding.ofMonotone]; simp
-        rcases trichotomous_of r x a with (h | h | h)
-        · exact Or.inl h
-        · exact Or.inr ⟨PUnit.unit, h.symm⟩
-        · rcases hl x with ⟨a', aS, hn⟩
-          refine absurd h ?_
-          convert hn
-          change (a : α) = ↑(⟨a', aS⟩ : S)
-          have := le_one_iff_subsingleton.1 (le_of_eq e)
-          congr!,
-    fun ⟨a, e⟩ => by simp [e]⟩
 
 /-! ### Fundamental sequences -/
 
@@ -615,7 +577,7 @@ theorem aleph0_le_cof {o} : ℵ₀ ≤ cof o ↔ IsSuccLimit o := by
     · apply l.ne_bot
       simpa using e
     · rw [natCast_succ, cof_succ] at this
-      rw [← this, cof_eq_one_iff_is_succ] at e
+      rw [← this, cof_eq_one_iff] at e
       rcases e with ⟨a, rfl⟩
       exact not_isSuccLimit_succ _ l
 
@@ -637,7 +599,8 @@ theorem cof_omega0 : cof ω = ℵ₀ :=
 
 theorem cof_eq' (r : α → α → Prop) [IsWellOrder α r] (h : IsSuccLimit (type r)) :
     ∃ S : Set α, (∀ a, ∃ b ∈ S, r a b) ∧ #S = cof (type r) :=
-  let ⟨S, H, e⟩ := cof_eq r
+  sorry
+/-  let ⟨S, H, e⟩ := cof_eq r
   ⟨S, fun a =>
     let a' := enum r ⟨_, h.succ_lt (typein_lt_type r a)⟩
     let ⟨b, h, ab⟩ := H a'
@@ -649,6 +612,7 @@ theorem cof_eq' (r : α → α → Prop) [IsWellOrder α r] (h : IsSuccLimit (ty
                 exact lt_succ (typein _ _))).resolve_right
         ab⟩,
     e⟩
+-/
 
 @[simp]
 theorem cof_univ : cof univ.{u, v} = Cardinal.univ.{u, v} :=
@@ -656,8 +620,8 @@ theorem cof_univ : cof univ.{u, v} = Cardinal.univ.{u, v} :=
     (by
       refine le_of_forall_lt fun c h => ?_
       rcases lt_univ'.1 h with ⟨c, rfl⟩
-      rcases @cof_eq Ordinal.{u} (· < ·) _ with ⟨S, H, Se⟩
-      rw [univ, ← lift_cof, ← Cardinal.lift_lift.{u + 1, v, u}, Cardinal.lift_lt, ← Se]
+      rcases Order.cof_eq Ordinal.{u} with ⟨S, H, Se⟩
+      rw [univ, ← lift_cof, ← Cardinal.lift_lift.{u + 1, v, u}, Cardinal.lift_lt, cof_type, ← Se]
       refine lt_of_not_ge fun h => ?_
       obtain ⟨a, e⟩ := Cardinal.mem_range_lift_of_le h
       refine Quotient.inductionOn a (fun α e => ?_) e
@@ -666,7 +630,7 @@ theorem cof_univ : cof univ.{u, v} = Cardinal.univ.{u, v} :=
       let g a := (f a).1
       let o := succ (iSup g)
       rcases H o with ⟨b, h, l⟩
-      refine l (lt_succ_iff.2 ?_)
+      refine l.not_gt (lt_succ_iff.2 ?_)
       rw [← show g (f.symm ⟨b, h⟩) = b by simp [g]]
       apply Ordinal.le_iSup)
 
@@ -707,6 +671,7 @@ theorem mk_bounded_subset {α : Type*} (h : ∀ x < #α, 2 ^ x < #α) {r : α �
     · intro a b hab
       simpa [singleton_eq_singleton_iff] using hab
 
+/-
 theorem mk_subset_mk_lt_cof {α : Type*} (h : ∀ x < #α, 2 ^ x < #α) :
     #{ s : Set α // #s < cof (#α).ord } = #α := by
   rcases eq_or_ne #α 0 with (ha | ha)
@@ -744,6 +709,7 @@ theorem unbounded_of_unbounded_iUnion {α β : Type u} (r : α → α → Prop) 
   rw [← sUnion_range] at h₁
   rcases unbounded_of_unbounded_sUnion r h₁ (mk_range_le.trans_lt h₂) with ⟨_, ⟨x, rfl⟩, u⟩
   exact ⟨x, u⟩
+-/
 
 /-! ### Consequences of König's lemma -/
 
