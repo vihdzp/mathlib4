@@ -639,10 +639,6 @@ theorem type_uLift (r : α → α → Prop) [IsWellOrder α r] :
     type (ULift.down ⁻¹'o r) = lift.{v} (type r) :=
   rfl
 
-theorem type_lt_uLift [LinearOrder α] [WellFoundedLT α] :
-    typeLT (ULift α) = lift.{v} (typeLT α) :=
-  rfl
-
 theorem _root_.RelIso.ordinal_lift_type_eq {r : α → α → Prop} {s : β → β → Prop}
     [IsWellOrder α r] [IsWellOrder β s] (f : r ≃r s) : lift.{v} (type r) = lift.{u} (type s) :=
   ((RelIso.preimage Equiv.ulift r).trans <|
