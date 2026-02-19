@@ -31,7 +31,7 @@ This file contains the definition of cofinality of an order and an ordinal numbe
   If `c` is a cardinal number, its cofinality is `c.ord.cof`.
 -/
 
-@[expose] public section
+public section
 
 noncomputable section
 
@@ -138,7 +138,7 @@ namespace Ordinal
 
 /-- The cofinality on an ordinal is the `Order.cof` of any isomorphic linear order.
 
-In particular, `cof 0 = 0` and `cof (o + 1) = 1`. -/
+In particular, `cof 0 = 0` and `cof (succ o) = 1`. -/
 def cof (o : Ordinal.{u}) : Cardinal.{u} :=
   o.liftOnWellOrder (fun α _ _ ↦ Order.cof α) fun _ _ _ _ _ _ h ↦
     let ⟨f⟩ := type_eq.1 h
@@ -411,6 +411,7 @@ theorem bsup_lt_ord {o : Ordinal} {f : ∀ a < o, Ordinal} {c : Ordinal} (ho : o
 
 /-- A fundamental sequence for `a` is an increasing sequence of length `o = cof a` that converges at
     `a`. We provide `o` explicitly in order to avoid type rewrites. -/
+@[expose]
 def IsFundamentalSequence (a o : Ordinal.{u}) (f : ∀ b < o, Ordinal.{u}) : Prop :=
   o ≤ a.cof.ord ∧ (∀ {i j} (hi hj), i < j → f i hi < f j hj) ∧ blsub.{u, u} o f = a
 
