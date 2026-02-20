@@ -483,7 +483,7 @@ variable [DecidableEq α] [Fintype α] (f : Perm α)
 /-- Factors a permutation `f` into a `Finset` of disjoint cyclic permutations that multiply to `f`.
 -/
 def cycleFactorsFinset : Finset (Perm α) :=
-  (squashCycleFactors f).lift
+  (squashCycleFactors f).lift'
     (fun l : { l : List (Perm α) // l.prod = f ∧ (∀ g ∈ l, IsCycle g) ∧ l.Pairwise Disjoint } =>
       ⟨↑l.val, nodup_of_pairwise_disjoint (fun h1 => not_isCycle_one <| l.2.2.1 _ h1) l.2.2.2⟩)
     fun ⟨_, hl⟩ ⟨_, hl'⟩ =>
@@ -495,7 +495,7 @@ open scoped List in
 theorem cycleFactorsFinset_eq_list_toFinset {σ : Perm α} {l : List (Perm α)} (hn : l.Nodup) :
     σ.cycleFactorsFinset = l.toFinset ↔
       (∀ f : Perm α, f ∈ l → f.IsCycle) ∧ l.Pairwise Disjoint ∧ l.prod = σ := by
-  obtain ⟨⟨l', hp', hc', hd'⟩, hl⟩ := Squash.exists_rep σ.truncCycleFactors
+  obtain ⟨⟨l', hp', hc', hd'⟩, hl⟩ := σ.squashCycleFactors.exists_rep
   have ht : cycleFactorsFinset σ = l'.toFinset := by
     rw [cycleFactorsFinset, ← hl, Squash.lift'_mk, Multiset.toFinset_eq, List.toFinset_coe]
   rw [ht]
@@ -800,7 +800,7 @@ theorem cycle_induction_on [Finite β] (P : Perm β → Prop) (σ : Perm β) (ba
   suffices ∀ l : List (Perm β),
       (∀ τ : Perm β, τ ∈ l → τ.IsCycle) → l.Pairwise Disjoint → P l.prod by
     classical
-      let x := σ.truncCycleFactors.out
+      let x := σ.squashCycleFactors.out
       exact (congr_arg P x.2.1).mp (this x.1 x.2.2.1 x.2.2.2)
   intro l
   induction l with
