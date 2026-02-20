@@ -198,23 +198,23 @@ end Fintype
 
 end Quotient
 
-namespace Trunc
+namespace Squash
 variable {ι : Type*} [DecidableEq ι] [Fintype ι] {α : ι → Sort*} {β : Sort*}
 
 /-- Given a function that for each `i : ι` gives a term of the corresponding
 truncation type, then there is corresponding term in the truncation of the product. -/
-def finChoice (q : ∀ i, Trunc (α i)) : Trunc (∀ i, α i) :=
+def finChoice (q : ∀ i, Squash (α i)) : Squash (∀ i, α i) :=
   Quotient.map' id (fun _ _ _ => trivial) (Quotient.finChoice q)
 
-theorem finChoice_eq (f : ∀ i, α i) : (Trunc.finChoice fun i => Trunc.mk (f i)) = Trunc.mk f :=
+theorem finChoice_eq (f : ∀ i, α i) : (Squash.finChoice fun i => .mk (f i)) = .mk f :=
   Subsingleton.elim _ _
 
-/-- Lift a function on `∀ i, α i` to a function on `∀ i, Trunc (α i)`. -/
-def finLiftOn (q : ∀ i, Trunc (α i)) (f : (∀ i, α i) → β) (h : ∀ (a b : ∀ i, α i), f a = f b) : β :=
+/-- Lift a function on `∀ i, α i` to a function on `∀ i, Squash (α i)`. -/
+def finLiftOn (q : ∀ i, Squash (α i)) (f : (∀ i, α i) → β) (h : ∀ a b, f a = f b) : β :=
   Quotient.finLiftOn q f (fun _ _ _ ↦ h _ _)
 
 @[simp]
-lemma finLiftOn_empty [e : IsEmpty ι] (q : ∀ i, Trunc (α i)) :
+lemma finLiftOn_empty [e : IsEmpty ι] (q : ∀ i, Squash (α i)) :
     finLiftOn (β := β) q = fun f _ ↦ f e.elim :=
   funext₂ fun _ _ ↦ congrFun₂ (Quotient.finLiftOn_empty q) _ _
 
@@ -225,14 +225,79 @@ lemma finLiftOn_mk (a : ∀ i, α i) :
 
 /-- `Trunc.finChoice` as an equivalence. -/
 @[simps]
+def finChoiceEquiv : (∀ i, Squash (α i)) ≃ Squash (∀ i, α i) where
+  toFun := finChoice
+  invFun q i := q.map (· i)
+  left_inv _ := Subsingleton.elim _ _
+  right_inv _ := Subsingleton.elim _ _
+
+/-- Recursion principle for `Squash`s indexed by a finite type. -/
+@[elab_as_elim]
+def finRecOn {C : (∀ i, Squash (α i)) → Sort*}
+    (q : ∀ i, Squash (α i))
+    (f : ∀ a : ∀ i, α i, C (mk <| a ·))
+    (h : ∀ (a b : ∀ i, α i), (Eq.ndrec (f a) (funext fun _ ↦ Squash.eq _ _)) = f b) :
+    C q :=
+  Quotient.finRecOn q (f ·) (fun _ _ _ ↦ h _ _)
+
+@[simp]
+lemma finRecOn_mk {C : (∀ i, Squash (α i)) → Sort*}
+    (a : ∀ i, α i) :
+    finRecOn (C := C) (⟦a ·⟧) = fun f _ ↦ f a := by
+  unfold finRecOn
+  simp
+
+end Squash
+
+namespace Trunc
+variable {ι : Type*} [DecidableEq ι] [Fintype ι] {α : ι → Sort*} {β : Sort*}
+
+set_option linter.deprecated false in
+/-- Given a function that for each `i : ι` gives a term of the corresponding
+truncation type, then there is corresponding term in the truncation of the product. -/
+@[deprecated Squash.finChoice (since := "2026-02-19")]
+def finChoice (q : ∀ i, Trunc (α i)) : Trunc (∀ i, α i) :=
+  Quotient.map' id (fun _ _ _ => trivial) (Quotient.finChoice q)
+
+set_option linter.deprecated false in
+@[deprecated Squash.finChoice_eq (since := "2026-02-19")]
+theorem finChoice_eq (f : ∀ i, α i) : (Trunc.finChoice fun i => Trunc.mk (f i)) = Trunc.mk f :=
+  Subsingleton.elim _ _
+
+set_option linter.deprecated false in
+/-- Lift a function on `∀ i, α i` to a function on `∀ i, Trunc (α i)`. -/
+@[deprecated Squash.finLiftOn (since := "2026-02-19")]
+def finLiftOn (q : ∀ i, Trunc (α i)) (f : (∀ i, α i) → β) (h : ∀ (a b : ∀ i, α i), f a = f b) : β :=
+  Quotient.finLiftOn q f (fun _ _ _ ↦ h _ _)
+
+set_option linter.deprecated false in
+@[deprecated Squash.finLiftOn_empty (since := "2026-02-19")]
+lemma finLiftOn_empty [e : IsEmpty ι] (q : ∀ i, Trunc (α i)) :
+    finLiftOn (β := β) q = fun f _ ↦ f e.elim :=
+  funext₂ fun _ _ ↦ congrFun₂ (Quotient.finLiftOn_empty q) _ _
+
+set_option linter.deprecated false in
+@[deprecated Squash.finLiftOn_mk (since := "2026-02-19")]
+lemma finLiftOn_mk (a : ∀ i, α i) :
+    finLiftOn (β := β) (⟦a ·⟧) = fun f _ ↦ f a :=
+  funext₂ fun _ _ ↦ congrFun₂ (Quotient.finLiftOn_mk a) _ _
+
+set_option linter.deprecated false in
+/-- `Trunc.finChoice` as an equivalence. -/
+@[deprecated Squash.finChoiceEquiv (since := "2026-02-19"), simps]
 def finChoiceEquiv : (∀ i, Trunc (α i)) ≃ Trunc (∀ i, α i) where
   toFun := finChoice
   invFun q i := q.map (· i)
   left_inv _ := Subsingleton.elim _ _
   right_inv _ := Subsingleton.elim _ _
 
+attribute [deprecated Squash.finChoiceEquiv_apply (since := "2026-02-19")] finChoiceEquiv_apply
+attribute [deprecated Squash.finChoiceEquiv_symm_apply (since := "2026-02-19")]
+  finChoiceEquiv_symm_apply
+
+set_option linter.deprecated false in
 /-- Recursion principle for `Trunc`s indexed by a finite type. -/
-@[elab_as_elim]
+@[deprecated Squash.finRecOn (since := "2026-02-19"), elab_as_elim]
 def finRecOn {C : (∀ i, Trunc (α i)) → Sort*}
     (q : ∀ i, Trunc (α i))
     (f : ∀ a : ∀ i, α i, C (mk <| a ·))
@@ -240,7 +305,8 @@ def finRecOn {C : (∀ i, Trunc (α i)) → Sort*}
     C q :=
   Quotient.finRecOn q (f ·) (fun _ _ _ ↦ h _ _)
 
-@[simp]
+set_option linter.deprecated false in
+@[deprecated Squash.finRecOn_mk (since := "2026-02-19")]
 lemma finRecOn_mk {C : (∀ i, Trunc (α i)) → Sort*}
     (a : ∀ i, α i) :
     finRecOn (C := C) (⟦a ·⟧) = fun f _ ↦ f a := by

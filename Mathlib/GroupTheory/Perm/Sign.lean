@@ -91,8 +91,8 @@ def swapFactors [Fintype α] [LinearOrder α] (f : Perm α) :
 /-- This computably represents the fact that any permutation can be represented as the product of
   a list of transpositions. -/
 def truncSwapFactors [Fintype α] (f : Perm α) :
-    Trunc { l : List (Perm α) // l.prod = f ∧ ∀ g ∈ l, IsSwap g } :=
-  Quotient.recOnSubsingleton (@univ α _).1 (fun l h => Trunc.mk (swapFactorsAux l f (h _)))
+    Squash { l : List (Perm α) // l.prod = f ∧ ∀ g ∈ l, IsSwap g } :=
+  Quotient.recOnSubsingleton (@univ α _).1 (fun l h => .mk (swapFactorsAux l f (h _)))
     (show ∀ x, f x ≠ x → x ∈ (@univ α _).1 from fun _ _ => mem_univ _)
 
 /-- An induction principle for permutations. If `P` holds for the identity permutation, and

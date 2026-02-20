@@ -109,11 +109,11 @@ instance _root_.Finset.countable [Countable α] : Countable (Finset α) :=
 def encodableOfList [DecidableEq α] (l : List α) (H : ∀ x, x ∈ l) : Encodable α :=
   ⟨fun a => idxOf a l, (l[·]?), fun _ => getElem?_idxOf (H _)⟩
 
-/-- A finite type is encodable. Because the encoding is not unique, we wrap it in `Trunc` to
+/-- A finite type is encodable. Because the encoding is not unique, we wrap it in `Squash` to
 preserve computability. -/
-def _root_.Fintype.truncEncodable (α : Type*) [DecidableEq α] [Fintype α] : Trunc (Encodable α) :=
-  @Quot.recOnSubsingleton _ _ (fun s : Multiset α => (∀ x : α, x ∈ s) → Trunc (Encodable α)) _
-    Finset.univ.1 (fun l H => Trunc.mk <| encodableOfList l H) Finset.mem_univ
+def _root_.Fintype.truncEncodable (α : Type*) [DecidableEq α] [Fintype α] : Squash (Encodable α) :=
+  @Quot.recOnSubsingleton _ _ (fun s : Multiset α => (∀ x : α, x ∈ s) → Squash (Encodable α)) _
+    Finset.univ.1 (fun l H => .mk <| encodableOfList l H) Finset.mem_univ
 
 /-- A noncomputable way to arbitrarily choose an ordering on a finite type.
 It is not made into a global instance, since it involves an arbitrary choice.

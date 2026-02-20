@@ -184,24 +184,51 @@ instance pfunFintype (p : Prop) [Decidable p] (α : p → Type*) [∀ hp, Fintyp
   else ⟨singleton fun h => (hp h).elim, fun h => mem_singleton.2
     (funext fun x => by contradiction)⟩
 
+section Squash
+
+/-- For `s : Multiset α`, we can lift the existential statement that `∃ x, x ∈ s` to `Squash α`. -/
+def squashOfMultisetExistsMem {α} (s : Multiset α) : (∃ x, x ∈ s) → Squash α :=
+  Quotient.recOnSubsingleton s fun l h =>
+    match l, h with
+    | [], _ => False.elim (by tauto)
+    | a :: _, _ => .mk a
+
+/-- A `Nonempty` `Fintype` constructively contains an element. -/
+def squashOfNonemptyFintype (α) [Nonempty α] [Fintype α] : Squash α :=
+  squashOfMultisetExistsMem Finset.univ.val (by simp)
+
+/-- By iterating over the elements of a fintype, we can lift an existential statement `∃ a, P a`
+to `Squash (Σ' a, P a)`, containing data. -/
+def squashSigmaOfExists {α} [Fintype α] {P : α → Prop} [DecidablePred P] (h : ∃ a, P a) :
+    Squash (Σ' a, P a) :=
+  @squashOfNonemptyFintype (Σ' a, P a) ((Exists.elim h) fun a ha => ⟨⟨a, ha⟩⟩) _
+
+end Squash
+
 section Trunc
 
+set_option linter.deprecated false in
 /-- For `s : Multiset α`, we can lift the existential statement that `∃ x, x ∈ s` to a `Trunc α`.
 -/
+@[deprecated squashOfMultisetExistsMem (since := "2026-02-19")]
 def truncOfMultisetExistsMem {α} (s : Multiset α) : (∃ x, x ∈ s) → Trunc α :=
   Quotient.recOnSubsingleton s fun l h =>
     match l, h with
     | [], _ => False.elim (by tauto)
     | a :: _, _ => Trunc.mk a
 
+set_option linter.deprecated false in
 /-- A `Nonempty` `Fintype` constructively contains an element.
 -/
+@[deprecated squashOfMultisetExistsMem (since := "2026-02-19")]
 def truncOfNonemptyFintype (α) [Nonempty α] [Fintype α] : Trunc α :=
   truncOfMultisetExistsMem Finset.univ.val (by simp)
 
+set_option linter.deprecated false in
 /-- By iterating over the elements of a fintype, we can lift an existential statement `∃ a, P a`
 to `Trunc (Σ' a, P a)`, containing data.
 -/
+@[deprecated squashSigmaOfExists (since := "2026-02-19")]
 def truncSigmaOfExists {α} [Fintype α] {P : α → Prop} [DecidablePred P] (h : ∃ a, P a) :
     Trunc (Σ' a, P a) :=
   @truncOfNonemptyFintype (Σ' a, P a) ((Exists.elim h) fun a ha => ⟨⟨a, ha⟩⟩) _

@@ -465,10 +465,16 @@ def cycleFactors [Fintype α] [LinearOrder α] (f : Perm α) :
 
 /-- Factors a permutation `f` into a list of disjoint cyclic permutations that multiply to `f`,
   without a linear order. -/
+def squashCycleFactors [DecidableEq α] [Fintype α] (f : Perm α) :
+    Squash { l : List (Perm α) // l.prod = f ∧ (∀ g ∈ l, IsCycle g) ∧ l.Pairwise Disjoint } :=
+  Quotient.recOnSubsingleton (@univ α _).1 (fun l h => .mk (cycleFactorsAux l f (h _)))
+    (show ∀ x, f x ≠ x → x ∈ (@univ α _).1 from fun _ _ => mem_univ _)
+
+set_option linter.deprecated false in
+@[deprecated squashCycleFactors (since := "2026-02-19")]
 def truncCycleFactors [DecidableEq α] [Fintype α] (f : Perm α) :
     Trunc { l : List (Perm α) // l.prod = f ∧ (∀ g ∈ l, IsCycle g) ∧ l.Pairwise Disjoint } :=
-  Quotient.recOnSubsingleton (@univ α _).1 (fun l h => Trunc.mk (cycleFactorsAux l f (h _)))
-    (show ∀ x, f x ≠ x → x ∈ (@univ α _).1 from fun _ _ => mem_univ _)
+  squashCycleFactors f
 
 section CycleFactorsFinset
 
@@ -477,7 +483,7 @@ variable [DecidableEq α] [Fintype α] (f : Perm α)
 /-- Factors a permutation `f` into a `Finset` of disjoint cyclic permutations that multiply to `f`.
 -/
 def cycleFactorsFinset : Finset (Perm α) :=
-  (truncCycleFactors f).lift
+  (squashCycleFactors f).lift
     (fun l : { l : List (Perm α) // l.prod = f ∧ (∀ g ∈ l, IsCycle g) ∧ l.Pairwise Disjoint } =>
       ⟨↑l.val, nodup_of_pairwise_disjoint (fun h1 => not_isCycle_one <| l.2.2.1 _ h1) l.2.2.2⟩)
     fun ⟨_, hl⟩ ⟨_, hl'⟩ =>
@@ -489,9 +495,9 @@ open scoped List in
 theorem cycleFactorsFinset_eq_list_toFinset {σ : Perm α} {l : List (Perm α)} (hn : l.Nodup) :
     σ.cycleFactorsFinset = l.toFinset ↔
       (∀ f : Perm α, f ∈ l → f.IsCycle) ∧ l.Pairwise Disjoint ∧ l.prod = σ := by
-  obtain ⟨⟨l', hp', hc', hd'⟩, hl⟩ := Trunc.exists_rep σ.truncCycleFactors
+  obtain ⟨⟨l', hp', hc', hd'⟩, hl⟩ := Squash.exists_rep σ.truncCycleFactors
   have ht : cycleFactorsFinset σ = l'.toFinset := by
-    rw [cycleFactorsFinset, ← hl, Trunc.lift_mk, Multiset.toFinset_eq, List.toFinset_coe]
+    rw [cycleFactorsFinset, ← hl, Squash.lift'_mk, Multiset.toFinset_eq, List.toFinset_coe]
   rw [ht]
   constructor
   · intro h

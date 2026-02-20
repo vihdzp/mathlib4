@@ -63,7 +63,7 @@ structure DFinsupp [∀ i, Zero (β i)] : Type max u v where mk' ::
   /-- The underlying function of a dependent function with finite support (aka `DFinsupp`). -/
   toFun : ∀ i, β i
   /-- The support of a dependent function with finite support (aka `DFinsupp`). -/
-  support' : Trunc { s : Multiset ι // ∀ i, i ∈ s ∨ toFun i = 0 }
+  support' : Squash { s : Multiset ι // ∀ i, i ∈ s ∨ toFun i = 0 }
 
 /-- `Π₀ i, β i` denotes the type of dependent functions with finite support `DFinsupp β`. -/
 notation3 "Π₀ "(...)", "r:(scoped f => DFinsupp f) => r
@@ -91,7 +91,7 @@ theorem ext {f g : Π₀ i, β i} (h : ∀ i, f i = g i) : f = g :=
 lemma ne_iff {f g : Π₀ i, β i} : f ≠ g ↔ ∃ i, f i ≠ g i := DFunLike.ne_iff
 
 instance : Zero (Π₀ i, β i) :=
-  ⟨⟨0, Trunc.mk <| ⟨∅, fun _ => Or.inr rfl⟩⟩⟩
+  ⟨⟨0, .mk <| ⟨∅, fun _ => Or.inr rfl⟩⟩⟩
 
 instance : Inhabited (Π₀ i, β i) :=
   ⟨0⟩
@@ -389,7 +389,7 @@ section Basic
 variable [∀ i, Zero (β i)]
 
 theorem finite_support (f : Π₀ i, β i) : Set.Finite { i | f i ≠ 0 } :=
-  Trunc.induction_on f.support' fun xs ↦
+  Squash.induction_on f.support' fun xs ↦
     xs.1.finite_toSet.subset fun i H ↦ ((xs.prop i).resolve_right H)
 
 section DecidableEq
@@ -399,7 +399,7 @@ variable [DecidableEq ι]
 defined on this `Finset`. -/
 def mk (s : Finset ι) (x : ∀ i : (↑s : Set ι), β (i : ι)) : Π₀ i, β i :=
   ⟨fun i => if H : i ∈ s then x ⟨i, H⟩ else 0,
-    Trunc.mk ⟨s.1, fun i => if H : i ∈ s then Or.inl H else Or.inr <| dif_neg H⟩⟩
+    .mk ⟨s.1, fun i => if H : i ∈ s then Or.inl H else Or.inr <| dif_neg H⟩⟩
 
 variable {s : Finset ι} {x : ∀ i : (↑s : Set ι), β i} {i : ι}
 
@@ -432,7 +432,7 @@ instance uniqueOfIsEmpty [IsEmpty ι] : Unique (Π₀ i, β i) :=
 @[simps apply]
 def equivFunOnFintype [Fintype ι] : (Π₀ i, β i) ≃ ∀ i, β i where
   toFun := (⇑)
-  invFun f := ⟨f, Trunc.mk ⟨Finset.univ.1, fun _ => Or.inl <| Finset.mem_univ_val _⟩⟩
+  invFun f := ⟨f, .mk ⟨Finset.univ.1, fun _ => Or.inl <| Finset.mem_univ_val _⟩⟩
   left_inv _ := DFunLike.coe_injective rfl
 
 @[simp]
@@ -445,7 +445,7 @@ variable [DecidableEq ι]
 and all other points to `0`. -/
 def single (i : ι) (b : β i) : Π₀ i, β i :=
   ⟨Pi.single i b,
-    Trunc.mk ⟨{i}, fun j => (Decidable.eq_or_ne j i).imp (by simp) fun h => Pi.single_eq_of_ne h _⟩⟩
+    .mk ⟨{i}, fun j => (Decidable.eq_or_ne j i).imp (by simp) fun h => Pi.single_eq_of_ne h _⟩⟩
 
 theorem single_eq_pi_single {i b} : ⇑(single i b : Π₀ i, β i) = Pi.single i b :=
   rfl
@@ -720,7 +720,7 @@ theorem erase_add_single (i : ι) (f : Π₀ i, β i) : f.erase i + single i (f 
 protected theorem induction {p : (Π₀ i, β i) → Prop} (f : Π₀ i, β i) (h0 : p 0)
     (ha : ∀ (i b) (f : Π₀ i, β i), f i = 0 → b ≠ 0 → p f → p (single i b + f)) : p f := by
   obtain ⟨f, s⟩ := f
-  induction s using Trunc.induction_on with | _ s
+  induction s using Squash.induction_on with | _ s
   obtain ⟨s, H⟩ := s
   induction s using Multiset.induction_on generalizing f with
   | empty =>
@@ -728,16 +728,16 @@ protected theorem induction {p : (Π₀ i, β i) → Prop} (f : Π₀ i, β i) (
     subst this
     exact h0
   | cons i s ih => ?_
-  have H2 : p (erase i ⟨f, Trunc.mk ⟨i ::ₘ s, H⟩⟩) := by
-    dsimp only [erase, Trunc.map, Trunc.bind, Trunc.liftOn, Trunc.lift_mk,
+  have H2 : p (erase i ⟨f, .mk ⟨i ::ₘ s, H⟩⟩) := by
+    dsimp only [erase, Squash.map, Squash.bind, Squash.liftOn, Squash.lift'_mk,
       Function.comp, Subtype.coe_mk]
     have H2 : ∀ j, j ∈ s ∨ ite (j = i) 0 (f j) = 0 := by grind
-    have H3 : ∀ aux, (⟨fun j : ι => ite (j = i) 0 (f j), Trunc.mk ⟨i ::ₘ s, aux⟩⟩ : Π₀ i, β i) =
-        ⟨fun j : ι => ite (j = i) 0 (f j), Trunc.mk ⟨s, H2⟩⟩ :=
+    have H3 : ∀ aux, (⟨fun j : ι => ite (j = i) 0 (f j), .mk ⟨i ::ₘ s, aux⟩⟩ : Π₀ i, β i) =
+        ⟨fun j : ι => ite (j = i) 0 (f j), .mk ⟨s, H2⟩⟩ :=
       fun _ ↦ ext fun _ => rfl
     rw [H3]
     apply ih
-  have H3 : single i _ + _ = (⟨f, Trunc.mk ⟨i ::ₘ s, H⟩⟩ : Π₀ i, β i) := single_add_erase _ _
+  have H3 : single i _ + _ = (⟨f, .mk ⟨i ::ₘ s, H⟩⟩ : Π₀ i, β i) := single_add_erase _ _
   rw [← H3]
   change p (single i (f i) + _)
   rcases Classical.em (f i = 0) with h | h
@@ -790,7 +790,7 @@ variable [∀ i, Zero (β i)] [∀ (i) (x : β i), Decidable (x ≠ 0)]
 
 /-- Set `{i | f x ≠ 0}` as a `Finset`. -/
 def support (f : Π₀ i, β i) : Finset ι :=
-  (f.support'.lift fun xs => (Multiset.toFinset xs.1).filter fun i => f i ≠ 0) <| by
+  (f.support'.lift' fun xs => (Multiset.toFinset xs.1).filter fun i => f i ≠ 0) <| by
     rintro ⟨sx, hx⟩ ⟨sy, hy⟩
     dsimp only [Subtype.coe_mk, toFun_eq_coe] at *
     ext i; constructor
@@ -807,14 +807,14 @@ theorem support_mk_subset {s : Finset ι} {x : ∀ i : (↑s : Set ι), β i.1} 
 
 @[simp]
 theorem support_mk'_subset {f : ∀ i, β i} {s : Multiset ι} {h} :
-    (mk' f <| Trunc.mk ⟨s, h⟩).support ⊆ s.toFinset := fun i H =>
+    (mk' f <| .mk ⟨s, h⟩).support ⊆ s.toFinset := fun i H =>
   Multiset.mem_toFinset.1 <| by simpa using (Finset.mem_filter.1 H).1
 
 @[simp, grind =]
 theorem mem_support_toFun (f : Π₀ i, β i) (i) : i ∈ f.support ↔ f i ≠ 0 := by
   obtain ⟨f, s⟩ := f
-  induction s using Trunc.induction_on with | _ s
-  dsimp only [support, Trunc.lift_mk]
+  induction s using Squash.induction_on with | _ s
+  dsimp only [support, Squash.lift'_mk]
   rw [Finset.mem_filter, Multiset.mem_toFinset, coe_mk']
   grind
 
@@ -922,7 +922,7 @@ theorem mapRange_surjective (f : ∀ i, β₁ i → β₂ i) (hf : ∀ i, f i 0 
           obtain ⟨u, hu⟩ := h i (x i)
           exact ⟨u, hu, fun h'' ↦ (h' h'').elim⟩)
     choose y hy using this
-    refine ⟨⟨y, Trunc.mk ⟨s, fun i ↦ ?_⟩⟩, ext fun i ↦ ?_⟩
+    refine ⟨⟨y, .mk ⟨s, fun i ↦ ?_⟩⟩, ext fun i ↦ ?_⟩
     · exact (hs i).imp_right (hy i).2
     · simp [(hy i).1]
 
