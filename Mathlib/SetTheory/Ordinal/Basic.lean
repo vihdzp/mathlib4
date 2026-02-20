@@ -333,12 +333,9 @@ theorem _root_.PrincipalSeg.ordinal_type_lt {α β} {r : α → α → Prop} {s 
     [IsWellOrder α r] [IsWellOrder β s] (h : r ≺i s) : type r < type s :=
   ⟨h⟩
 
-private theorem zero_le (o : Ordinal) : 0 ≤ o :=
-  inductionOn o fun _ r _ => (InitialSeg.ofIsEmpty _ r).ordinal_type_le
-
 instance : OrderBot Ordinal where
   bot := 0
-  bot_le := private zero_le
+  bot_le o := inductionOn o fun _ r _ => (InitialSeg.ofIsEmpty _ r).ordinal_type_le
 
 @[simp]
 theorem bot_eq_zero : (⊥ : Ordinal) = 0 :=
@@ -351,7 +348,6 @@ instance instIsEmptyIioZero : IsEmpty (Iio (0 : Ordinal)) := by
 protected theorem le_zero {o : Ordinal} : o ≤ 0 ↔ o = 0 :=
   le_bot_iff
 
-private theorem pos_iff_ne_zero {o : Ordinal} : 0 < o ↔ o ≠ 0 := bot_lt_iff_ne_bot
 
 @[deprecated not_neg (since := "2025-11-21")]
 protected theorem not_lt_zero (o : Ordinal) : ¬o < 0 :=
@@ -361,7 +357,7 @@ protected theorem not_lt_zero (o : Ordinal) : ¬o < 0 :=
 protected theorem eq_zero_or_pos : ∀ a : Ordinal, a = 0 ∨ 0 < a := eq_bot_or_bot_lt
 
 instance : ZeroLEOneClass Ordinal :=
-  ⟨zero_le _⟩
+  ⟨bot_le⟩
 
 instance instNeZeroOne : NeZero (1 : Ordinal) :=
   ⟨Ordinal.one_ne_zero⟩
@@ -500,7 +496,7 @@ theorem enum_inj {r : α → α → Prop} [IsWellOrder α r] {o₁ o₂ : Iio (t
 theorem enum_zero_le {r : α → α → Prop} [IsWellOrder α r] (h0 : 0 < type r) (a : α) :
     ¬r a (enum r ⟨0, h0⟩) := by
   rw [← enum_typein r a, enum_le_enum r]
-  apply zero_le
+  exact bot_le (α := Ordinal)
 
 theorem enum_zero_le' {o : Ordinal} (h0 : 0 < o) (a : o.ToType) :
     enum (α := o.ToType) (· < ·) ⟨0, type_toType _ ▸ h0⟩ ≤ a := by
@@ -552,7 +548,7 @@ instance small_Ioc (a b : Ordinal.{u}) : Small.{u} (Ioc a b) := small_subset Ioc
 /-- `o.ToType` is an `OrderBot` whenever `o ≠ 0`. -/
 def toTypeOrderBot {o : Ordinal} (ho : o ≠ 0) : OrderBot o.ToType where
   bot := (enum (· < ·)) ⟨0, _⟩
-  bot_le := enum_zero_le' (by rwa [pos_iff_ne_zero])
+  bot_le := enum_zero_le' (bot_lt_iff_ne_bot.2 ho)
 
 theorem enum_zero_eq_bot {o : Ordinal} (ho : 0 < o) :
     enum (α := o.ToType) (· < ·) ⟨0, by rwa [type_toType]⟩ =
@@ -837,8 +833,8 @@ instance existsAddOfLE : ExistsAddOfLE Ordinal where
     exact ⟨type t, g.ordinal_type_eq.symm⟩
 
 instance canonicallyOrderedAdd : CanonicallyOrderedAdd Ordinal where
-  le_add_self a b := by simpa using add_le_add_left (zero_le b) a
-  le_self_add a b := by simpa using add_le_add_right (zero_le b) a
+  le_add_self a b := by simpa using add_le_add_left bot_le a
+  le_self_add a b := by simpa using add_le_add_right bot_le a
 
 @[deprecated le_self_add (since := "2025-11-21")]
 protected theorem le_add_right (a b : Ordinal) : a ≤ a + b := le_self_add
