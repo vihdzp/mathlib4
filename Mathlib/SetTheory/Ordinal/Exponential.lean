@@ -61,6 +61,10 @@ theorem opow_succ (a b : Ordinal) : a ^ succ b = a ^ b * a := by
   · rw [zero_opow (succ_ne_zero b), mul_zero]
   · rw [opow_of_ne_zero h, opow_of_ne_zero h, limitRecOn_succ]
 
+@[simp]
+theorem opow_add_one (a b : Ordinal) : a ^ (b + 1) = a ^ b * a :=
+  opow_succ a b
+
 theorem opow_limit {a b : Ordinal} (ha : a ≠ 0) (hb : IsSuccLimit b) :
     a ^ b = ⨆ x : Iio b, a ^ x.1 := by
   simp_rw [opow_of_ne_zero ha, limitRecOn_limit _ _ _ _ hb]
@@ -76,8 +80,7 @@ theorem lt_opow_of_isSuccLimit {a b c : Ordinal} (b0 : b ≠ 0) (h : IsSuccLimit
 
 @[simp]
 theorem opow_one (a : Ordinal) : a ^ (1 : Ordinal) = a := by
-  rw [← succ_zero, opow_succ]
-  simp only [opow_zero, one_mul]
+  rw [← zero_add 1, opow_add_one, opow_zero, one_mul]
 
 @[simp]
 theorem one_opow (a : Ordinal) : (1 : Ordinal) ^ a = 1 := by
@@ -111,7 +114,7 @@ theorem opow_eq_zero {a b : Ordinal} : a ^ b = 0 ↔ a = 0 ∧ b ≠ 0 := by
 theorem opow_natCast (a : Ordinal) (n : ℕ) : a ^ (n : Ordinal) = a ^ n := by
   induction n with
   | zero => rw [Nat.cast_zero, opow_zero, pow_zero]
-  | succ n IH => rw [Nat.cast_succ, add_one_eq_succ, opow_succ, pow_succ, IH]
+  | succ n IH => rw [Nat.cast_succ, opow_add_one, pow_succ, IH]
 
 theorem isNormal_opow {a : Ordinal} (h : 1 < a) : IsNormal (a ^ · : Ordinal → Ordinal) := by
   have ha : 0 < a := zero_lt_one.trans h
@@ -192,7 +195,7 @@ theorem opow_add (a b c : Ordinal) : a ^ (b + c) = a ^ b * a ^ c := by
   obtain rfl | ha' := (one_le_iff_ne_zero.2 ha.ne').eq_or_lt; · simp
   induction c using limitRecOn with
   | zero => simp
-  | succ c IH => rw [add_succ, opow_succ, IH, opow_succ, mul_assoc]
+  | succ c IH => rw [succ_eq_add_one, ← add_assoc, opow_add_one, IH, opow_add_one, mul_assoc]
   | limit c l IH =>
     refine eq_of_forall_ge_iff fun d ↦
       (((isNormal_opow ha').comp (isNormal_add_right b)).le_iff_forall_le l).trans ?_
@@ -278,7 +281,7 @@ theorem log_zero_left : ∀ b, log 0 b = 0 :=
 @[simp]
 theorem log_zero_right (b : Ordinal) : log b 0 = 0 := by
   obtain hb | hb := lt_or_ge 1 b
-  · rw [log_def hb, ← nonpos_iff_eq_zero, pred_le_iff_le_succ, succ_zero]
+  · rw [log_def hb, ← nonpos_iff_eq_zero, pred_le_iff_le_succ, succ_eq_add_one, zero_add]
     apply csInf_le'
     rw [mem_setOf, opow_one]
     exact bot_lt_of_lt hb
@@ -377,7 +380,7 @@ theorem lt_log_of_lt_opow {b x c : Ordinal} (hc : c ≠ 0) : x < b ^ c → log b
   lt_imp_lt_of_le_imp_le <| opow_le_of_le_log hc
 
 theorem log_pos {b o : Ordinal} (hb : 1 < b) (ho : o ≠ 0) (hbo : b ≤ o) : 0 < log b o := by
-  rwa [← succ_le_iff, succ_zero, ← opow_le_iff_le_log hb ho, opow_one]
+  rwa [pos_iff_ne_zero, ← one_le_iff_ne_zero, ← opow_le_iff_le_log hb ho, opow_one]
 
 theorem log_eq_zero {b o : Ordinal} (hbo : o < b) : log b o = 0 := by
   rcases eq_or_ne o 0 with (rfl | ho)
@@ -386,7 +389,7 @@ theorem log_eq_zero {b o : Ordinal} (hbo : o < b) : log b o = 0 := by
   · rcases le_one_iff.1 hb with (rfl | rfl)
     · exact log_zero_left o
     · exact log_one_left o
-  · rwa [← nonpos_iff_eq_zero, ← lt_succ_iff, succ_zero, ← lt_opow_iff_log_lt hb ho, opow_one]
+  · rwa [← lt_one_iff_zero, ← lt_opow_iff_log_lt hb ho, opow_one]
 
 @[gcongr, mono]
 theorem log_mono_right (b : Ordinal) {x y : Ordinal} (xy : x ≤ y) : log b x ≤ log b y := by
@@ -442,7 +445,7 @@ theorem log_opow_mul_add {b u v w : Ordinal} (hb : 1 < b) (hv : v ≠ 0) (hw : w
   · constructor
     · grw [opow_add, opow_log_le_self b hv, ← le_self_add]
     · apply (add_lt_add_right hw _).trans_le
-      rw [← mul_succ, ← add_succ, opow_add]
+      rw [← mul_succ, succ_eq_add_one (_ + _), add_assoc, opow_add]
       gcongr
       rw [succ_le_iff]
       exact lt_opow_succ_log_self hb _
@@ -487,7 +490,7 @@ theorem lt_omega0_opow {a b : Ordinal} (hb : b ≠ 0) :
     fun ⟨c, hc, n, hn⟩ ↦ hn.trans (omega0_opow_mul_nat_lt hc n)⟩
   obtain ⟨n, hn⟩ := lt_omega0.1 (div_opow_log_lt a one_lt_omega0)
   use n.succ
-  rw [natCast_succ, ← hn]
+  rw [Nat.cast_add_one, ← hn]
   exact lt_mul_succ_div a (opow_ne_zero _ omega0_ne_zero)
 
 theorem lt_omega0_opow_succ {a b : Ordinal} : a < ω ^ succ b ↔ ∃ n : ℕ, a < ω ^ b * n := by
