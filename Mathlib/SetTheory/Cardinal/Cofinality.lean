@@ -64,10 +64,8 @@ theorem cof_eq : ∃ s : Set α, IsCofinal s ∧ #s = cof α := by
   exact ⟨s.1, s.2, hs⟩
 
 variable (α) in
-theorem cof_le_cardinalMk : cof α ≤ #α := by
-  obtain ⟨s, -, hs⟩ := cof_eq α
-  rw [← hs]
-  exact mk_set_le s
+theorem cof_le_cardinalMk : cof α ≤ #α :=
+  cof_le .univ |>.trans_eq mk_univ
 
 theorem cof_eq_zero_iff : cof α = 0 ↔ IsEmpty α := by
   refine ⟨fun _ ↦ ?_, fun _ ↦ by simp [cof]⟩
