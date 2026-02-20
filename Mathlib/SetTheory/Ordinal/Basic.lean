@@ -635,12 +635,14 @@ def lift (o : Ordinal.{v}) : Ordinal.{max v u} :=
       ⟨(RelIso.preimage Equiv.ulift r).trans <| f.trans (RelIso.preimage Equiv.ulift s).symm⟩
 
 @[simp]
-theorem type_uLift (r : α → α → Prop) [IsWellOrder α r] :
+theorem type_ulift (r : α → α → Prop) [IsWellOrder α r] :
     type (ULift.down ⁻¹'o r) = lift.{v} (type r) :=
   rfl
 
+@[deprecated (since := "2026-02-20")] alias type_uLift := type_ulift
+
 @[simp]
-theorem type_lt_uLift [LinearOrder α] [WellFoundedLT α] :
+theorem type_lt_ulift [LinearOrder α] [WellFoundedLT α] :
     typeLT (ULift α) = lift.{v} (typeLT α) :=
   rfl
 
