@@ -126,13 +126,13 @@ theorem det_toMatrix_eq_det_toMatrix [DecidableEq κ] (b : Basis ι A M) (c : Ba
 
 See `LinearMap.det` for a version that populates the basis non-computably.
 
-Although the `Squash (Basis ι A M)` parameter makes it slightly more convenient to switch bases,
+Although the `Trunc (Basis ι A M)` parameter makes it slightly more convenient to switch bases,
 there is no good way to generalize over universe parameters, so we can't fully state in `detAux`'s
 type that it does not depend on the choice of basis. Instead you can use the `detAux_def''` lemma,
 or avoid mentioning a basis at all using `LinearMap.det`.
 -/
-irreducible_def detAux : Squash (Basis ι A M) → (M →ₗ[A] M) →* A :=
-  Squash.lift'
+irreducible_def detAux : Trunc (Basis ι A M) → (M →ₗ[A] M) →* A :=
+  Trunc.lift
     (fun b : Basis ι A M => detMonoidHom.comp (toMatrixAlgEquiv b : (M →ₗ[A] M) →* Matrix ι ι A))
     fun b c => MonoidHom.ext <| det_toMatrix_eq_det_toMatrix b c
 
@@ -141,22 +141,22 @@ irreducible_def detAux : Squash (Basis ι A M) → (M →ₗ[A] M) →* A :=
 See also `detAux_def''` which allows you to vary the basis.
 -/
 theorem detAux_def' (b : Basis ι A M) (f : M →ₗ[A] M) :
-    LinearMap.detAux (Squash.mk b) f = Matrix.det (LinearMap.toMatrix b b f) := by
+    LinearMap.detAux (Trunc.mk b) f = Matrix.det (LinearMap.toMatrix b b f) := by
   rw [detAux]
   rfl
 
-theorem detAux_def'' {ι' : Type*} [Fintype ι'] [DecidableEq ι'] (tb : Squash <| Basis ι A M)
+theorem detAux_def'' {ι' : Type*} [Fintype ι'] [DecidableEq ι'] (tb : Trunc <| Basis ι A M)
     (b' : Basis ι' A M) (f : M →ₗ[A] M) :
     LinearMap.detAux tb f = Matrix.det (LinearMap.toMatrix b' b' f) := by
-  induction tb using Squash.induction_on with
+  induction tb using Trunc.induction_on with
   | h b => rw [detAux_def', det_toMatrix_eq_det_toMatrix b b']
 
 @[simp]
-theorem detAux_id (b : Squash <| Basis ι A M) : LinearMap.detAux b LinearMap.id = 1 :=
+theorem detAux_id (b : Trunc <| Basis ι A M) : LinearMap.detAux b LinearMap.id = 1 :=
   (LinearMap.detAux b).map_one
 
 @[simp]
-theorem detAux_comp (b : Squash <| Basis ι A M) (f g : M →ₗ[A] M) :
+theorem detAux_comp (b : Trunc <| Basis ι A M) (f g : M →ₗ[A] M) :
     LinearMap.detAux b (f.comp g) = LinearMap.detAux b f * LinearMap.detAux b g :=
   (LinearMap.detAux b).map_mul f g
 
@@ -170,14 +170,14 @@ open scoped Classical in
 If there is no finite basis on `M`, the result is `1` instead.
 -/
 protected irreducible_def det : (M →ₗ[A] M) →* A :=
-  if H : ∃ s : Finset M, Nonempty (Basis s A M) then LinearMap.detAux (.mk H.choose_spec.some)
+  if H : ∃ s : Finset M, Nonempty (Basis s A M) then LinearMap.detAux (Trunc.mk H.choose_spec.some)
   else 1
 
 open scoped Classical in
 theorem coe_det [DecidableEq M] :
     ⇑(LinearMap.det : (M →ₗ[A] M) →* A) =
       if H : ∃ s : Finset M, Nonempty (Basis s A M) then
-        LinearMap.detAux (Squash.mk H.choose_spec.some)
+        LinearMap.detAux (Trunc.mk H.choose_spec.some)
       else 1 := by
   ext
   rw [LinearMap.det_def]

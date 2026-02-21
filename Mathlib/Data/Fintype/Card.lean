@@ -450,15 +450,15 @@ instance Bool.instWellFoundedGT : WellFoundedGT Bool := inferInstance
 instance Prop.instWellFoundedLT : WellFoundedLT Prop := inferInstance
 instance Prop.instWellFoundedGT : WellFoundedGT Prop := inferInstance
 
-/-- A `Fintype` with positive cardinality constructively contains an element. -/
-def squashOfCardPos {α} [Fintype α] (h : 0 < Fintype.card α) : Squash α :=
-  letI := Fintype.card_pos_iff.mp h
-  squashOfNonemptyFintype α
+section Trunc
 
-set_option linter.deprecated false in
-@[deprecated squashOfCardPos (since := "2026-02-19")]
+/-- A `Fintype` with positive cardinality constructively contains an element.
+-/
 def truncOfCardPos {α} [Fintype α] (h : 0 < Fintype.card α) : Trunc α :=
-  squashOfCardPos h
+  letI := Fintype.card_pos_iff.mp h
+  truncOfNonemptyFintype α
+
+end Trunc
 
 /-- A custom induction principle for fintypes. The base case is a subsingleton type,
 and the induction step is for non-trivial types, and one can assume the hypothesis for
