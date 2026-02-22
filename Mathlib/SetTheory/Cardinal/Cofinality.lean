@@ -206,8 +206,8 @@ theorem ord_cof_eq (α : Type*) [LinearOrder α] [WellFoundedLT α] :
   · apply (trichotomous_of r _ _).resolve_right
     rintro (_ | hxy')
     · simp_all [Subtype.coe_inj]
-    · obtain ⟨x, ⟨z, hz⟩, hz', rfl⟩ := x
-      exact (hz' _ hxy').asymm hxy
+    · obtain ⟨x, z, hz, rfl⟩ := x
+      exact (hz _ hxy').asymm hxy
 
 /-! ### Cofinality of suprema and least strict upper bounds -/
 
