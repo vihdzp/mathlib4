@@ -225,6 +225,10 @@ def abbreviationDict : Std.HashMap String String := .ofList [
   ("predColimit", "PredLimit"),
   ("codirectedOrder", "DirectedOrder"),
   ("directedOrder", "CodirectedOrder"),
+  ("nhdsLT", "NhdsGT"),
+  ("nhdsGT", "NhdsLT"),
+  ("nhdsLE", "NhdsGE"),
+  ("nhdsGE", "NhdsLE"),
 ]
 
 /-- The bundle of environment extensions for `to_dual` -/
