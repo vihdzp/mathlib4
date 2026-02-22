@@ -60,19 +60,27 @@ theorem Ioi_injective : Injective (Ioi : α → Set α) := fun _ _ =>
 theorem Ioi_inj : Ioi a = Ioi b ↔ a = b :=
   Ioi_injective.eq_iff
 
-@[to_dual]
+@[to_dual Ioc_subset_Ioc_iff']
 theorem Ico_subset_Ico_iff (h₁ : a₁ < b₁) : Ico a₁ b₁ ⊆ Ico a₂ b₂ ↔ a₂ ≤ a₁ ∧ b₁ ≤ b₂ :=
   ⟨fun h =>
     have : a₂ ≤ a₁ ∧ a₁ < b₂ := h ⟨le_rfl, h₁⟩
     ⟨this.1, le_of_not_gt fun h' => lt_irrefl b₂ (h ⟨this.2.le, h'⟩).2⟩,
     fun ⟨h₁, h₂⟩ => Ico_subset_Ico h₁ h₂⟩
 
-@[to_dual]
+@[to_dual Ioc_subset_Ioc_iff]
+theorem Ico_subset_Ico_iff' (h₁ : a₁ < b₁) : Ico a₁ b₁ ⊆ Ico a₂ b₂ ↔ b₁ ≤ b₂ ∧ a₂ ≤ a₁ := by
+  rw [Ico_subset_Ico_iff h₁, and_comm]
+
+@[to_dual Ioc_eq_Ioc_iff']
 theorem Ico_eq_Ico_iff (h : a < b ∨ c < d) : Ico a b = Ico c d ↔ a = c ∧ b = d := by
   refine ⟨fun h ↦ ?_, by grind⟩
   have : c ≤ a ∧ b ≤ d := (Ico_subset_Ico_iff (show a < b by grind [Set.nonempty_Ico])).1 h.subset
   have : a ≤ c ∧ d ≤ b := (Ico_subset_Ico_iff (show c < d by grind [Set.nonempty_Ico])).1 h.superset
   grind
+
+@[to_dual Ioc_eq_Ioc_iff]
+theorem Ico_eq_Ico_iff' (h : a < b ∨ c < d) : Ico a b = Ico c d ↔ b = d ∧ a = c := by
+  rw [Ico_eq_Ico_iff h, and_comm]
 
 @[to_dual (reorder := a₁ b₁, a₂ b₂) self]
 theorem Ioo_subset_Ioo_iff [DenselyOrdered α] (h₁ : a₁ < b₁) :
@@ -320,9 +328,13 @@ theorem Iic_union_Ico_eq_Iio (h : a < b) : Iic a ∪ Ico a b = Iio b :=
 
 /-! ### Two finite intervals, `I?o` and `Ic?` -/
 
-@[to_dual]
+@[to_dual Ioo_subset_Ioo_union_Ioc']
 theorem Ioo_subset_Ioo_union_Ico : Ioo a c ⊆ Ioo a b ∪ Ico b c := fun x hx =>
   (lt_or_ge x b).elim (fun hxb => Or.inl ⟨hx.1, hxb⟩) fun hxb => Or.inr ⟨hxb, hx.2⟩
+
+@[to_dual Ioo_subset_Ioo_union_Ioc]
+theorem Ioo_subset_Ioo_union_Ico' : Ioo a c ⊆ Ico b c ∪ Ioo a b :=
+  union_comm .. ▸ Ioo_subset_Ioo_union_Ico
 
 @[to_dual (attr := simp)]
 theorem Ioo_union_Ico_eq_Ioo (h₁ : a < b) (h₂ : b ≤ c) : Ioo a b ∪ Ico b c = Ioo a c :=
@@ -330,9 +342,13 @@ theorem Ioo_union_Ico_eq_Ioo (h₁ : a < b) (h₂ : b ≤ c) : Ioo a b ∪ Ico b
     (fun _ hx => hx.elim (fun hx => ⟨hx.1, hx.2.trans_le h₂⟩) fun hx => ⟨h₁.trans_le hx.1, hx.2⟩)
     Ioo_subset_Ioo_union_Ico
 
-@[to_dual]
+@[to_dual Ioc_subset_Ioc_union_Ioc']
 theorem Ico_subset_Ico_union_Ico : Ico a c ⊆ Ico a b ∪ Ico b c := fun x hx =>
   (lt_or_ge x b).elim (fun hxb => Or.inl ⟨hx.1, hxb⟩) fun hxb => Or.inr ⟨hxb, hx.2⟩
+
+@[to_dual Ioc_subset_Ioc_union_Ioc]
+theorem Ico_subset_Ico_union_Ico' : Ico a c ⊆ Ico b c ∪ Ico a b :=
+  union_comm .. ▸ Ico_subset_Ico_union_Ico
 
 @[to_dual (attr := simp)]
 theorem Ico_union_Ico_eq_Ico (h₁ : a ≤ b) (h₂ : b ≤ c) : Ico a b ∪ Ico b c = Ico a c :=
@@ -446,8 +462,13 @@ theorem Icc_union_Icc (h₁ : min a b < max c d) (h₂ : min c d < max a b) :
     Icc a b ∪ Icc c d = Icc (min a c) (max b d) := by
   grind
 
+@[to_dual Ico_subset_Ico_union_Icc']
 theorem Ioc_subset_Ioc_union_Icc : Ioc a c ⊆ Ioc a b ∪ Icc b c :=
   Subset.trans Ioc_subset_Ioc_union_Ioc (union_subset_union_right _ Ioc_subset_Icc_self)
+
+@[to_dual Ico_subset_Ico_union_Icc]
+theorem Ioc_subset_Ioc_union_Icc' : Ioc a c ⊆ Icc b c ∪ Ioc a b :=
+  union_comm .. ▸ Ioc_subset_Ioc_union_Icc
 
 @[to_dual (attr := simp)]
 theorem Ioc_union_Icc_eq_Ioc (h₁ : a < b) (h₂ : b ≤ c) : Ioc a b ∪ Icc b c = Ioc a c :=
@@ -455,13 +476,16 @@ theorem Ioc_union_Icc_eq_Ioc (h₁ : a < b) (h₂ : b ≤ c) : Ioc a b ∪ Icc b
     (fun _ hx => hx.elim (fun hx => ⟨hx.1, hx.2.trans h₂⟩) fun hx => ⟨h₁.trans_le hx.1, hx.2⟩)
     Ioc_subset_Ioc_union_Icc
 
+@[to_dual self (reorder := a b, c d, h₁ h₂)]
 theorem Ioo_union_Ioo' (h₁ : c < b) (h₂ : a < d) : Ioo a b ∪ Ioo c d = Ioo (min a c) (max b d) := by
   grind
 
+@[to_dual none]
 theorem Ioo_union_Ioo (h₁ : min a b < max c d) (h₂ : min c d < max a b) :
     Ioo a b ∪ Ioo c d = Ioo (min a c) (max b d) := by
   grind
 
+@[to_dual none]
 theorem Ioo_subset_Ioo_union_Ioo (h₁ : a ≤ a₁) (h₂ : c < b) (h₃ : b₁ ≤ d) :
     Ioo a₁ b₁ ⊆ Ioo a b ∪ Ioo c d := fun x hx =>
   (lt_or_ge x b).elim (fun hxb => Or.inl ⟨lt_of_le_of_lt h₁ hx.1, hxb⟩)
@@ -473,36 +497,35 @@ theorem Ioo_subset_Ioo_union_Ioo (h₁ : a ≤ a₁) (h₂ : c < b) (h₃ : b₁
 theorem Ioi_inter_Ioi : Ioi a ∩ Ioi b = Ioi (a ⊔ b) :=
   ext fun _ => sup_lt_iff.symm
 
+@[to_dual]
 theorem Ico_inter_Ico : Ico a₁ b₁ ∩ Ico a₂ b₂ = Ico (a₁ ⊔ a₂) (b₁ ⊓ b₂) := by
   grind
 
-theorem Ioc_inter_Ioc : Ioc a₁ b₁ ∩ Ioc a₂ b₂ = Ioc (a₁ ⊔ a₂) (b₁ ⊓ b₂) := by
-  grind
-
+@[to_dual self]
 theorem Ioo_inter_Ioo : Ioo a₁ b₁ ∩ Ioo a₂ b₂ = Ioo (a₁ ⊔ a₂) (b₁ ⊓ b₂) := by
   grind
 
+@[to_dual]
 theorem Ioo_inter_Iio : Ioo a b ∩ Iio c = Ioo a (min b c) := by
   grind
 
+@[to_dual]
 theorem Iio_inter_Ioo : Iio a ∩ Ioo b c = Ioo b (min a c) := by
   grind
 
-theorem Ioo_inter_Ioi : Ioo a b ∩ Ioi c = Ioo (max a c) b := by
-  grind
-
-theorem Ioi_inter_Ioo : Set.Ioi a ∩ Set.Ioo b c = Set.Ioo (max a b) c := by
-  grind
-
+@[to_dual Ico_inter_Ioo_of_left_gt]
 theorem Ioc_inter_Ioo_of_left_lt (h : b₁ < b₂) : Ioc a₁ b₁ ∩ Ioo a₂ b₂ = Ioc (max a₁ a₂) b₁ := by
   grind
 
+@[to_dual Ico_inter_Ioo_of_right_ge]
 theorem Ioc_inter_Ioo_of_right_le (h : b₂ ≤ b₁) : Ioc a₁ b₁ ∩ Ioo a₂ b₂ = Ioo (max a₁ a₂) b₂ := by
   grind
 
+@[to_dual Ico_inter_Ioo_of_left_ge]
 theorem Ioo_inter_Ioc_of_left_le (h : b₁ ≤ b₂) : Ioo a₁ b₁ ∩ Ioc a₂ b₂ = Ioo (max a₁ a₂) b₁ := by
   grind
 
+@[to_dual Ico_inter_Ioo_of_right_gt]
 theorem Ioo_inter_Ioc_of_right_lt (h : b₂ < b₁) : Ioo a₁ b₁ ∩ Ioc a₂ b₂ = Ioc (max a₁ a₂) b₂ := by
   grind
 
@@ -518,12 +541,19 @@ theorem Ioc_inter_Ioi : Ioc a b ∩ Ioi c = Ioc (a ⊔ c) b := by
 theorem Ioc_diff_Iic : Ioc a b \ Iic c = Ioc (max a c) b := by
   grind
 
+@[to_dual compl_Ico']
 theorem compl_Ioc : (Ioc a b)ᶜ = Iic a ∪ Ioi b := by
   grind
 
+@[to_dual compl_Ico]
+theorem compl_Ioc' : (Ioc a b)ᶜ = Ioi b ∪ Iic a :=
+  union_comm .. ▸ compl_Ioc
+
+@[to_dual]
 theorem Iic_diff_Ioc : Iic b \ Ioc a b = Iic (a ⊓ b) := by
   grind
 
+@[to_dual]
 theorem Iic_diff_Ioc_self_of_le (hab : a ≤ b) : Iic b \ Ioc a b = Iic a := by
   grind
 
