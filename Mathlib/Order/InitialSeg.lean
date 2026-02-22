@@ -172,17 +172,14 @@ protected theorem eq [IsWellOrder β s] (f g : r ≼i s) (a) : f a = g a := by
 theorem eq_relIso [IsWellOrder β s] (f : r ≼i s) (g : r ≃r s) (a : α) : g a = f a :=
   InitialSeg.eq g.toInitialSeg f a
 
-set_option backward.privateInPublic true in
 private theorem antisymm_aux [IsWellOrder α r] (f : r ≼i s) (g : s ≼i r) : LeftInverse g f :=
   (f.trans g).eq (InitialSeg.refl _)
 
-set_option backward.privateInPublic true in
-set_option backward.privateInPublic.warn false in
 /-- If we have order embeddings between `α` and `β` whose ranges are initial segments, and `β` is a
 well order, then `α` and `β` are order-isomorphic. -/
 def antisymm [IsWellOrder β s] (f : r ≼i s) (g : s ≼i r) : r ≃r s :=
   have := f.toRelEmbedding.isWellOrder
-  ⟨⟨f, g, antisymm_aux f g, antisymm_aux g f⟩, f.map_rel_iff'⟩
+  ⟨⟨f, g, by exact antisymm_aux f g, by exact antisymm_aux g f⟩, f.map_rel_iff'⟩
 
 @[simp]
 theorem antisymm_toFun [IsWellOrder β s] (f : r ≼i s) (g : s ≼i r) : (antisymm f g : α → β) = f :=
