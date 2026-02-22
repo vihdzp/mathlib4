@@ -215,8 +215,6 @@ def nameDict : Std.HashMap String (List String) := .ofList [
   ("comonad", ["Monad"]),
   ("monadic", ["Comonadic"]),
   ("comonadic", ["Monadic"]),
-  ("nhdsLT", ["NhdsGT"]),
-  ("nhdsGT", ["NhdsLT"]),
 ]
 
 @[inherit_doc GuessName.GuessNameData.abbreviationDict]
@@ -227,6 +225,10 @@ def abbreviationDict : Std.HashMap String String := .ofList [
   ("predColimit", "PredLimit"),
   ("codirectedOrder", "DirectedOrder"),
   ("directedOrder", "CodirectedOrder"),
+  ("nhdsLT", "NhdsGT"),
+  ("nhdsGT", "NhdsLT"),
+  ("nhdsLE", "NhdsGE"),
+  ("nhdsGE", "NhdsLE"),
 ]
 
 /-- The bundle of environment extensions for `to_dual` -/

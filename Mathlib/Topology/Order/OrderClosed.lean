@@ -291,6 +291,7 @@ protected theorem PredOrder.nhdsLT [PredOrder α] : 𝓝[<] a = ⊥ := by
   if h : IsMin a then simp [h.Iio_eq]
   else exact (Order.pred_covBy_of_not_isMin h).nhdsLT
 
+@[to_dual nhdsLT_eq_nhdsNE]
 theorem PredOrder.nhdsGT_eq_nhdsNE [PredOrder α] (a : α) : 𝓝[>] a = 𝓝[≠] a := by
   rw [← nhdsLT_sup_nhdsGT, PredOrder.nhdsLT, bot_sup_eq]
 
