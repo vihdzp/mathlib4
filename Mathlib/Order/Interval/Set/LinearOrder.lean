@@ -24,18 +24,20 @@ namespace Set
 
 variable {α : Type*} [LinearOrder α] {a a₁ a₂ b b₁ b₂ c d : α}
 
+@[to_dual]
 theorem notMem_Ici : c ∉ Ici a ↔ c < a :=
   not_le
 
-theorem notMem_Iic : c ∉ Iic b ↔ b < c :=
-  not_le
-
+@[to_dual]
 theorem notMem_Ioi : c ∉ Ioi a ↔ c ≤ a :=
   not_lt
 
+<<<<<<< HEAD
 theorem notMem_Iio : c ∉ Iio b ↔ b ≤ c :=
   not_lt
 
+=======
+>>>>>>> master
 @[to_dual (attr := simp)]
 theorem compl_Iic : (Iic a)ᶜ = Ioi a :=
   ext fun _ => not_le
