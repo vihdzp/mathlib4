@@ -194,7 +194,6 @@ theorem cof_succ (o) : cof (succ o) = 1 :=
 
 @[deprecated (since := "2026-02-18")] alias cof_eq_one_iff_is_succ := cof_eq_one_iff
 
-set_option backward.isDefEq.respectTransparency false in
 theorem ord_cof_eq (α : Type*) [LinearOrder α] [WellFoundedLT α] :
     ∃ s : Set α, IsCofinal s ∧ typeLT s = (Order.cof α).ord := by
   obtain ⟨s, hs, hs'⟩ := Order.cof_eq α
