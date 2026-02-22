@@ -78,6 +78,8 @@ class ClosedIciTopology (α : Type*) [TopologicalSpace α] [Preorder α] : Prop 
   /-- For any `a`, the set `[a, +∞)` is closed. -/
   isClosed_Ici (a : α) : IsClosed (Ici a)
 
+attribute [to_dual existing] ClosedIicTopology ClosedIicTopology.isClosed_Iic
+
 /-- A topology on a set which is both a topological space and a preorder is _order-closed_ if the
 set of points `(x, y)` with `x ≤ y` is closed in the product space. We introduce this as a mixin.
 This property is satisfied for the order topology on a linear order, but it can be satisfied more
@@ -97,11 +99,9 @@ theorem Dense.orderDual [TopologicalSpace α] {s : Set α} (hs : Dense s) :
 section General
 variable [TopologicalSpace α] [Preorder α] {s : Set α}
 
+@[to_dual]
 protected lemma BddAbove.of_closure : BddAbove (closure s) → BddAbove s :=
   BddAbove.mono subset_closure
-
-protected lemma BddBelow.of_closure : BddBelow (closure s) → BddBelow s :=
-  BddBelow.mono subset_closure
 
 end General
 
@@ -111,37 +111,45 @@ section Preorder
 
 variable [TopologicalSpace α] [Preorder α] [ClosedIicTopology α] {f : β → α} {a b : α} {s : Set α}
 
+@[to_dual]
 theorem isClosed_Iic : IsClosed (Iic a) :=
   ClosedIicTopology.isClosed_Iic a
 
+@[to_dual]
 instance : ClosedIciTopology αᵒᵈ where
   isClosed_Ici _ := isClosed_Iic (α := α)
 
-@[simp]
+@[to_dual (attr := simp)]
 theorem closure_Iic (a : α) : closure (Iic a) = Iic a :=
   isClosed_Iic.closure_eq
 
+@[to_dual ge_of_tendsto_of_frequently]
 theorem le_of_tendsto_of_frequently {x : Filter β} (lim : Tendsto f x (𝓝 a))
     (h : ∃ᶠ c in x, f c ≤ b) : a ≤ b :=
   isClosed_Iic.mem_of_frequently_of_tendsto h lim
 
+@[to_dual ge_of_tendsto]
 theorem le_of_tendsto {x : Filter β} [NeBot x] (lim : Tendsto f x (𝓝 a))
     (h : ∀ᶠ c in x, f c ≤ b) : a ≤ b :=
   isClosed_Iic.mem_of_tendsto lim h
 
+@[to_dual ge_of_tendsto']
 theorem le_of_tendsto' {x : Filter β} [NeBot x] (lim : Tendsto f x (𝓝 a))
     (h : ∀ c, f c ≤ b) : a ≤ b :=
   le_of_tendsto lim (Eventually.of_forall h)
 
-@[simp] lemma upperBounds_closure (s : Set α) : upperBounds (closure s : Set α) = upperBounds s :=
+@[to_dual (attr := simp)]
+lemma upperBounds_closure (s : Set α) : upperBounds (closure s : Set α) = upperBounds s :=
   ext fun a ↦ by simp_rw [mem_upperBounds_iff_subset_Iic, isClosed_Iic.closure_subset_iff]
 
-@[simp] lemma bddAbove_closure : BddAbove (closure s) ↔ BddAbove s := by
+@[to_dual (attr := simp)]
+lemma bddAbove_closure : BddAbove (closure s) ↔ BddAbove s := by
   simp_rw [BddAbove, upperBounds_closure]
 
+@[to_dual]
 protected alias ⟨_, BddAbove.closure⟩ := bddAbove_closure
 
-@[simp]
+@[to_dual (attr := simp) disjoint_nhds_atTop_iff]
 theorem disjoint_nhds_atBot_iff : Disjoint (𝓝 a) atBot ↔ ¬IsBot a := by
   constructor
   · intro hd hbot
@@ -152,6 +160,7 @@ theorem disjoint_nhds_atBot_iff : Disjoint (𝓝 a) atBot ↔ ¬IsBot a := by
     refine disjoint_of_disjoint_of_mem disjoint_compl_left ?_ (Iic_mem_atBot b)
     exact isClosed_Iic.isOpen_compl.mem_nhds hb
 
+@[to_dual]
 theorem IsLUB.range_of_tendsto {F : Filter β} [F.NeBot] (hle : ∀ i, f i ≤ a)
     (hlim : Tendsto f F (𝓝 a)) : IsLUB (range f) a :=
   ⟨forall_mem_range.mpr hle, fun _c hc ↦ le_of_tendsto' hlim fun i ↦ hc <| mem_range_self i⟩
@@ -163,14 +172,17 @@ section NoBotOrder
 variable [Preorder α] [NoBotOrder α] [TopologicalSpace α] [ClosedIicTopology α] {a : α}
   {l : Filter β} [NeBot l] {f : β → α}
 
+@[to_dual disjoint_nhds_atTop]
 theorem disjoint_nhds_atBot (a : α) : Disjoint (𝓝 a) atBot := by simp
 
-@[simp]
+@[to_dual (attr := simp) inf_nhds_atTop]
 theorem inf_nhds_atBot (a : α) : 𝓝 a ⊓ atBot = ⊥ := (disjoint_nhds_atBot a).eq_bot
 
+@[to_dual]
 theorem not_tendsto_nhds_of_tendsto_atBot (hf : Tendsto f l atBot) (a : α) : ¬Tendsto f l (𝓝 a) :=
   hf.not_tendsto (disjoint_nhds_atBot a).symm
 
+@[to_dual]
 theorem not_tendsto_atBot_of_tendsto_nhds (hf : Tendsto f l (𝓝 a)) : ¬Tendsto f l atBot :=
   hf.not_tendsto (disjoint_nhds_atBot a)
 
@@ -198,39 +210,49 @@ section LinearOrder
 variable [TopologicalSpace α] [LinearOrder α] [ClosedIicTopology α] [TopologicalSpace β]
   {a b c : α} {f : α → β}
 
+@[to_dual]
 theorem isOpen_Ioi : IsOpen (Ioi a) := by
   rw [← compl_Iic]
   exact isClosed_Iic.isOpen_compl
 
-@[simp]
+@[to_dual (attr := simp)]
 theorem interior_Ioi : interior (Ioi a) = Ioi a :=
   isOpen_Ioi.interior_eq
 
+@[to_dual]
 theorem Ioi_mem_nhds (h : a < b) : Ioi a ∈ 𝓝 b := IsOpen.mem_nhds isOpen_Ioi h
 
+@[to_dual eventually_lt_nhds]
 theorem eventually_gt_nhds (hab : b < a) : ∀ᶠ x in 𝓝 a, b < x := Ioi_mem_nhds hab
 
+@[to_dual]
 theorem Ici_mem_nhds (h : a < b) : Ici a ∈ 𝓝 b :=
   mem_of_superset (Ioi_mem_nhds h) Ioi_subset_Ici_self
 
+@[to_dual eventually_le_nhds]
 theorem eventually_ge_nhds (hab : b < a) : ∀ᶠ x in 𝓝 a, b ≤ x := Ici_mem_nhds hab
 
+@[to_dual eventually_lt_const]
 theorem Filter.Tendsto.eventually_const_lt {l : Filter γ} {f : γ → α} {u v : α} (hv : u < v)
     (h : Filter.Tendsto f l (𝓝 v)) : ∀ᶠ a in l, u < f a :=
   h.eventually <| eventually_gt_nhds hv
 
+@[to_dual eventually_le_const]
 theorem Filter.Tendsto.eventually_const_le {l : Filter γ} {f : γ → α} {u v : α} (hv : u < v)
     (h : Tendsto f l (𝓝 v)) : ∀ᶠ a in l, u ≤ f a :=
   h.eventually <| eventually_ge_nhds hv
 
+@[to_dual exists_lt]
 protected theorem Dense.exists_gt [NoMaxOrder α] {s : Set α} (hs : Dense s) (x : α) :
     ∃ y ∈ s, x < y :=
   hs.exists_mem_open isOpen_Ioi (exists_gt x)
 
+@[to_dual exists_le]
 protected theorem Dense.exists_ge [NoMaxOrder α] {s : Set α} (hs : Dense s) (x : α) :
     ∃ y ∈ s, x ≤ y :=
   (hs.exists_gt x).imp fun _ h ↦ ⟨h.1, h.2.le⟩
 
+@[to_dual exists_le']
 theorem Dense.exists_ge' {s : Set α} (hs : Dense s) (htop : ∀ x, IsTop x → x ∈ s) (x : α) :
     ∃ y ∈ s, x ≤ y := by
   by_cases hx : IsTop x
@@ -242,26 +264,29 @@ theorem Dense.exists_ge' {s : Set α} (hs : Dense s) (htop : ∀ x, IsTop x → 
 /-!
 ### Left neighborhoods on a `ClosedIicTopology`
 
-Limits to the left of real functions are defined in terms of neighborhoods to the left,
-either open or closed, i.e., members of `𝓝[<] a` and `𝓝[≤] a`.
-Here we prove that all left-neighborhoods of a point are equal,
-and we prove other useful characterizations which require the stronger hypothesis `OrderTopology α`
-in another file.
+Limits to the left of real functions are defined in terms of neighborhoods to the left, either open
+or closed, i.e., members of `𝓝[<] a` and `𝓝[≤] a`. Here we prove that all left-neighborhoods of a
+point are equal, and we prove other useful characterizations which require the stronger hypothesis
+`OrderTopology α` in another file.
 -/
 
 /-!
 #### Point excluded
 -/
 
+@[to_dual Ioo_mem_nhdsGT]
 theorem Ioo_mem_nhdsLT (H : a < b) : Ioo a b ∈ 𝓝[<] b := by
   simpa only [← Iio_inter_Ioi] using inter_mem_nhdsWithin _ (Ioi_mem_nhds H)
 
+@[to_dual Ioo_mem_nhdsGT_of_mem]
 theorem Ioo_mem_nhdsLT_of_mem (H : b ∈ Ioc a c) : Ioo a c ∈ 𝓝[<] b :=
   mem_of_superset (Ioo_mem_nhdsLT H.1) <| Ioo_subset_Ioo_right H.2
 
+@[to_dual nhdsGT]
 protected theorem CovBy.nhdsLT (h : a ⋖ b) : 𝓝[<] b = ⊥ :=
   empty_mem_iff_bot.mp <| h.Ioo_eq ▸ Ioo_mem_nhdsLT h.1
 
+@[to_dual nhdsGT]
 protected theorem PredOrder.nhdsLT [PredOrder α] : 𝓝[<] a = ⊥ := by
   if h : IsMin a then simp [h.Iio_eq]
   else exact (Order.pred_covBy_of_not_isMin h).nhdsLT
@@ -356,68 +381,6 @@ end ClosedIicTopology
 
 section ClosedIciTopology
 
-section Preorder
-
-variable [TopologicalSpace α] [Preorder α] [ClosedIciTopology α] {f : β → α} {a b : α} {s : Set α}
-
-theorem isClosed_Ici {a : α} : IsClosed (Ici a) :=
-  ClosedIciTopology.isClosed_Ici a
-
-instance : ClosedIicTopology αᵒᵈ where
-  isClosed_Iic _ := isClosed_Ici (α := α)
-
-@[simp]
-theorem closure_Ici (a : α) : closure (Ici a) = Ici a :=
-  isClosed_Ici.closure_eq
-
-lemma ge_of_tendsto_of_frequently {x : Filter β} (lim : Tendsto f x (𝓝 a))
-    (h : ∃ᶠ c in x, b ≤ f c) : b ≤ a :=
-  isClosed_Ici.mem_of_frequently_of_tendsto h lim
-
-theorem ge_of_tendsto {x : Filter β} [NeBot x] (lim : Tendsto f x (𝓝 a))
-    (h : ∀ᶠ c in x, b ≤ f c) : b ≤ a :=
-  isClosed_Ici.mem_of_tendsto lim h
-
-theorem ge_of_tendsto' {x : Filter β} [NeBot x] (lim : Tendsto f x (𝓝 a))
-    (h : ∀ c, b ≤ f c) : b ≤ a :=
-  ge_of_tendsto lim (Eventually.of_forall h)
-
-@[simp] lemma lowerBounds_closure (s : Set α) : lowerBounds (closure s : Set α) = lowerBounds s :=
-  ext fun a ↦ by simp_rw [mem_lowerBounds_iff_subset_Ici, isClosed_Ici.closure_subset_iff]
-
-@[simp] lemma bddBelow_closure : BddBelow (closure s) ↔ BddBelow s := by
-  simp_rw [BddBelow, lowerBounds_closure]
-
-protected alias ⟨_, BddBelow.closure⟩ := bddBelow_closure
-
-@[simp]
-theorem disjoint_nhds_atTop_iff : Disjoint (𝓝 a) atTop ↔ ¬IsTop a :=
-  disjoint_nhds_atBot_iff (α := αᵒᵈ)
-
-theorem IsGLB.range_of_tendsto {F : Filter β} [F.NeBot] (hle : ∀ i, a ≤ f i)
-    (hlim : Tendsto f F (𝓝 a)) : IsGLB (range f) a :=
-  IsLUB.range_of_tendsto (α := αᵒᵈ) hle hlim
-
-end Preorder
-
-section NoTopOrder
-
-variable [Preorder α] [NoTopOrder α] [TopologicalSpace α] [ClosedIciTopology α] {a : α}
-  {l : Filter β} [NeBot l] {f : β → α}
-
-theorem disjoint_nhds_atTop (a : α) : Disjoint (𝓝 a) atTop := disjoint_nhds_atBot (toDual a)
-
-@[simp]
-theorem inf_nhds_atTop (a : α) : 𝓝 a ⊓ atTop = ⊥ := (disjoint_nhds_atTop a).eq_bot
-
-theorem not_tendsto_nhds_of_tendsto_atTop (hf : Tendsto f l atTop) (a : α) : ¬Tendsto f l (𝓝 a) :=
-  hf.not_tendsto (disjoint_nhds_atTop a).symm
-
-theorem not_tendsto_atTop_of_tendsto_nhds (hf : Tendsto f l (𝓝 a)) : ¬Tendsto f l atTop :=
-  hf.not_tendsto (disjoint_nhds_atTop a)
-
-end NoTopOrder
-
 theorem iInf_eq_of_forall_le_of_tendsto {ι : Type*} {F : Filter ι} [F.NeBot]
     [ConditionallyCompleteLattice α] [TopologicalSpace α] [ClosedIciTopology α]
     {a : α} {f : ι → α} (hle : ∀ i, a ≤ f i) (hlim : Tendsto f F (𝓝 a)) :
@@ -431,42 +394,6 @@ theorem iUnion_Ici_eq_Ioi_of_lt_of_tendsto {ι : Type*} {F : Filter ι} [F.NeBot
   iUnion_Iic_eq_Iio_of_lt_of_tendsto (α := αᵒᵈ) hlt hlim
 
 section LinearOrder
-
-variable [TopologicalSpace α] [LinearOrder α] [ClosedIciTopology α] [TopologicalSpace β]
-  {a b c : α} {f : α → β}
-
-theorem isOpen_Iio : IsOpen (Iio a) := isOpen_Ioi (α := αᵒᵈ)
-
-@[simp] theorem interior_Iio : interior (Iio a) = Iio a := isOpen_Iio.interior_eq
-
-theorem Iio_mem_nhds (h : a < b) : Iio b ∈ 𝓝 a := isOpen_Iio.mem_nhds h
-
-theorem eventually_lt_nhds (hab : a < b) : ∀ᶠ x in 𝓝 a, x < b := Iio_mem_nhds hab
-
-theorem Iic_mem_nhds (h : a < b) : Iic b ∈ 𝓝 a :=
-  mem_of_superset (Iio_mem_nhds h) Iio_subset_Iic_self
-
-theorem eventually_le_nhds (hab : a < b) : ∀ᶠ x in 𝓝 a, x ≤ b := Iic_mem_nhds hab
-
-theorem Filter.Tendsto.eventually_lt_const {l : Filter γ} {f : γ → α} {u v : α} (hv : v < u)
-    (h : Filter.Tendsto f l (𝓝 v)) : ∀ᶠ a in l, f a < u :=
-  h.eventually <| eventually_lt_nhds hv
-
-theorem Filter.Tendsto.eventually_le_const {l : Filter γ} {f : γ → α} {u v : α} (hv : v < u)
-    (h : Tendsto f l (𝓝 v)) : ∀ᶠ a in l, f a ≤ u :=
-  h.eventually <| eventually_le_nhds hv
-
-protected theorem Dense.exists_lt [NoMinOrder α] {s : Set α} (hs : Dense s) (x : α) :
-    ∃ y ∈ s, y < x :=
-  hs.orderDual.exists_gt x
-
-protected theorem Dense.exists_le [NoMinOrder α] {s : Set α} (hs : Dense s) (x : α) :
-    ∃ y ∈ s, y ≤ x :=
-  hs.orderDual.exists_ge x
-
-theorem Dense.exists_le' {s : Set α} (hs : Dense s) (hbot : ∀ x, IsBot x → x ∈ s) (x : α) :
-    ∃ y ∈ s, y ≤ x :=
-  hs.orderDual.exists_ge' hbot x
 
 /-!
 ### Right neighborhoods on a `ClosedIciTopology`
@@ -482,11 +409,15 @@ in another file.
 #### Point excluded
 -/
 
+variable [TopologicalSpace α] [LinearOrder α] [ClosedIciTopology α] [TopologicalSpace β]
+  {a b c : α} {f : α → β}
 
+@[to_dual existing Ioo_mem_nhdsLT_of_mem]
 theorem Ioo_mem_nhdsGT_of_mem (H : b ∈ Ico a c) : Ioo a c ∈ 𝓝[>] b :=
   mem_nhdsWithin.2
     ⟨Iio c, isOpen_Iio, H.2, by rw [inter_comm, Ioi_inter_Iio]; exact Ioo_subset_Ioo_left H.1⟩
 
+@[to_dual existing Ioo_mem_nhdsLT]
 theorem Ioo_mem_nhdsGT (H : a < b) : Ioo a b ∈ 𝓝[>] a := Ioo_mem_nhdsGT_of_mem ⟨le_rfl, H⟩
 
 protected theorem CovBy.nhdsGT (h : a ⋖ b) : 𝓝[>] a = ⊥ := h.toDual.nhdsLT

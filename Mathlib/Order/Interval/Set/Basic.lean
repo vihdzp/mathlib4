@@ -410,29 +410,21 @@ the equivalence in dense linear orders, use `Ioi_subset_Ici_iff`. -/]
 theorem Iio_subset_Iic (h : a ≤ b) : Iio a ⊆ Iic b :=
   Subset.trans (Iio_subset_Iio h) Iio_subset_Iic_self
 
+@[to_dual]
 theorem Ici_inter_Iic : Ici a ∩ Iic b = Icc a b :=
   rfl
 
+@[to_dual]
 theorem Ici_inter_Iio : Ici a ∩ Iio b = Ico a b :=
   rfl
 
+@[to_dual]
 theorem Ioi_inter_Iic : Ioi a ∩ Iic b = Ioc a b :=
   rfl
 
+@[to_dual]
 theorem Ioi_inter_Iio : Ioi a ∩ Iio b = Ioo a b :=
   rfl
-
-theorem Iic_inter_Ici : Iic a ∩ Ici b = Icc b a :=
-  inter_comm _ _
-
-theorem Iio_inter_Ici : Iio a ∩ Ici b = Ico b a :=
-  inter_comm _ _
-
-theorem Iic_inter_Ioi : Iic a ∩ Ioi b = Ioc b a :=
-  inter_comm _ _
-
-theorem Iio_inter_Ioi : Iio a ∩ Ioi b = Ioo b a :=
-  inter_comm _ _
 
 theorem mem_Icc_of_Ioo (h : x ∈ Ioo a b) : x ∈ Icc a b :=
   Ioo_subset_Icc_self h

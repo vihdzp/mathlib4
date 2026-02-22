@@ -36,20 +36,12 @@ theorem notMem_Ioi : c ∉ Ioi a ↔ c ≤ a :=
 theorem notMem_Iio : c ∉ Iio b ↔ b ≤ c :=
   not_lt
 
-@[simp]
+@[to_dual (attr := simp)]
 theorem compl_Iic : (Iic a)ᶜ = Ioi a :=
   ext fun _ => not_le
 
-@[simp]
-theorem compl_Ici : (Ici a)ᶜ = Iio a :=
-  ext fun _ => not_le
-
-@[simp]
+@[to_dual (attr := simp)]
 theorem compl_Iio : (Iio a)ᶜ = Ici a :=
-  ext fun _ => not_lt
-
-@[simp]
-theorem compl_Ioi : (Ioi a)ᶜ = Iic a :=
   ext fun _ => not_lt
 
 @[simp]
