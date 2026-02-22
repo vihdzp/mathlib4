@@ -70,7 +70,9 @@ instance decidableMemIoc [Decidable (a < x ∧ x ≤ b)] : Decidable (x ∈ Ioc 
 @[to_dual] theorem self_notMem_Iio : a ∉ Iio a := by simp
 @[to_dual] theorem self_mem_Iic : a ∈ Iic a := by simp
 
+@[to_dual (reorder := a b) right_notMem_Ioo]
 theorem left_notMem_Ioo (a b : α) : a ∉ Ioo a b := by simp
+@[to_dual (reorder := a b) right_notMem_Ico]
 theorem left_notMem_Ioc (a b : α) : a ∉ Ioc a b := by simp
 
 @[deprecated left_notMem_Ioo (since := "2025-12-26")]
@@ -79,24 +81,19 @@ theorem left_mem_Ioo : a ∈ Ioo a b ↔ False := by simp
 @[deprecated left_notMem_Ioc (since := "2025-12-26")]
 theorem left_mem_Ioc : a ∈ Ioc a b ↔ False := by simp
 
+@[to_dual (reorder := a b) right_mem_Ioc]
 theorem left_mem_Ico : a ∈ Ico a b ↔ a < b := by simp
+@[to_dual (reorder := a b) right_mem_Icc]
 theorem left_mem_Icc : a ∈ Icc a b ↔ a ≤ b := by simp
 
 @[deprecated (since := "2025-12-26")]
 alias left_mem_Ici := self_mem_Ici
-
-theorem right_notMem_Ioo : b ∉ Ioo a b := by simp
-theorem right_notMem_Ico : b ∉ Ico a b := by simp
 
 @[deprecated right_notMem_Ioo (since := "2025-12-26")]
 theorem right_mem_Ioo : b ∈ Ioo a b ↔ False := by simp
 
 @[deprecated right_notMem_Ico (since := "2025-12-26")]
 theorem right_mem_Ico : b ∈ Ico a b ↔ False := by simp
-
-theorem right_mem_Ioc : b ∈ Ioc a b ↔ a < b := by simp
-theorem right_mem_Icc : b ∈ Icc a b ↔ a ≤ b := by simp
-
 
 @[deprecated (since := "2025-12-26")]
 alias right_mem_Iic := self_mem_Iic
@@ -109,19 +106,15 @@ theorem Iio_toDual : Iio (toDual a) = ofDual ⁻¹' Ioi a :=
 theorem Iic_toDual : Iic (toDual a) = ofDual ⁻¹' Ici a :=
   rfl
 
-@[simp]
+@[to_dual self, simp]
 theorem Icc_toDual : Icc (toDual a) (toDual b) = ofDual ⁻¹' Icc b a :=
   Set.ext fun _ => and_comm
 
-@[simp]
+@[to_dual (attr := simp)]
 theorem Ioc_toDual : Ioc (toDual a) (toDual b) = ofDual ⁻¹' Ico b a :=
   Set.ext fun _ => and_comm
 
-@[simp]
-theorem Ico_toDual : Ico (toDual a) (toDual b) = ofDual ⁻¹' Ioc b a :=
-  Set.ext fun _ => and_comm
-
-@[simp]
+@[to_dual self, simp]
 theorem Ioo_toDual : Ioo (toDual a) (toDual b) = ofDual ⁻¹' Ioo b a :=
   Set.ext fun _ => and_comm
 
@@ -133,19 +126,15 @@ theorem Iio_ofDual {x : αᵒᵈ} : Iio (ofDual x) = toDual ⁻¹' Ioi x :=
 theorem Iic_ofDual {x : αᵒᵈ} : Iic (ofDual x) = toDual ⁻¹' Ici x :=
   rfl
 
-@[simp]
+@[to_dual self, simp]
 theorem Icc_ofDual {x y : αᵒᵈ} : Icc (ofDual y) (ofDual x) = toDual ⁻¹' Icc x y :=
   Set.ext fun _ => and_comm
 
-@[simp]
+@[to_dual (attr := simp)]
 theorem Ico_ofDual {x y : αᵒᵈ} : Ico (ofDual y) (ofDual x) = toDual ⁻¹' Ioc x y :=
   Set.ext fun _ => and_comm
 
-@[simp]
-theorem Ioc_ofDual {x y : αᵒᵈ} : Ioc (ofDual y) (ofDual x) = toDual ⁻¹' Ico x y :=
-  Set.ext fun _ => and_comm
-
-@[simp]
+@[to_dual self, simp]
 theorem Ioo_ofDual {x y : αᵒᵈ} : Ioo (ofDual y) (ofDual x) = toDual ⁻¹' Ioo x y :=
   Set.ext fun _ => and_comm
 
@@ -157,19 +146,15 @@ theorem nonempty_Iio [NoMinOrder α] : (Iio a).Nonempty :=
 theorem nonempty_Iic : (Iic a).Nonempty :=
   ⟨a, self_mem_Iic⟩
 
-@[simp]
+@[to_dual self, simp]
 theorem nonempty_Icc : (Icc a b).Nonempty ↔ a ≤ b :=
   ⟨fun ⟨_, hx⟩ => hx.1.trans hx.2, fun h => ⟨a, left_mem_Icc.2 h⟩⟩
 
-@[simp]
+@[to_dual (attr := simp)]
 theorem nonempty_Ico : (Ico a b).Nonempty ↔ a < b :=
   ⟨fun ⟨_, hx⟩ => hx.1.trans_lt hx.2, fun h => ⟨a, left_mem_Ico.2 h⟩⟩
 
-@[simp]
-theorem nonempty_Ioc : (Ioc a b).Nonempty ↔ a < b :=
-  ⟨fun ⟨_, hx⟩ => hx.1.trans_le hx.2, fun h => ⟨b, right_mem_Ioc.2 h⟩⟩
-
-@[simp]
+@[to_dual self, simp]
 theorem nonempty_Ioo [DenselyOrdered α] : (Ioo a b).Nonempty ↔ a < b :=
   ⟨fun ⟨_, ha, hb⟩ => ha.trans hb, exists_between⟩
 
@@ -183,15 +168,15 @@ instance nonempty_Iio_subtype [NoMinOrder α] : Nonempty (Iio a) :=
 instance nonempty_Iic_subtype : Nonempty (Iic a) :=
   Nonempty.to_subtype nonempty_Iic
 
+@[to_dual self]
 theorem nonempty_Icc_subtype (h : a ≤ b) : Nonempty (Icc a b) :=
   Nonempty.to_subtype (nonempty_Icc.mpr h)
 
+@[to_dual]
 theorem nonempty_Ico_subtype (h : a < b) : Nonempty (Ico a b) :=
   Nonempty.to_subtype (nonempty_Ico.mpr h)
 
-theorem nonempty_Ioc_subtype (h : a < b) : Nonempty (Ioc a b) :=
-  Nonempty.to_subtype (nonempty_Ioc.mpr h)
-
+@[to_dual self]
 theorem nonempty_Ioo_subtype [DenselyOrdered α] (h : a < b) : Nonempty (Ioo a b) :=
   Nonempty.to_subtype (nonempty_Ioo.mpr h)
 
@@ -207,43 +192,33 @@ instance [NoMinOrder α] : NoMinOrder (Iic a) :=
     let ⟨b, hb⟩ := exists_lt (a : α)
     ⟨⟨b, hb.le.trans a.2⟩, hb⟩⟩
 
-@[simp]
+@[to_dual self, simp]
 theorem Icc_eq_empty (h : ¬a ≤ b) : Icc a b = ∅ :=
   eq_empty_iff_forall_notMem.2 fun _ ⟨ha, hb⟩ => h (ha.trans hb)
 
-@[simp]
+@[to_dual, simp]
 theorem Ico_eq_empty (h : ¬a < b) : Ico a b = ∅ :=
-  eq_empty_iff_forall_notMem.2 fun _ ⟨ha, hb⟩ => h (ha.trans_lt hb)
+  eq_empty_iff_forall_notMem.2 fun _ hab => h (hab.1.trans_lt hab.2)
 
-@[simp]
-theorem Ioc_eq_empty (h : ¬a < b) : Ioc a b = ∅ :=
-  eq_empty_iff_forall_notMem.2 fun _ ⟨ha, hb⟩ => h (ha.trans_le hb)
-
-@[simp]
+@[to_dual self, simp]
 theorem Ioo_eq_empty (h : ¬a < b) : Ioo a b = ∅ :=
   eq_empty_iff_forall_notMem.2 fun _ ⟨ha, hb⟩ => h (ha.trans hb)
 
-@[simp]
+@[to_dual self, simp]
 theorem Icc_eq_empty_of_lt (h : b < a) : Icc a b = ∅ :=
   Icc_eq_empty h.not_ge
 
-@[simp]
+@[to_dual (attr := simp)]
 theorem Ico_eq_empty_of_le (h : b ≤ a) : Ico a b = ∅ :=
   Ico_eq_empty h.not_gt
 
-@[simp]
-theorem Ioc_eq_empty_of_le (h : b ≤ a) : Ioc a b = ∅ :=
-  Ioc_eq_empty h.not_gt
-
-@[simp]
+@[to_dual self, simp]
 theorem Ioo_eq_empty_of_le (h : b ≤ a) : Ioo a b = ∅ :=
   Ioo_eq_empty h.not_gt
 
+@[to_dual]
 theorem Ico_self (a : α) : Ico a a = ∅ :=
   Ico_eq_empty <| lt_irrefl _
-
-theorem Ioc_self (a : α) : Ioc a a = ∅ :=
-  Ioc_eq_empty <| lt_irrefl _
 
 theorem Ioo_self (a : α) : Ioo a a = ∅ :=
   Ioo_eq_empty <| lt_irrefl _
@@ -264,128 +239,107 @@ theorem Iic_ssubset_Iic : Iic a ⊂ Iic b ↔ a < b where
 theorem Iic_subset_Iio : Iic a ⊆ Iio b ↔ a < b :=
   ⟨fun h => h self_mem_Iic, fun h _ hx => lt_of_le_of_lt hx h⟩
 
-@[gcongr]
+@[to_dual self (reorder := a₁ b₁, a₂ b₂, h₁ h₂), gcongr]
 theorem Ioo_subset_Ioo (h₁ : a₂ ≤ a₁) (h₂ : b₁ ≤ b₂) : Ioo a₁ b₁ ⊆ Ioo a₂ b₂ := fun _ ⟨hx₁, hx₂⟩ =>
   ⟨h₁.trans_lt hx₁, hx₂.trans_le h₂⟩
 
+@[to_dual Ioo_subset_Ioo_right]
 theorem Ioo_subset_Ioo_left (h : a₁ ≤ a₂) : Ioo a₂ b ⊆ Ioo a₁ b :=
   Ioo_subset_Ioo h le_rfl
 
-theorem Ioo_subset_Ioo_right (h : b₁ ≤ b₂) : Ioo a b₁ ⊆ Ioo a b₂ :=
-  Ioo_subset_Ioo le_rfl h
+@[to_dual (reorder := a₁ b₁, a₂ b₂, h₁ h₂), gcongr]
+theorem Ico_subset_Ico (h₁ : a₂ ≤ a₁) (h₂ : b₁ ≤ b₂) : Ico a₁ b₁ ⊆ Ico a₂ b₂ := fun _ hx ↦
+  ⟨h₁.trans hx.1, hx.2.trans_le h₂⟩
 
-@[gcongr]
-theorem Ico_subset_Ico (h₁ : a₂ ≤ a₁) (h₂ : b₁ ≤ b₂) : Ico a₁ b₁ ⊆ Ico a₂ b₂ := fun _ ⟨hx₁, hx₂⟩ =>
-  ⟨h₁.trans hx₁, hx₂.trans_le h₂⟩
-
+@[to_dual Ioc_subset_Ioc_right]
 theorem Ico_subset_Ico_left (h : a₁ ≤ a₂) : Ico a₂ b ⊆ Ico a₁ b :=
   Ico_subset_Ico h le_rfl
 
+@[to_dual Ioc_subset_Ioc_left]
 theorem Ico_subset_Ico_right (h : b₁ ≤ b₂) : Ico a b₁ ⊆ Ico a b₂ :=
   Ico_subset_Ico le_rfl h
 
-@[gcongr]
+@[to_dual self (reorder := a₁ b₁, a₂ b₂, h₁ h₂), gcongr]
 theorem Icc_subset_Icc (h₁ : a₂ ≤ a₁) (h₂ : b₁ ≤ b₂) : Icc a₁ b₁ ⊆ Icc a₂ b₂ := fun _ ⟨hx₁, hx₂⟩ =>
   ⟨h₁.trans hx₁, le_trans hx₂ h₂⟩
 
+@[to_dual Icc_subset_Icc_right]
 theorem Icc_subset_Icc_left (h : a₁ ≤ a₂) : Icc a₂ b ⊆ Icc a₁ b :=
   Icc_subset_Icc h le_rfl
 
-theorem Icc_subset_Icc_right (h : b₁ ≤ b₂) : Icc a b₁ ⊆ Icc a b₂ :=
-  Icc_subset_Icc le_rfl h
-
+@[to_dual self (reorder := a₁ b₁, a₂ b₂, ha hb)]
 theorem Icc_subset_Ioo (ha : a₂ < a₁) (hb : b₁ < b₂) : Icc a₁ b₁ ⊆ Ioo a₂ b₂ := fun _ hx =>
   ⟨ha.trans_le hx.1, hx.2.trans_lt hb⟩
 
+@[to_dual]
 theorem Icc_subset_Ici_self : Icc a b ⊆ Ici a := fun _ => And.left
 
-theorem Icc_subset_Iic_self : Icc a b ⊆ Iic b := fun _ => And.right
-
+@[to_dual]
 theorem Ioc_subset_Iic_self : Ioc a b ⊆ Iic b := fun _ => And.right
 
-@[gcongr]
-theorem Ioc_subset_Ioc (h₁ : a₂ ≤ a₁) (h₂ : b₁ ≤ b₂) : Ioc a₁ b₁ ⊆ Ioc a₂ b₂ := fun _ ⟨hx₁, hx₂⟩ =>
-  ⟨h₁.trans_lt hx₁, hx₂.trans h₂⟩
-
-theorem Ioc_subset_Ioc_left (h : a₁ ≤ a₂) : Ioc a₂ b ⊆ Ioc a₁ b :=
-  Ioc_subset_Ioc h le_rfl
-
-theorem Ioc_subset_Ioc_right (h : b₁ ≤ b₂) : Ioc a b₁ ⊆ Ioc a b₂ :=
-  Ioc_subset_Ioc le_rfl h
-
+@[to_dual Ioc_subset_Ioo_right]
 theorem Ico_subset_Ioo_left (h₁ : a₁ < a₂) : Ico a₂ b ⊆ Ioo a₁ b := fun _ =>
   And.imp_left h₁.trans_le
 
-theorem Ioc_subset_Ioo_right (h : b₁ < b₂) : Ioc a b₁ ⊆ Ioo a b₂ := fun _ =>
-  And.imp_right fun h' => h'.trans_lt h
-
+@[to_dual Icc_subset_Ioc_left]
 theorem Icc_subset_Ico_right (h₁ : b₁ < b₂) : Icc a b₁ ⊆ Ico a b₂ := fun _ =>
   And.imp_right fun h₂ => h₂.trans_lt h₁
 
+@[to_dual]
 theorem Ioo_subset_Ico_self : Ioo a b ⊆ Ico a b := fun _ => And.imp_left le_of_lt
 
-theorem Ioo_subset_Ioc_self : Ioo a b ⊆ Ioc a b := fun _ => And.imp_right le_of_lt
-
+@[to_dual]
 theorem Ico_subset_Icc_self : Ico a b ⊆ Icc a b := fun _ => And.imp_right le_of_lt
 
-theorem Ioc_subset_Icc_self : Ioc a b ⊆ Icc a b := fun _ => And.imp_left le_of_lt
-
+@[to_dual self]
 theorem Ioo_subset_Icc_self : Ioo a b ⊆ Icc a b :=
   Subset.trans Ioo_subset_Ico_self Ico_subset_Icc_self
 
+@[to_dual]
 theorem Ico_subset_Iio_self : Ico a b ⊆ Iio b := fun _ => And.right
 
+@[to_dual]
 theorem Ioo_subset_Iio_self : Ioo a b ⊆ Iio b := fun _ => And.right
-
-theorem Ioc_subset_Ioi_self : Ioc a b ⊆ Ioi a := fun _ => And.left
-
-theorem Ioo_subset_Ioi_self : Ioo a b ⊆ Ioi a := fun _ => And.left
 
 @[to_dual]
 theorem Iio_subset_Iic_self : Iio a ⊆ Iic a := fun _ hx => le_of_lt hx
-
-theorem Ico_subset_Ici_self : Ico a b ⊆ Ici a := fun _ => And.left
 
 @[to_dual]
 theorem Iio_ssubset_Iic_self : Iio a ⊂ Iic a :=
   ⟨Iio_subset_Iic_self, fun h => lt_irrefl a (h le_rfl)⟩
 
+@[to_dual none]
 theorem Icc_subset_Icc_iff (h₁ : a₁ ≤ b₁) : Icc a₁ b₁ ⊆ Icc a₂ b₂ ↔ a₂ ≤ a₁ ∧ b₁ ≤ b₂ :=
-  ⟨fun h => ⟨(h ⟨le_rfl, h₁⟩).1, (h ⟨h₁, le_rfl⟩).2⟩, fun ⟨h, h'⟩ _ ⟨hx, hx'⟩ =>
-    ⟨h.trans hx, hx'.trans h'⟩⟩
+  ⟨fun h => ⟨(h ⟨le_rfl, h₁⟩).1, (h ⟨h₁, le_rfl⟩).2⟩, fun h _ hx ↦
+    ⟨h.1.trans hx.1, hx.2.trans h.2⟩⟩
 
+@[to_dual none]
 theorem Icc_subset_Ioo_iff (h₁ : a₁ ≤ b₁) : Icc a₁ b₁ ⊆ Ioo a₂ b₂ ↔ a₂ < a₁ ∧ b₁ < b₂ :=
-  ⟨fun h => ⟨(h ⟨le_rfl, h₁⟩).1, (h ⟨h₁, le_rfl⟩).2⟩, fun ⟨h, h'⟩ _ ⟨hx, hx'⟩ =>
-    ⟨h.trans_le hx, hx'.trans_lt h'⟩⟩
+  ⟨fun h => ⟨(h ⟨le_rfl, h₁⟩).1, (h ⟨h₁, le_rfl⟩).2⟩, fun h _ hx ↦
+    ⟨h.1.trans_le hx.1, hx.2.trans_lt h.2⟩⟩
 
+@[to_dual none]
 theorem Icc_subset_Ico_iff (h₁ : a₁ ≤ b₁) : Icc a₁ b₁ ⊆ Ico a₂ b₂ ↔ a₂ ≤ a₁ ∧ b₁ < b₂ :=
-  ⟨fun h => ⟨(h ⟨le_rfl, h₁⟩).1, (h ⟨h₁, le_rfl⟩).2⟩, fun ⟨h, h'⟩ _ ⟨hx, hx'⟩ =>
-    ⟨h.trans hx, hx'.trans_lt h'⟩⟩
+  ⟨fun h => ⟨(h ⟨le_rfl, h₁⟩).1, (h ⟨h₁, le_rfl⟩).2⟩, fun h _ hx ↦
+    ⟨h.1.trans hx.1, hx.2.trans_lt h.2⟩⟩
 
+@[to_dual none]
 theorem Icc_subset_Ioc_iff (h₁ : a₁ ≤ b₁) : Icc a₁ b₁ ⊆ Ioc a₂ b₂ ↔ a₂ < a₁ ∧ b₁ ≤ b₂ :=
-  ⟨fun h => ⟨(h ⟨le_rfl, h₁⟩).1, (h ⟨h₁, le_rfl⟩).2⟩, fun ⟨h, h'⟩ _ ⟨hx, hx'⟩ =>
-    ⟨h.trans_le hx, hx'.trans h'⟩⟩
+  ⟨fun h => ⟨(h ⟨le_rfl, h₁⟩).1, (h ⟨h₁, le_rfl⟩).2⟩, fun h _ hx ↦
+    ⟨h.1.trans_le hx.1, hx.2.trans h.2⟩⟩
 
+@[to_dual]
 theorem Icc_subset_Iio_iff (h₁ : a₁ ≤ b₁) : Icc a₁ b₁ ⊆ Iio b₂ ↔ b₁ < b₂ :=
-  ⟨fun h => h ⟨h₁, le_rfl⟩, fun h _ ⟨_, hx'⟩ => hx'.trans_lt h⟩
+  ⟨fun h => h ⟨h₁, le_rfl⟩, fun h _ hx => hx.2.trans_lt h⟩
 
-theorem Icc_subset_Ioi_iff (h₁ : a₁ ≤ b₁) : Icc a₁ b₁ ⊆ Ioi a₂ ↔ a₂ < a₁ :=
-  ⟨fun h => h ⟨le_rfl, h₁⟩, fun h _ ⟨hx, _⟩ => h.trans_le hx⟩
-
+@[to_dual]
 theorem Icc_subset_Iic_iff (h₁ : a₁ ≤ b₁) : Icc a₁ b₁ ⊆ Iic b₂ ↔ b₁ ≤ b₂ :=
-  ⟨fun h => h ⟨h₁, le_rfl⟩, fun h _ ⟨_, hx'⟩ => hx'.trans h⟩
+  ⟨fun h => h ⟨h₁, le_rfl⟩, fun h _ hx => hx.2.trans h⟩
 
-theorem Icc_subset_Ici_iff (h₁ : a₁ ≤ b₁) : Icc a₁ b₁ ⊆ Ici a₂ ↔ a₂ ≤ a₁ :=
-  ⟨fun h => h ⟨le_rfl, h₁⟩, fun h _ ⟨hx, _⟩ => h.trans hx⟩
-
+@[to_dual (reorder := a₁ b₁, a₂ b₂, ha hb) Icc_ssubset_Icc_right]
 theorem Icc_ssubset_Icc_left (hI : a₂ ≤ b₂) (ha : a₂ < a₁) (hb : b₁ ≤ b₂) : Icc a₁ b₁ ⊂ Icc a₂ b₂ :=
   (ssubset_iff_of_subset (Icc_subset_Icc (le_of_lt ha) hb)).mpr
     ⟨a₂, left_mem_Icc.mpr hI, not_and.mpr fun f _ => lt_irrefl a₂ (ha.trans_le f)⟩
-
-theorem Icc_ssubset_Icc_right (hI : a₂ ≤ b₂) (ha : a₂ ≤ a₁) (hb : b₁ < b₂) :
-    Icc a₁ b₁ ⊂ Icc a₂ b₂ :=
-  (ssubset_iff_of_subset (Icc_subset_Icc ha (le_of_lt hb))).mpr
-    ⟨b₂, right_mem_Icc.mpr hI, fun f => lt_irrefl b₁ (hb.trans_le f.2)⟩
 
 /-- If `a ≤ b`, then `(-∞, a) ⊆ (-∞, b)`. In preorders, this is just an implication. If you need
 the equivalence in linear orders, use `Iio_subset_Iio_iff`. -/
@@ -410,29 +364,21 @@ the equivalence in dense linear orders, use `Ioi_subset_Ici_iff`. -/]
 theorem Iio_subset_Iic (h : a ≤ b) : Iio a ⊆ Iic b :=
   Subset.trans (Iio_subset_Iio h) Iio_subset_Iic_self
 
+@[to_dual]
 theorem Ici_inter_Iic : Ici a ∩ Iic b = Icc a b :=
   rfl
 
+@[to_dual]
 theorem Ici_inter_Iio : Ici a ∩ Iio b = Ico a b :=
   rfl
 
+@[to_dual]
 theorem Ioi_inter_Iic : Ioi a ∩ Iic b = Ioc a b :=
   rfl
 
+@[to_dual]
 theorem Ioi_inter_Iio : Ioi a ∩ Iio b = Ioo a b :=
   rfl
-
-theorem Iic_inter_Ici : Iic a ∩ Ici b = Icc b a :=
-  inter_comm _ _
-
-theorem Iio_inter_Ici : Iio a ∩ Ici b = Ico b a :=
-  inter_comm _ _
-
-theorem Iic_inter_Ioi : Iic a ∩ Ioi b = Ioc b a :=
-  inter_comm _ _
-
-theorem Iio_inter_Ioi : Iio a ∩ Ioi b = Ioo b a :=
-  inter_comm _ _
 
 theorem mem_Icc_of_Ioo (h : x ∈ Ioo a b) : x ∈ Icc a b :=
   Ioo_subset_Icc_self h
