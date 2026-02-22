@@ -199,24 +199,21 @@ theorem ord_cof_eq (α : Type*) [LinearOrder α] [WellFoundedLT α] :
     ∃ s : Set α, IsCofinal s ∧ typeLT s = (Order.cof α).ord := by
   obtain ⟨s, hs, hs'⟩ := Order.cof_eq α
   obtain ⟨r, hr, hr'⟩ := ord_eq s
-  suffices ht : IsCofinal {a | ∃ ha : a ∈ s, ∀ b : s, r b ⟨a, ha⟩ → b < a} by
-    refine ⟨_, ht, (ord_le.2 (cof_le ht)).antisymm' ?_⟩
-    rw [← hs', hr', type_le_iff']
-    refine ⟨.ofMonotone (fun x ↦ ⟨x.1, ?_⟩) fun x y hxy ↦ ?_⟩
-    · obtain ⟨h, _⟩ := x.2
-      exact h
-    · apply (trichotomous_of r _ _).resolve_right
-      rintro (_ | hxy')
-      · simp_all [Subtype.coe_inj]
-      · obtain ⟨_, h⟩ := x.2
-        exact (h _ hxy').asymm hxy
-  intro a
-  obtain ⟨b, hb, hb'⟩ := hs a
-  obtain ⟨c, hc, hc'⟩ := WellFounded.has_min hr.wf {c : s | a ≤ c} ⟨⟨b, hb⟩, hb'⟩
-  refine ⟨c, ⟨c.2, fun d hd ↦ ?_⟩, hc⟩
-  contrapose! hd
-  exact hc' d (hc.trans hd)
+  have ht : IsCofinal {a | ∃ ha : a ∈ s, ∀ b : s, r b ⟨a, ha⟩ → b < a} := by
+    convert hs.trans (isCofinal_setOf_imp_lt r)
+    aesop
+  refine ⟨_, ht, (ord_le.2 (cof_le ht)).antisymm' ?_⟩
+  rw [← hs', hr', type_le_iff']
+  refine ⟨.ofMonotone (fun x ↦ ⟨x.1, ?_⟩) fun x y hxy ↦ ?_⟩
+  · obtain ⟨h, _⟩ := x.2
+    exact h
+  · apply (trichotomous_of r _ _).resolve_right
+    rintro (_ | hxy')
+    · simp_all [Subtype.coe_inj]
+    · obtain ⟨_, h⟩ := x.2
+      exact (h _ hxy').asymm hxy
 
+#exit
 /-! ### Cofinality of suprema and least strict upper bounds -/
 
 -- TODO: use `⨆ i, succ (f i)` instead of `lsub`
