@@ -44,6 +44,7 @@ section Preorder
 
 variable [Preorder α]
 
+-- `to_dual` cannot yet reorder arguments of arguments
 instance [SuccOrder α] [IsSuccArchimedean α] : IsPredArchimedean αᵒᵈ :=
   ⟨fun {a b} h => by convert exists_succ_iterate_of_le h.ofDual⟩
 
@@ -65,8 +66,10 @@ theorem exists_succ_iterate_iff_le : (∃ n, succ^[n] a = b) ↔ a ≤ b := by
   rintro ⟨n, rfl⟩
   exact id_le_iterate_of_id_le le_succ n a
 
+-- TODO: rename to `Order.succ_rec`?
 /-- Induction principle on a type with a `SuccOrder` for all elements above a given element `m`. -/
-@[to_dual (attr := elab_as_elim) Pred.rec]
+@[to_dual (attr := elab_as_elim) Pred.rec
+/-- Induction principle on a type with a `PredOrder` for all elements below a given element `m`. -/]
 theorem Succ.rec {m : α} {P : ∀ n, m ≤ n → Prop} (rfl : P m le_rfl)
     (succ : ∀ n (hmn : m ≤ n), P n hmn → P (succ n) (hmn.trans <| le_succ _)) ⦃n : α⦄
     (hmn : m ≤ n) : P n hmn := by
@@ -105,7 +108,7 @@ section PartialOrder
 
 variable [PartialOrder α]
 
-@[to_dual lt_or_le_of_directed]
+@[to_dual (reorder := h₁ h₂) lt_or_le_of_directed]
 lemma lt_or_le_of_codirected [SuccOrder α] [IsSuccArchimedean α] {r v₁ v₂ : α} (h₁ : r ≤ v₁)
     (h₂ : r ≤ v₂) : v₁ < v₂ ∨ v₂ ≤ v₁ := by
   rw [Classical.or_iff_not_imp_right]
@@ -114,6 +117,7 @@ lemma lt_or_le_of_codirected [SuccOrder α] [IsSuccArchimedean α] {r v₁ v₂ 
   · apply lt_of_le_of_ne h (ne_of_not_le nh).symm
   · contradiction
 
+-- `to_dual` cannot yet reorder arguments of arguments
 /--
 This isn't an instance due to a loop with `LinearOrder`.
 -/
@@ -201,6 +205,7 @@ section IsWellFounded
 
 variable [PartialOrder α]
 
+-- `to_dual` cannot yet reorder arguments of arguments
 instance (priority := 100) WellFoundedLT.toIsPredArchimedean [h : WellFoundedLT α]
     [PredOrder α] : IsPredArchimedean α :=
   ⟨fun {a b} => by
@@ -280,6 +285,7 @@ section OrderIso
 
 variable {X Y : Type*} [PartialOrder X] [PartialOrder Y]
 
+-- `to_dual` cannot yet reorder arguments of arguments
 /-- `IsSuccArchimedean` transfers across equivalences between `SuccOrder`s. -/
 protected lemma IsSuccArchimedean.of_orderIso [SuccOrder X] [IsSuccArchimedean X] [SuccOrder Y]
     (f : X ≃o Y) : IsSuccArchimedean Y where
