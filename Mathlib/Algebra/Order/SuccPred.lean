@@ -48,6 +48,7 @@ section Add
 
 variable [Add α] [One α] [SuccAddOrder α]
 
+@[simp]
 theorem succ_eq_add_one (x : α) : succ x = x + 1 :=
   SuccAddOrder.succ_eq_add_one x
 
@@ -202,7 +203,7 @@ theorem succ_eq_zero [AddZeroClass α] [OrderBot α] [CanonicallyOrderedAdd α] 
   cases a
   · simp [bot_eq_zero]
   · rename_i a
-    simp only [WithBot.succ_coe, WithBot.coe_ne_bot, iff_false]
+    simp only [WithBot.succ_coe, WithBot.coe_ne_bot, iff_false, succ_eq_add_one]
     by_contra h
     simpa [h] using max_of_succ_le (a := a)
 
