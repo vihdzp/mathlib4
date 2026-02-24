@@ -187,6 +187,7 @@ theorem cof_zero : cof 0 = 0 :=
 theorem cof_eq_one_iff {o} : cof o = 1 ↔ o ∈ range succ := by
   induction o using inductionOnWellOrder with | H α
   rw [cof_type, Order.cof_eq_one_iff, type_lt_mem_range_succ_iff]
+  simp_rw [isTop_iff_isMax]
 
 @[simp]
 theorem cof_succ (o) : cof (succ o) = 1 :=
@@ -592,10 +593,7 @@ theorem cof_eq' (r : α → α → Prop) [H : IsWellOrder α r] (h : IsSuccLimit
   classical
   let := linearOrderOfSTO r
   have : WellFoundedLT α := H.toIsWellFounded
-  have : NoMaxOrder α := by
-    rw [← noTopOrder_iff_noMaxOrder]
-    constructor
-    simpa [IsTop] using isSuccPrelimit_type_lt_iff.1 h.isSuccPrelimit
+  have : NoMaxOrder α := isSuccPrelimit_type_lt_iff.1 h.isSuccPrelimit
   obtain ⟨s, hs, hs'⟩ := Order.cof_eq α
   refine ⟨s, ?_, hs'⟩
   rwa [← not_bddAbove_iff_isCofinal, not_bddAbove_iff] at hs
