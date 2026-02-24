@@ -920,8 +920,12 @@ theorem one_le_iff_ne_zero {o : Ordinal} : 1 ≤ o ↔ o ≠ 0 := by
 theorem succ_pos (o : Ordinal) : 0 < succ o :=
   bot_lt_succ o
 
+theorem add_one_ne_zero (o : Ordinal) : o + 1 ≠ 0 :=
+  (succ_pos o).ne'
+
+-- TODO: deprecate
 theorem succ_ne_zero (o : Ordinal) : succ o ≠ 0 :=
-  ne_of_gt <| succ_pos o
+  add_one_ne_zero o
 
 @[simp]
 theorem lt_one_iff_zero {a : Ordinal} : a < 1 ↔ a = 0 := by

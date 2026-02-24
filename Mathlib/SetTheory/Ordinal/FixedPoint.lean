@@ -340,8 +340,12 @@ theorem deriv_zero_right (f) : deriv f 0 = nfp f 0 :=
   derivFamily_zero _
 
 @[simp]
-theorem deriv_succ (f o) : deriv f (succ o) = nfp f (succ (deriv f o)) :=
+theorem deriv_add_one (f o) : deriv f (o + 1) = nfp f (succ (deriv f o)) :=
   derivFamily_succ _ _
+
+-- TODO: deprecate
+theorem deriv_succ (f o) : deriv f (succ o) = nfp f (succ (deriv f o)) :=
+  deriv_add_one ..
 
 theorem deriv_limit (f) {o} : IsSuccLimit o → deriv f o = ⨆ a : {a // a < o}, deriv f a :=
   derivFamily_limit _

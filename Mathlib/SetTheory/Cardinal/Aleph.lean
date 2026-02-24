@@ -556,9 +556,13 @@ theorem preBeth_zero : preBeth 0 = 0 := by
   simp
 
 @[simp]
-theorem preBeth_succ (o : Ordinal) : preBeth (succ o) = 2 ^ preBeth o := by
-  rw [preBeth, Iio_succ]
+theorem preBeth_add_one (o : Ordinal) : preBeth (o + 1) = 2 ^ preBeth o := by
+  rw [preBeth, ← succ_eq_add_one, Iio_succ]
   exact ciSup_Iic o fun x y h ↦ power_le_power_left two_ne_zero (preBeth_mono h)
+
+-- TODO: deprecate
+theorem preBeth_succ (o : Ordinal) : preBeth (succ o) = 2 ^ preBeth o :=
+  preBeth_add_one o
 
 theorem preBeth_limit {o : Ordinal} (ho : IsSuccPrelimit o) :
     preBeth o = ⨆ a : Iio o, preBeth a := by
@@ -621,7 +625,7 @@ theorem isStrongLimit_preBeth {o : Ordinal} : IsStrongLimit (preBeth o) ↔ IsSu
     obtain ho | ⟨a, rfl⟩ := H
     · simp [ho.eq_bot]
     · intro h
-      simpa using h.two_power_lt (preBeth_strictMono (lt_succ a))
+      simpa using h.two_power_lt (preBeth_strictMono (lt_add_one a))
 
 @[simp]
 theorem lift_preBeth (o : Ordinal) : lift.{v} (preBeth o) = preBeth (Ordinal.lift.{v} o) := by
@@ -676,8 +680,12 @@ theorem beth_zero : ℶ_ 0 = ℵ₀ := by
   simp [beth]
 
 @[simp]
-theorem beth_succ (o : Ordinal) : ℶ_ (succ o) = 2 ^ ℶ_ o := by
-  simp [beth, add_succ]
+theorem beth_add_one (o : Ordinal) : ℶ_ (o + 1) = 2 ^ ℶ_ o := by
+  simp [beth, ← add_assoc]
+
+-- TODO; deprecate
+theorem beth_succ (o : Ordinal) : ℶ_ (succ o) = 2 ^ ℶ_ o :=
+  beth_add_one o
 
 theorem isNormal_beth : Order.IsNormal beth :=
   isNormal_preBeth.comp (isNormal_add_right _)

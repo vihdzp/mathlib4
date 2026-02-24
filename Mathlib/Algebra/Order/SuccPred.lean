@@ -198,6 +198,16 @@ theorem not_isSuccLimit_natCast [AddMonoidWithOne α] [SuccAddOrder α]
   fun h ↦ (h.natCast_lt n).false
 
 @[simp]
+theorem not_isSuccPrelimit_add_one (a : α) [Add α] [One α] [SuccAddOrder α] [NoMaxOrder α] :
+    ¬ IsSuccPrelimit (a + 1) :=
+  succ_eq_add_one a ▸ not_isSuccPrelimit_succ a
+
+@[simp]
+theorem not_isSuccLimit_add_one (a : α) [Add α] [One α] [SuccAddOrder α] [NoMaxOrder α] :
+    ¬ IsSuccLimit (a + 1) :=
+  succ_eq_add_one a ▸ not_isSuccLimit_succ a
+
+@[simp]
 theorem succ_eq_zero [AddZeroClass α] [OrderBot α] [CanonicallyOrderedAdd α] [One α] [NoMaxOrder α]
     [SuccAddOrder α] {a : WithBot α} : WithBot.succ a = 0 ↔ a = ⊥ := by
   cases a
@@ -227,6 +237,10 @@ theorem lt_add_one_iff_of_not_isMax (hy : ¬ IsMax y) : x < y + 1 ↔ x ≤ y :=
 @[simp]
 theorem lt_add_one_iff [NoMaxOrder α] : x < y + 1 ↔ x ≤ y :=
   lt_add_one_iff_of_not_isMax (not_isMax y)
+
+@[simp]
+theorem add_one_inj [NoMaxOrder α] : x + 1 = y + 1 ↔ x = y := by
+  simp [← succ_eq_add_one]
 
 end Add
 
