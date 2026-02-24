@@ -160,7 +160,7 @@ theorem cof_toType (o : Ordinal) : Order.cof o.ToType = o.cof := by
 @[simp]
 theorem lift_cof (o : Ordinal.{u}) : Cardinal.lift.{v} (cof o) = cof (Ordinal.lift.{v} o) := by
   induction o using inductionOnWellOrder with | H α
-  rw [cof_type, ← type_lt_uLift, cof_type, ← Cardinal.lift_id'.{u, v} (Order.cof (ULift _)),
+  rw [cof_type, ← type_lt_ulift, cof_type, ← Cardinal.lift_id'.{u, v} (Order.cof (ULift _)),
     ← Cardinal.lift_umax, ← ULift.orderIso.cof_eq_lift]
 
 theorem cof_le_card (o : Ordinal) : cof o ≤ card o := by
@@ -186,7 +186,7 @@ theorem cof_zero : cof 0 = 0 :=
 
 theorem cof_eq_one_iff {o} : cof o = 1 ↔ o ∈ range succ := by
   induction o using inductionOnWellOrder with | H α
-  rw [cof_type, Order.cof_eq_one_iff, type_mem_range_succ_iff]
+  rw [cof_type, Order.cof_eq_one_iff, type_lt_mem_range_succ_iff]
 
 @[simp]
 theorem cof_succ (o) : cof (succ o) = 1 :=
@@ -595,7 +595,7 @@ theorem cof_eq' (r : α → α → Prop) [H : IsWellOrder α r] (h : IsSuccLimit
   have : NoMaxOrder α := by
     rw [← noTopOrder_iff_noMaxOrder]
     constructor
-    simpa [IsTop] using isSuccPrelimit_type_iff.1 h.isSuccPrelimit
+    simpa [IsTop] using isSuccPrelimit_type_lt_iff.1 h.isSuccPrelimit
   obtain ⟨s, hs, hs'⟩ := Order.cof_eq α
   refine ⟨s, ?_, hs'⟩
   rwa [← not_bddAbove_iff_isCofinal, not_bddAbove_iff] at hs
