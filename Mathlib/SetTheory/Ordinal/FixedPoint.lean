@@ -345,7 +345,7 @@ theorem deriv_zero_right (f) : deriv f 0 = nfp f 0 :=
   derivFamily_zero _
 
 @[simp]
-theorem deriv_add_one (f o) : deriv f (o + 1) = nfp f (succ (deriv f o)) :=
+theorem deriv_add_one (f o) : deriv f (o + 1) = nfp f (deriv f o + 1) :=
   derivFamily_succ _ _
 
 -- TODO: deprecate
