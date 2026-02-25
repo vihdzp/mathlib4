@@ -308,7 +308,10 @@ theorem preAleph_max (o₁ o₂ : Ordinal) : preAleph (max o₁ o₂) = max (pre
 theorem preAleph_zero : preAleph 0 = 0 :=
   preAleph.map_bot
 
-@[simp]
+theorem preAleph_add_one (o : Ordinal) : preAleph (o + 1) = succ (preAleph o) :=
+  preAleph.map_succ o
+
+-- TODO: deprecate
 theorem preAleph_succ (o : Ordinal) : preAleph (succ o) = succ (preAleph o) :=
   preAleph.map_succ o
 
@@ -401,8 +404,12 @@ theorem preAleph_le_aleph (o : Ordinal) : preAleph o ≤ ℵ_ o :=
   preAleph_le_preAleph.2 le_add_self
 
 @[simp]
-theorem aleph_succ (o : Ordinal) : ℵ_ (succ o) = succ (ℵ_ o) := by
-  rw [aleph_eq_preAleph, add_succ, preAleph_succ, aleph_eq_preAleph]
+theorem aleph_add_one (o : Ordinal) : ℵ_ (o + 1) = succ (ℵ_ o) := by
+  rw [aleph_eq_preAleph, ← add_assoc, preAleph_add_one, aleph_eq_preAleph]
+
+-- TODO: deprecate
+theorem aleph_succ (o : Ordinal) : ℵ_ (succ o) = succ (ℵ_ o) :=
+  aleph_add_one o
 
 @[simp]
 theorem aleph_zero : ℵ_ 0 = ℵ₀ := by rw [aleph_eq_preAleph, add_zero, preAleph_omega0]

@@ -904,12 +904,12 @@ instance : SuccAddOrder Ordinal := ⟨fun _ => rfl⟩
 theorem add_one_eq_succ (o : Ordinal) : o + 1 = succ o :=
   rfl
 
-@[simp]
+-- TODO: deprecate
 theorem succ_zero : succ (0 : Ordinal) = 1 :=
   zero_add 1
 
-@[simp]
-theorem succ_one : succ (1 : Ordinal) = 2 := by congr; simp only [Nat.unaryCast, zero_add]
+-- TODO: deprecate
+theorem succ_one : succ (1 : Ordinal) = 2 := one_add_one_eq_two
 
 theorem add_succ (o₁ o₂ : Ordinal) : o₁ + succ o₂ = succ (o₁ + o₂) :=
   (add_assoc _ _ _).symm

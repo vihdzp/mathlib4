@@ -397,7 +397,6 @@ theorem cof_succ (o) : cof (succ o) = 1 := by
     simpa [lt_iff_le_and_ne, Cardinal.zero_le] using fun h =>
       succ_ne_zero o (cof_eq_zero.1 (Eq.symm h))
 
-@[simp]
 theorem cof_add_one (o) : cof (o + 1) = 1 :=
   cof_succ o
 
@@ -434,7 +433,7 @@ theorem cof_eq_one_iff_is_succ {o} : cof.{u} o = 1 ↔ ∃ a, o = succ a :=
           change (a : α) = ↑(⟨a', aS⟩ : S)
           have := le_one_iff_subsingleton.1 (le_of_eq e)
           congr!,
-    fun ⟨a, e⟩ => by simp [e]⟩
+    fun ⟨a, e⟩ => by simp [e, cof_add_one]⟩
 
 /-! ### Fundamental sequences -/
 
