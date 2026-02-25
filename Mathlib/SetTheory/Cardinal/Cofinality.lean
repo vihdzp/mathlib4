@@ -16,7 +16,7 @@ This file contains the definition of cofinality of an order and an ordinal numbe
 
 ## Main Definitions
 
-* `Order.cof α` is the cofinality of a preorder. This is the smallest cardinality of an `IsCofinal`
+* `Order.cof α` is the cofinality of a preorder. This is the smallest cardinality of a cofinal
   subset.
 * `Ordinal.cof o` is the cofinality of the ordinal `o` when viewed as a linear order.
 
