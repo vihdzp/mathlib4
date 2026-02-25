@@ -19,7 +19,6 @@ For the cofinality of a set as a cardinal, see `Mathlib/SetTheory/Cardinal/Cofin
 
 ## TODO
 
-- Define `Order.cof` in terms of `Cofinal`.
 - Deprecate `Order.Cofinal` in favor of this predicate.
 -/
 
