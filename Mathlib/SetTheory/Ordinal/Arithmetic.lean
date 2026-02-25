@@ -266,7 +266,6 @@ theorem pred_add_one (o) : pred (o + 1) = o :=
   isSuccPrelimitRecOn_succ ..
 
 -- TODO: deprecate
-@[simp]
 theorem pred_succ (o) : pred (succ o) = o :=
   pred_add_one o
 
@@ -285,7 +284,7 @@ theorem pred_zero : pred 0 = 0 :=
 @[simp]
 theorem pred_le_iff_le_succ {a b} : pred a ≤ b ↔ a ≤ succ b := by
   obtain ⟨a, rfl⟩ | ha := mem_range_succ_or_isSuccPrelimit a
-  · simp [-succ_eq_add_one]
+  · simp
   · rw [ha.ordinalPred_eq, ha.le_succ_iff]
 
 @[simp]
@@ -297,7 +296,7 @@ theorem pred_le_self (o) : pred o ≤ o := by
 
 /-- `Ordinal.pred` and `Order.succ` form a Galois insertion. -/
 def pred_succ_gi : GaloisInsertion pred succ :=
-  GaloisConnection.toGaloisInsertion @pred_le_iff_le_succ (by simp [-succ_eq_add_one])
+  GaloisConnection.toGaloisInsertion @pred_le_iff_le_succ (by simp)
 
 theorem pred_surjective : Function.Surjective pred :=
   pred_succ_gi.l_surjective
