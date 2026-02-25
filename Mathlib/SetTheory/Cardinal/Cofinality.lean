@@ -130,8 +130,8 @@ end Congr
 
 /-- If the union of `s` is cofinal and `s` is smaller than the cofinality, then `s` has a cofinal
 member. -/
-theorem isCofinal_of_isCofinal_sUnion {α : Type*} [LinearOrder α] [WellFoundedLT α]
-    {s : Set (Set α)} (h₁ : IsCofinal (⋃₀ s)) (h₂ : #s < Order.cof α) : ∃ x ∈ s, IsCofinal x := by
+theorem isCofinal_of_isCofinal_sUnion {α : Type*} [LinearOrder α] {s : Set (Set α)}
+    (h₁ : IsCofinal (⋃₀ s)) (h₂ : #s < Order.cof α) : ∃ x ∈ s, IsCofinal x := by
   contrapose! h₂
   simp_rw [not_isCofinal_iff] at h₂
   choose f hf using h₂
@@ -141,8 +141,8 @@ theorem isCofinal_of_isCofinal_sUnion {α : Type*} [LinearOrder α] [WellFounded
 
 /-- If the union of `s` is cofinal and `s` is smaller than the cofinality, then `s` has a cofinal
 member. -/
-theorem isCofinal_of_isCofinal_iUnion {α : Type*} {ι} [LinearOrder α] [WellFoundedLT α]
-    {s : ι → Set α} (h₁ : IsCofinal (⋃ i, s i)) (h₂ : #ι < Order.cof α) : ∃ i, IsCofinal (s i) := by
+theorem isCofinal_of_isCofinal_iUnion {α : Type*} {ι} [LinearOrder α] {s : ι → Set α}
+    (h₁ : IsCofinal (⋃ i, s i)) (h₂ : #ι < Order.cof α) : ∃ i, IsCofinal (s i) := by
   rw [← sUnion_range] at h₁
   obtain ⟨_, ⟨i, rfl⟩, h⟩ := isCofinal_of_isCofinal_sUnion h₁ (mk_range_le.trans_lt h₂)
   exact ⟨i, h⟩
