@@ -128,6 +128,25 @@ theorem OrderIso.cof_eq (f : α ≃o γ) : Order.cof α = Order.cof γ := by
 
 end Congr
 
+/-- If the union of `s` is cofinal and `s` is smaller than the cofinality, then `s` has a cofinal
+member. -/
+theorem isCofinal_of_isCofinal_sUnion {α : Type*} [LinearOrder α] [WellFoundedLT α]
+    {s : Set (Set α)} (h₁ : IsCofinal (⋃₀ s)) (h₂ : #s < Order.cof α) : ∃ x ∈ s, IsCofinal x := by
+  contrapose! h₂
+  simp_rw [not_isCofinal_iff] at h₂
+  choose f hf using h₂
+  refine (cof_le (s := range fun x ↦ f x.1 x.2) fun a ↦ ?_).trans mk_range_le
+  obtain ⟨b, ⟨t, ht, hb⟩, hab⟩ := h₁ a
+  simpa using ⟨t, ht, hab.trans (hf t ht b hb).le⟩
+
+/-- If the union of `s` is cofinal and `s` is smaller than the cofinality, then `s` has a cofinal
+member. -/
+theorem isCofinal_of_isCofinal_iUnion {α : Type*} {ι} [LinearOrder α] [WellFoundedLT α]
+    {s : ι → Set α} (h₁ : IsCofinal (⋃ i, s i)) (h₂ : #ι < Order.cof α) : ∃ i, IsCofinal (s i) := by
+  rw [← sUnion_range] at h₁
+  obtain ⟨_, ⟨i, rfl⟩, h⟩ := isCofinal_of_isCofinal_sUnion h₁ (mk_range_le.trans_lt h₂)
+  exact ⟨i, h⟩
+
 /-! ### Cofinality of ordinals -/
 
 namespace Ordinal
@@ -680,27 +699,10 @@ theorem mk_subset_mk_lt_cof {α : Type*} (h : ∀ x < #α, 2 ^ x < #α) :
     · intro a b hab
       simpa [singleton_eq_singleton_iff] using hab
 
-/-
-/-- If the union of s is unbounded and s is smaller than the cofinality,
-  then s has an unbounded member -/
-theorem unbounded_of_unbounded_sUnion (r : α → α → Prop) [wo : IsWellOrder α r] {s : Set (Set α)}
-    (h₁ : Unbounded r <| ⋃₀ s) (h₂ : #s < Order.cof (swap rᶜ)) : ∃ x ∈ s, Unbounded r x := by
-  by_contra! h
-  simp_rw [not_unbounded_iff] at h
-  let f : s → α := fun x : s => wo.wf.sup x (h x.1 x.2)
-  refine h₂.not_ge (le_trans (csInf_le' ⟨range f, fun x => ?_, rfl⟩) mk_range_le)
-  rcases h₁ x with ⟨y, ⟨c, hc, hy⟩, hxy⟩
-  exact ⟨f ⟨c, hc⟩, mem_range_self _, fun hxz => hxy (Trans.trans (wo.wf.lt_sup _ hy) hxz)⟩
-
-/-- If the union of s is unbounded and s is smaller than the cofinality,
-  then s has an unbounded member -/
-theorem unbounded_of_unbounded_iUnion {α β : Type u} (r : α → α → Prop) [wo : IsWellOrder α r]
-    (s : β → Set α) (h₁ : Unbounded r <| ⋃ x, s x) (h₂ : #β < Order.cof (swap rᶜ)) :
-    ∃ x : β, Unbounded r (s x) := by
-  rw [← sUnion_range] at h₁
-  rcases unbounded_of_unbounded_sUnion r h₁ (mk_range_le.trans_lt h₂) with ⟨_, ⟨x, rfl⟩, u⟩
-  exact ⟨x, u⟩
--/
+@[deprecated (since := "2026-02-25")]
+alias unbounded_of_unbounded_sUnion := isCofinal_of_isCofinal_sUnion
+@[deprecated (since := "2026-02-25")]
+alias unbounded_of_unbounded_iUnion := isCofinal_of_isCofinal_iUnion
 
 /-! ### Consequences of König's lemma -/
 
