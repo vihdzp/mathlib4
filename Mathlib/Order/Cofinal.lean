@@ -5,6 +5,7 @@ Authors: Violeta Hernández Palacios
 -/
 module
 
+public import Mathlib.Data.Sum.Order
 public import Mathlib.Order.GaloisConnection.Basic
 public import Mathlib.Order.Interval.Set.Basic
 public import Mathlib.Order.WellFounded
@@ -84,6 +85,47 @@ theorem Monotone.isCofinal_image [Preorder β] {f : α → β} {s : Set α} (hf 
   obtain ⟨c, hc, hc'⟩ := hs a
   exact ⟨_, Set.mem_image_of_mem _ hc, ha.trans (hf hc')⟩
 
+theorem isCofinal_range_inr [Nonempty β] [Preorder β] :
+    IsCofinal (α := α ⊕ₗ β) (.range (toLex ∘ Sum.inr)) := by
+  intro a
+  cases a
+  aesop
+
+theorem isCofinal_inr_image [Nonempty β] [Preorder β] {s : Set β} (hs : IsCofinal s) :
+    IsCofinal (α := α ⊕ₗ β) ((toLex ∘ Sum.inr) '' s) :=
+  Sum.Lex.inr_mono.isCofinal_image isCofinal_range_inr hs
+
+theorem isCofinal_inr_preimage [Preorder β] {s : Set (α ⊕ₗ β)} (hs : IsCofinal s) :
+    IsCofinal ((toLex ∘ Sum.inr) ⁻¹' s) := by
+  intro a
+  simpa using hs (toLex (.inr a))
+
+theorem isCofinal_inter_range_inr_iff_left [Nonempty β] [Preorder β] {t : Set (α ⊕ₗ β)} :
+    IsCofinal (.range (toLex ∘ Sum.inr) ∩ t) ↔ IsCofinal t where
+  mp h := h.mono (Set.inter_subset_right ..)
+  mpr h a := by
+    inhabit β
+    cases a with | h a
+    cases a with
+    | inl a =>
+      obtain ⟨b, hb, hb'⟩ := h (toLex (.inr default))
+      use b
+      cases b
+      aesop
+    | inr a =>
+      obtain ⟨b, hb, hb'⟩ := h (toLex (.inr a))
+      use b
+      cases b
+      aesop
+
+alias ⟨_, IsCofinal.inter_range_inr_left⟩ := isCofinal_inter_range_inr_iff_left
+
+theorem isCofinal_inter_range_inr_iff_right [Nonempty β] [Preorder β] {t : Set (α ⊕ₗ β)} :
+    IsCofinal (t ∩ .range (toLex ∘ Sum.inr)) ↔ IsCofinal t := by
+  rw [Set.inter_comm, isCofinal_inter_range_inr_iff_left]
+
+alias ⟨_, IsCofinal.inter_range_inr_right⟩ := isCofinal_inter_range_inr_iff_right
+
 end Preorder
 
 section PartialOrder
@@ -107,6 +149,22 @@ variable [LinearOrder α]
 
 theorem not_isCofinal_iff {s : Set α} : ¬ IsCofinal s ↔ ∃ x, ∀ y ∈ s, y < x := by
   simp [IsCofinal]
+
+theorem isCofinal_inter_iff_left {s t : Set α} (hs : s.Nonempty) (hs' : IsUpperSet s) :
+    IsCofinal (s ∩ t) ↔ IsCofinal t where
+  mp h := h.mono (Set.inter_subset_right ..)
+  mpr h a := by
+    obtain ⟨c, hc⟩ := hs
+    obtain ⟨b, hb, hb'⟩ := h (max a c)
+    exact ⟨b, ⟨hs' ((le_max_right ..).trans hb') hc, hb⟩, (le_max_left ..).trans hb'⟩
+
+alias ⟨_, IsCofinal.inter_left⟩ := isCofinal_inter_iff_left
+
+theorem isCofinal_inter_iff_right {s t : Set α} (hs : s.Nonempty) (hs' : IsUpperSet s) :
+    IsCofinal (t ∩ s) ↔ IsCofinal t := by
+  rw [Set.inter_comm, isCofinal_inter_iff_left hs hs']
+
+alias ⟨_, IsCofinal.inter_right⟩ := isCofinal_inter_iff_right
 
 theorem BddAbove.of_not_isCofinal {s : Set α} (h : ¬ IsCofinal s) : BddAbove s := by
   rw [not_isCofinal_iff] at h

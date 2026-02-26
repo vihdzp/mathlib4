@@ -105,6 +105,27 @@ theorem cof_eq_one_iff : cof α = 1 ↔ ∃ x : α, IsTop x := by
 theorem cof_eq_one [OrderTop α] : cof α = 1 :=
   cof_eq_one_iff.2 ⟨⊤, isTop_top⟩
 
+variable (α β) in
+theorem cof_sum_le_lift [Preorder β] : Cardinal.lift.{u} (cof β) ≤ cof (α ⊕ₗ β) := by
+  rw [le_cof_iff]
+  intro s hs
+  apply (Cardinal.lift_le.2 <| cof_le (isCofinal_inr_preimage hs)).trans
+  rw [← Cardinal.lift_umax.{v, u}, ← Cardinal.lift_id'.{v} (#s)]
+  apply mk_preimage_of_injective_lift
+  simpa using Sum.inr_injective
+
+variable (α β) in
+@[simp]
+theorem cof_sum_lift [Nonempty β] [Preorder β] : cof (α ⊕ₗ β) = Cardinal.lift.{u} (cof β) := by
+  apply (cof_sum_le_lift ..).antisymm'
+  rw [le_cof_iff_lift]
+  intro s hs
+  apply (cof_le (isCofinal_inr_image hs)).trans
+  rw [← Cardinal.lift_id'.{v} (# _), ← Cardinal.lift_umax.{v, u}]
+  apply mk_image_le_lift
+  
+
+#exit
 end Order
 
 section Preorder
@@ -305,6 +326,36 @@ theorem cof_preOmega {o : Ordinal} (ho : IsSuccPrelimit o) : (preOmega o).cof = 
 @[simp]
 theorem cof_omega {o : Ordinal} (ho : IsSuccLimit o) : (ω_ o).cof = o.cof :=
   cof_eq_of_isNormal isNormal_omega ho
+
+@[simp]
+theorem cof_add (a b : Ordinal) : b ≠ 0 → cof (a + b) = cof b := fun h => by
+  rcases zero_or_succ_or_isSuccLimit b with (rfl | ⟨c, rfl⟩ | hb)
+  · contradiction
+  · rw [add_succ, cof_succ, cof_succ]
+  · exact cof_eq_of_isNormal (isNormal_add_right a) hb
+
+theorem aleph0_le_cof {o} : ℵ₀ ≤ cof o ↔ IsSuccLimit o := by
+  rcases zero_or_succ_or_isSuccLimit o with (rfl | ⟨o, rfl⟩ | l)
+  · simp [Cardinal.aleph0_ne_zero]
+  · simp [Cardinal.one_lt_aleph0]
+  · simp only [l, iff_true]
+    refine le_of_not_gt fun h => ?_
+    obtain ⟨n, e⟩ := Cardinal.lt_aleph0.1 h
+    have := cof_ord_cof o
+    rw [e, ord_nat] at this
+    cases n
+    · apply l.ne_bot
+      simpa using e
+    · rw [natCast_succ, cof_succ] at this
+      rw [← this, cof_eq_one_iff] at e
+      rcases e with ⟨a, rfl⟩
+      exact not_isSuccLimit_succ _ l
+
+@[simp]
+theorem cof_omega0 : cof ω = ℵ₀ :=
+  (aleph0_le_cof.2 isSuccLimit_omega0).antisymm' <| by
+    rw [← card_omega0]
+    apply cof_le_card
 
 /-! ### Cofinality of suprema and least strict upper bounds -/
 
@@ -624,36 +675,6 @@ alias IsNormal.cof_eq := cof_eq_of_isNormal
 
 @[deprecated (since := "2025-12-25")]
 alias IsNormal.cof_le := cof_le_of_isNormal
-
-@[simp]
-theorem cof_add (a b : Ordinal) : b ≠ 0 → cof (a + b) = cof b := fun h => by
-  rcases zero_or_succ_or_isSuccLimit b with (rfl | ⟨c, rfl⟩ | hb)
-  · contradiction
-  · rw [add_succ, cof_succ, cof_succ]
-  · exact cof_eq_of_isNormal (isNormal_add_right a) hb
-
-theorem aleph0_le_cof {o} : ℵ₀ ≤ cof o ↔ IsSuccLimit o := by
-  rcases zero_or_succ_or_isSuccLimit o with (rfl | ⟨o, rfl⟩ | l)
-  · simp [Cardinal.aleph0_ne_zero]
-  · simp [Cardinal.one_lt_aleph0]
-  · simp only [l, iff_true]
-    refine le_of_not_gt fun h => ?_
-    obtain ⟨n, e⟩ := Cardinal.lt_aleph0.1 h
-    have := cof_ord_cof o
-    rw [e, ord_nat] at this
-    cases n
-    · apply l.ne_bot
-      simpa using e
-    · rw [natCast_succ, cof_succ] at this
-      rw [← this, cof_eq_one_iff] at e
-      rcases e with ⟨a, rfl⟩
-      exact not_isSuccLimit_succ _ l
-
-@[simp]
-theorem cof_omega0 : cof ω = ℵ₀ :=
-  (aleph0_le_cof.2 isSuccLimit_omega0).antisymm' <| by
-    rw [← card_omega0]
-    apply cof_le_card
 
 -- TODO: deprecate in favor of `Order.cof_eq`
 theorem cof_eq' (r : α → α → Prop) [H : IsWellOrder α r] (h : IsSuccLimit (type r)) :
