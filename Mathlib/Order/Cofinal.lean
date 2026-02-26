@@ -77,6 +77,13 @@ theorem OrderIso.map_cofinal [Preorder β] (e : α ≃o β) {s : Set α} (hs : I
     IsCofinal (e '' s) :=
   e.symm.to_galoisConnection.map_cofinal hs
 
+theorem Monotone.isCofinal_image [Preorder β] {f : α → β} {s : Set α} (hf : Monotone f)
+    (hf' : IsCofinal (.range f)) (hs : IsCofinal s) : IsCofinal (f '' s) := by
+  intro b
+  obtain ⟨_, ⟨a, rfl⟩, ha⟩ := hf' b
+  obtain ⟨c, hc, hc'⟩ := hs a
+  exact ⟨_, Set.mem_image_of_mem _ hc, ha.trans (hf hc')⟩
+
 end Preorder
 
 section PartialOrder
@@ -106,9 +113,8 @@ theorem BddAbove.of_not_isCofinal {s : Set α} (h : ¬ IsCofinal s) : BddAbove s
   obtain ⟨x, h⟩ := h
   exact ⟨x, fun y hy ↦ (h y hy).le⟩
 
-theorem IsCofinal.of_not_bddAbove {s : Set α} (h : ¬ BddAbove s) : IsCofinal s := by
-  contrapose! h
-  exact .of_not_isCofinal h
+theorem IsCofinal.of_not_bddAbove {s : Set α} (h : ¬ BddAbove s) : IsCofinal s :=
+  not_imp_comm.1 .of_not_isCofinal h
 
 /-- In a linear order with no maximum, cofinal sets are the same as unbounded sets. -/
 theorem not_isCofinal_iff_bddAbove [NoMaxOrder α] {s : Set α} : ¬ IsCofinal s ↔ BddAbove s := by
