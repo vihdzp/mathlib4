@@ -114,6 +114,10 @@ theorem cof_sum_le_lift [Preorder β] : Cardinal.lift.{u} (cof β) ≤ cof (α �
   apply mk_preimage_of_injective_lift
   simpa using Sum.inr_injective
 
+variable (α γ) in
+theorem cof_sum_le [Preorder γ] : cof γ ≤ cof (α ⊕ₗ γ) := by
+  simpa using cof_sum_le_lift α γ
+
 variable (α β) in
 @[simp]
 theorem cof_sum_lift [Nonempty β] [Preorder β] : cof (α ⊕ₗ β) = Cardinal.lift.{u} (cof β) := by
@@ -122,10 +126,11 @@ theorem cof_sum_lift [Nonempty β] [Preorder β] : cof (α ⊕ₗ β) = Cardinal
   intro s hs
   apply (cof_le (isCofinal_inr_image hs)).trans
   rw [← Cardinal.lift_id'.{v} (# _), ← Cardinal.lift_umax.{v, u}]
-  apply mk_image_le_lift
-  
+  exact mk_image_le_lift
 
-#exit
+variable (α γ) in
+theorem cof_sum [Nonempty γ] [Preorder γ] : cof (α ⊕ₗ γ) = cof γ := by simp
+
 end Order
 
 section Preorder
@@ -237,7 +242,7 @@ theorem cof_Iio (o : Ordinal.{u}) : Order.cof (Iio o) = Cardinal.lift.{u + 1} o.
 @[deprecated (since := "2026-02-18")] alias cof_eq := Order.cof_eq
 
 @[simp]
-theorem lift_cof (o : Ordinal.{u}) : Cardinal.lift.{v} (cof o) = cof (Ordinal.lift.{v} o) := by
+theorem lift_cof (o : Ordinal.{u}) : Cardinal.lift.{v} (cof o) = cof (lift.{v} o) := by
   induction o using inductionOnWellOrder with | H α
   rw [cof_type, ← type_lt_ulift, cof_type, ← Cardinal.lift_id'.{u, v} (Order.cof (ULift _)),
     ← Cardinal.lift_umax, ← ULift.orderIso.cof_eq_lift]
@@ -328,7 +333,7 @@ theorem cof_omega {o : Ordinal} (ho : IsSuccLimit o) : (ω_ o).cof = o.cof :=
   cof_eq_of_isNormal isNormal_omega ho
 
 @[simp]
-theorem cof_add (a b : Ordinal) : b ≠ 0 → cof (a + b) = cof b := fun h => by
+theorem cof_add (a : Ordinal) {b : Ordinal} (hb : b ≠ 0) : cof (a + b) = cof b := by
   rcases zero_or_succ_or_isSuccLimit b with (rfl | ⟨c, rfl⟩ | hb)
   · contradiction
   · rw [add_succ, cof_succ, cof_succ]

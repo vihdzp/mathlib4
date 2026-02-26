@@ -96,8 +96,7 @@ theorem isCofinal_inr_image [Nonempty β] [Preorder β] {s : Set β} (hs : IsCof
   Sum.Lex.inr_mono.isCofinal_image isCofinal_range_inr hs
 
 theorem isCofinal_inr_preimage [Preorder β] {s : Set (α ⊕ₗ β)} (hs : IsCofinal s) :
-    IsCofinal ((toLex ∘ Sum.inr) ⁻¹' s) := by
-  intro a
+    IsCofinal ((toLex ∘ Sum.inr) ⁻¹' s) := fun a ↦ by
   simpa using hs (toLex (.inr a))
 
 end Preorder
