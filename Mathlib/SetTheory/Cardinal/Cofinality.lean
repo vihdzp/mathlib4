@@ -282,14 +282,14 @@ theorem cof_ord_cof (o : Ordinal) : o.cof.ord.cof = o.cof := by
 
 @[deprecated (since := "2026-02-25")] alias cof_cof := cof_ord_cof
 
-theorem cof_eq_of_isNormal {f : Ordinal → Ordinal} {o : Ordinal.{u}} (hf : IsNormal f)
+theorem cof_eq_of_isNormal {f : Ordinal → Ordinal} {o : Ordinal} (hf : IsNormal f)
     (ho : IsSuccLimit o) : cof (f o) = cof o := by
-  rw [← Cardinal.lift_inj.{u, u + 1}, ← cof_Iio, ← cof_Iio, (hf.to_Iio o).strictMono.cof_eq]
+  rw [← Cardinal.lift_inj, ← cof_Iio, ← cof_Iio, (hf.to_Iio o).strictMono.cof_eq]
   intro a
   obtain ⟨_, ⟨b, hb, rfl⟩, hab, -⟩ := (hf.isLUB_image_Iio_of_isSuccLimit ho).exists_between a.2
   exact ⟨⟨_, hf.strictMono hb⟩, ⟨⟨b, hb⟩, rfl⟩, hab.le⟩
 
-theorem cof_le_of_isNormal {f : Ordinal → Ordinal} {o : Ordinal.{u}} (hf : IsNormal f) :
+theorem cof_le_of_isNormal {f : Ordinal → Ordinal} {o : Ordinal} (hf : IsNormal f) :
     cof o ≤ cof (f o) := by
   obtain rfl | ⟨o, rfl⟩ | ho := zero_or_succ_or_isSuccLimit o
   · simp
