@@ -186,7 +186,7 @@ theorem le_iff_le_sSup (hf : IsNormal f) {x : α} {y : β}
 `Order.IsNormal.le_iff_le_sSup`. -/
 theorem le_iff_le_sSup' [WellFoundedLT α] {f : α → α} (hf : IsNormal f) {x y : α}
     (h : (f ⁻¹' Iic y).Nonempty) : f x ≤ y ↔ x ≤ sSup (f ⁻¹' Iic y) :=
-  hf.le_iff_le_sSup h ⟨y, fun _ ↦ le_trans hf.strictMono.le_apply⟩
+  hf.le_iff_le_sSup h ⟨y, fun _ ↦ hf.strictMono.le_apply.trans⟩
 
 end ConditionallyCompleteLinearOrder
 
