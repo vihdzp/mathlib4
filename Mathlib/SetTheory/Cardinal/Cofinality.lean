@@ -208,9 +208,12 @@ theorem cof_eq_one_iff {o} : cof o = 1 ↔ o ∈ range succ := by
   rw [cof_type, Order.cof_eq_one_iff, type_lt_mem_range_succ_iff]
   simp_rw [isTop_iff_isMax]
 
-@[simp]
-theorem cof_succ (o) : cof (succ o) = 1 :=
+theorem cof_add_one (o) : cof (o + 1) = 1 :=
   cof_eq_one_iff.2 (mem_range_self o)
+  
+-- TODO: deprecate
+theorem cof_succ (o) : cof (succ o) = 1 :=
+  cof_add_one o
 
 @[deprecated (since := "2026-02-18")] alias cof_eq_one_iff_is_succ := cof_eq_one_iff
 
