@@ -263,7 +263,7 @@ theorem opow_mul_add_lt_opow_succ {b u v w : Ordinal} (hvb : v < b) (hw : w < b 
 /-- The ordinal logarithm is the solution `u` to the equation `x = b ^ u * v + w` where `v < b` and
 `w < b ^ u`.
 
-We special case `log 0 x = log 1 x = 0`. -/
+We special case `log 0 x = log 1 x = 0`, as well as `log b 0 = 0`. -/
 @[pp_nodot, no_expose]
 def log (b : Ordinal) (x : Ordinal) : Ordinal :=
   sSup ((b ^ ·) ⁻¹' Iic x)
@@ -295,9 +295,8 @@ See `opow_le_iff_le_log'` for a variant assuming `c ≠ 0` rather than `x ≠ 0`
 `le_log_of_opow_le` and `opow_le_of_le_log`, which are both separate implications under weaker
 assumptions. -/
 theorem opow_le_iff_le_log {b x c : Ordinal} (hb : 1 < b) (hx : x ≠ 0) :
-    b ^ c ≤ x ↔ c ≤ log b x := by
-  refine (isNormal_opow hb).le_iff_le_sSup' ⟨0, ?_⟩
-  simpa [one_le_iff_ne_zero]
+    b ^ c ≤ x ↔ c ≤ log b x :=
+  (isNormal_opow hb).le_iff_le_sSup' ⟨0, by simpa [one_le_iff_ne_zero]⟩
 
 /-- `opow b` and `log b` (almost) form a Galois connection.
 
