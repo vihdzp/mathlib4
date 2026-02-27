@@ -211,6 +211,10 @@ theorem cof_eq_one_iff {o} : cof o = 1 ↔ o ∈ range succ := by
 theorem cof_add_one (o) : cof (o + 1) = 1 :=
   cof_eq_one_iff.2 (mem_range_self o)
 
+@[simp]
+theorem cof_one : cof 1 = 1 := by
+  simpa using cof_add_one 0
+
 -- TODO: deprecate
 theorem cof_succ (o) : cof (succ o) = 1 :=
   cof_add_one o
@@ -579,7 +583,7 @@ theorem cof_add (a b : Ordinal) : b ≠ 0 → cof (a + b) = cof b := fun h => by
 theorem aleph0_le_cof {o} : ℵ₀ ≤ cof o ↔ IsSuccLimit o := by
   rcases zero_or_succ_or_isSuccLimit o with (rfl | ⟨o, rfl⟩ | l)
   · simp [Cardinal.aleph0_ne_zero]
-  · simp [Cardinal.one_lt_aleph0]
+  · simp 
   · simp only [l, iff_true]
     refine le_of_not_gt fun h => ?_
     obtain ⟨n, e⟩ := Cardinal.lt_aleph0.1 h
