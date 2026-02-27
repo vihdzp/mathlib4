@@ -177,6 +177,11 @@ theorem preimage_Iic (hf : IsNormal f) {x : β}
     · rw [csSup_Iic]
     · simpa
 
+theorem le_iff_le_sSup (hf : IsNormal f) {x : α} {y : β}
+    (h₁ : (f ⁻¹' Iic y).Nonempty) (h₂ : BddAbove (f ⁻¹' Iic y)) :
+    f x ≤ y ↔ x ≤ sSup (f ⁻¹' Iic y) :=
+  Set.ext_iff.1 (preimage_Iic hf h₁ h₂) x
+
 end ConditionallyCompleteLinearOrder
 
 section ConditionallyCompleteLinearOrderBot
