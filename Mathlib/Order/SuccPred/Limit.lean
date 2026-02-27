@@ -141,7 +141,7 @@ theorem not_isSuccLimit_iff : ¬ IsSuccLimit a ↔ IsMin a ∨ ¬ IsSuccPrelimit
   rw [IsSuccLimit, not_and_or, not_not]
 
 @[to_dual]
-theorem IsSuccPrelimit.subtype {s : Set α} (hs : IsLowerSet s) {a : s}
+theorem IsSuccPrelimit.subtypeVal {s : Set α} (hs : IsLowerSet s) {a : s}
     (ha : IsSuccPrelimit a) : IsSuccPrelimit a.1 := by
   intro b hb
   have := ha ⟨b, hs hb.le a.2⟩
@@ -151,9 +151,9 @@ theorem IsSuccPrelimit.subtype {s : Set α} (hs : IsLowerSet s) {a : s}
   · exact hb.lt
 
 @[to_dual]
-theorem IsSuccLimit.subtype {s : Set α} (hs : IsLowerSet s) {a : s}
+theorem IsSuccLimit.subtypeVal {s : Set α} (hs : IsLowerSet s) {a : s}
     (ha : IsSuccLimit a) : IsSuccLimit a.1 := by
-  refine ⟨?_, ha.isSuccPrelimit.subtype hs⟩
+  refine ⟨?_, ha.isSuccPrelimit.subtypeVal hs⟩
   have := ha.1
   rw [not_isMin_iff] at ⊢ this
   obtain ⟨b, hb⟩ := this
