@@ -591,7 +591,7 @@ alias IsNormal.cof_le := cof_le_of_isNormal
 theorem cof_add (a b : Ordinal) : b ≠ 0 → cof (a + b) = cof b := fun h => by
   rcases zero_or_succ_or_isSuccLimit b with (rfl | ⟨c, rfl⟩ | hb)
   · contradiction
-  · rw [add_succ, cof_succ, cof_succ]
+  · rw [succ_eq_add_one, ← add_assoc, cof_add_one, cof_add_one]
   · exact cof_eq_of_isNormal (isNormal_add_right a) hb
 
 theorem aleph0_le_cof {o} : ℵ₀ ≤ cof o ↔ IsSuccLimit o := by
