@@ -623,6 +623,10 @@ theorem card_zero : card 0 = 0 := mk_eq_zero _
 @[simp]
 theorem card_one : card 1 = 1 := mk_eq_one _
 
+@[simp]
+theorem mk_toType (o : Ordinal) : #o.ToType = o.card :=
+  (Ordinal.card_type _).symm.trans <| by rw [Ordinal.type_toType]
+
 /-! ### Lifting ordinals to a higher universe -/
 
 /-- The universe lift operation for ordinals, which embeds `Ordinal.{u}` as
@@ -1070,17 +1074,12 @@ end Ordinal
 
 /-! ### Representing a cardinal with an ordinal -/
 
-
 namespace Cardinal
 
 open Ordinal
 
-@[simp]
-theorem mk_toType (o : Ordinal) : #o.ToType = o.card :=
-  (Ordinal.card_type _).symm.trans <| by rw [Ordinal.type_toType]
-
-/-- The ordinal corresponding to a cardinal `c` is the least ordinal
-  whose cardinal is `c`. For the order-embedding version, see `ord.order_embedding`. -/
+/-- The ordinal corresponding to a cardinal `c` is the least ordinal whose cardinal is `c`. -/
+@[no_expose]
 def ord (c : Cardinal) : Ordinal :=
   Quot.liftOn c (fun α : Type u => ⨅ r : { r // IsWellOrder α r }, @type α r.1 r.2) <| by
   rintro α β ⟨f⟩
@@ -1089,7 +1088,8 @@ def ord (c : Cardinal) : Ordinal :=
     refine ⟨⟨_, RelIso.IsWellOrder.preimage r ?_⟩, type_preimage _ _⟩
   exacts [f.symm, f]
 
-theorem ord_eq_Inf (α : Type u) : ord #α = ⨅ r : { r // IsWellOrder α r }, @type α r.1 r.2 :=
+@[deprecated "A better characterization of `ord` is given by `gciOrdCard`." (since := "2026-02-27")]
+theorem ord_eq_Inf (α : Type u) : ord #α = ⨅ r : { r // IsWellOrder α r }, @type α r.1 r.2 := by
   rfl
 
 /-- There exists a well-order on `α` whose order type is exactly `ord #α`. -/
@@ -1100,8 +1100,13 @@ theorem ord_eq (α) : ∃ (r : α → α → Prop) (wo : IsWellOrder α r), ord 
 theorem ord_le_type (r : α → α → Prop) [h : IsWellOrder α r] : ord #α ≤ type r :=
   ciInf_le' _ (Subtype.mk r h)
 
-theorem ord_le {c o} : ord c ≤ o ↔ c ≤ o.card := by
-  refine c.inductionOn fun α ↦ o.inductionOn fun β s _ ↦ ?_
+@[simp]
+theorem card_ord (c) : (ord c).card = c :=
+  c.inductionOn fun α ↦ let ⟨r, _, e⟩ := ord_eq α; e ▸ card_type r
+
+/-- Galois connection between `Cardinal.ord` and `Ordinal.card`. -/
+theorem gc_ord_card : GaloisConnection ord card := by
+  refine fun c o ↦ c.inductionOn fun α ↦ o.inductionOn fun β s _ ↦ ?_
   let ⟨r, _, e⟩ := ord_eq α
   constructor <;> intro h
   · rw [e] at h
@@ -1111,24 +1116,21 @@ theorem ord_le {c o} : ord c ≤ o ↔ c ≤ o.card := by
     have := RelEmbedding.isWellOrder g
     exact (ord_le_type _).trans g.ordinal_type_le
 
-theorem gc_ord_card : GaloisConnection ord card := fun _ _ => ord_le
+/-- Galois coinsertion between `Cardinal.ord` and `Ordinal.card`. -/
+def gciOrdCard : GaloisCoinsertion ord card :=
+  gc_ord_card.toGaloisCoinsertion fun c ↦ c.card_ord.le
+
+theorem ord_le {c o} : ord c ≤ o ↔ c ≤ o.card :=
+  gc_ord_card.le_iff_le
 
 theorem lt_ord {c o} : o < ord c ↔ o.card < c :=
   gc_ord_card.lt_iff_lt
-
-@[simp]
-theorem card_ord (c) : (ord c).card = c :=
-  c.inductionOn fun α ↦ let ⟨r, _, e⟩ := ord_eq α; e ▸ card_type r
 
 theorem card_surjective : Function.Surjective card :=
   fun c ↦ ⟨_, card_ord c⟩
 
 theorem bddAbove_ord_image_iff {s : Set Cardinal} : BddAbove (ord '' s) ↔ BddAbove s :=
   gc_ord_card.bddAbove_l_image
-
-/-- Galois coinsertion between `Cardinal.ord` and `Ordinal.card`. -/
-def gciOrdCard : GaloisCoinsertion ord card :=
-  gc_ord_card.toGaloisCoinsertion fun c => c.card_ord.le
 
 theorem ord_card_le (o : Ordinal) : o.card.ord ≤ o :=
   gc_ord_card.l_u_le _
@@ -1258,13 +1260,16 @@ theorem ord_eq_omega0 {a : Cardinal} : a.ord = ω ↔ a = ℵ₀ :=
 /-- The ordinal corresponding to a cardinal `c` is the least ordinal
   whose cardinal is `c`. This is the order-embedding version. For the regular function, see `ord`.
 -/
+@[deprecated ord (since := "2026-02-27")]
 def ord.orderEmbedding : Cardinal ↪o Ordinal :=
-  RelEmbedding.orderEmbeddingOfLTEmbedding
-    (RelEmbedding.ofMonotone Cardinal.ord fun _ _ => Cardinal.ord_lt_ord.2)
+  OrderEmbedding.ofStrictMono _ fun _ _ ↦ Cardinal.ord_lt_ord.2
 
-@[simp]
+set_option linter.deprecated false in
+@[deprecated ord (since := "2026-02-27")]
 theorem ord.orderEmbedding_coe : (ord.orderEmbedding : Cardinal → Ordinal) = ord :=
   rfl
+
+/-! ### Universal cardinal -/
 
 -- intended to be used with explicit universe parameters
 /-- The cardinal `univ` is the cardinality of ordinal `univ`, or
