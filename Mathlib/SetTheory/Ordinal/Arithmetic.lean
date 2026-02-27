@@ -19,10 +19,9 @@ them into a monoid. One can also define (truncated) subtraction and division ope
 
 ## Main definitions and results
 
-* `a + b` is the order on the disjoint union of `a` and `b` obtained by declaring that
-  every element of `a` is smaller than every element of `b`.
+* `a + b` is the order type of the lexicographic sum `a ⊕ₗ b`.
 * `a - b` is the unique ordinal `c` such that `b + c = a`, when `b ≤ a`.
-* `a * b` is the lexicographic order on `b × a`.
+* `a * b` is the order type of the lexicographic product `b ×ₗ a`.
 * `a / b` is the ordinal `q` such that `a = b * q + r` with `r < b`. We also define the
   divisibility predicate, and a modulo operation.
 * `limitRecOn` is limit recursion on ordinals, i.e. well-founded recursion separating out the zero,
@@ -254,7 +253,7 @@ theorem mk_Iio_ordinal (o : Ordinal.{u}) :
 
 /-! ### The predecessor of an ordinal -/
 
-/-- The ordinal predecessor of `o` is `o'` if `o = succ o'`, and `o` otherwise. -/
+/-- The ordinal predecessor of `a` is `b` if `a = succ b`, and `a` otherwise. -/
 def pred (o : Ordinal) : Ordinal :=
   isSuccPrelimitRecOn o (fun a _ ↦ a) (fun a _ ↦ a)
 
