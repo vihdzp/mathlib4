@@ -394,8 +394,7 @@ theorem cof_succ (o) : cof (succ o) = 1 := by
       rcases a with (a | ⟨⟨⟨⟩⟩⟩) <;> simp
     · simp
   · rw [← Cardinal.succ_zero, succ_le_iff]
-    simpa [lt_iff_le_and_ne, Cardinal.zero_le] using fun h =>
-      succ_ne_zero o (cof_eq_zero.1 (Eq.symm h))
+    simpa [lt_iff_le_and_ne] using fun h ↦ add_one_ne_zero o (cof_eq_zero.1 h.symm)
 
 theorem cof_add_one (o) : cof (o + 1) = 1 :=
   cof_succ o

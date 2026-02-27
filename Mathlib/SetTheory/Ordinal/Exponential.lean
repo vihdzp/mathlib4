@@ -496,7 +496,7 @@ theorem lt_omega0_opow {a b : Ordinal} (hb : b ≠ 0) :
 
 theorem lt_omega0_opow_succ {a b : Ordinal} : a < ω ^ succ b ↔ ∃ n : ℕ, a < ω ^ b * n := by
   refine ⟨fun ha ↦ ?_, fun ⟨n, hn⟩ ↦ hn.trans (omega0_opow_mul_nat_lt (lt_succ b) n)⟩
-  obtain ⟨c, hc, n, hn⟩ := (lt_omega0_opow (succ_ne_zero b)).1 ha
+  obtain ⟨c, hc, n, hn⟩ := (lt_omega0_opow (add_one_ne_zero b)).1 ha
   refine ⟨n, hn.trans_le ?_⟩
   grw [lt_succ_iff.1 hc]
   exact omega0_pos

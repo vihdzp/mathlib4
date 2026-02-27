@@ -822,7 +822,10 @@ instance addMonoidWithOne : AddMonoidWithOne Ordinal.{u} where
 
 @[simp]
 theorem card_add (o₁ o₂ : Ordinal) : card (o₁ + o₂) = card o₁ + card o₂ :=
-  inductionOn o₁ fun _ __ => inductionOn o₂ fun _ _ _ => rfl
+  inductionOn₂ o₁ o₂ fun _ _ _ _ _ _ ↦ rfl
+
+theorem card_add_one (o : Ordinal) : card (o + 1) = card o + 1 := by
+  simp
 
 @[simp]
 theorem type_sum_lex {α β : Type u} (r : α → α → Prop) (s : β → β → Prop) [IsWellOrder α r]
@@ -921,10 +924,11 @@ theorem one_le_iff_ne_zero {o : Ordinal} : 1 ≤ o ↔ o ≠ 0 := by
 theorem succ_pos (o : Ordinal) : 0 < succ o :=
   bot_lt_succ o
 
+-- TODO: generalize to `SuccAddOrder`
 theorem add_one_ne_zero (o : Ordinal) : o + 1 ≠ 0 :=
   (succ_pos o).ne'
 
--- TODO: deprecate
+@[deprecated add_one_ne_zero (since := "2026-02-27")]
 theorem succ_ne_zero (o : Ordinal) : succ o ≠ 0 :=
   add_one_ne_zero o
 
@@ -935,7 +939,7 @@ theorem lt_one_iff_zero {a : Ordinal} : a < 1 ↔ a = 0 := by
 theorem le_one_iff {a : Ordinal} : a ≤ 1 ↔ a = 0 ∨ a = 1 := by
   simpa using @le_succ_bot_iff _ _ _ a _
 
--- TODO: deprecate
+@[deprecated card_add_one (since := "2026-02-27")]
 theorem card_succ (o : Ordinal) : card (succ o) = card o + 1 := by
   simp
 
