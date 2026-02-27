@@ -952,15 +952,13 @@ theorem mod_le (a b : Ordinal) : a % b ≤ a :=
   sub_le_self a _
 
 @[simp]
-theorem mod_zero (a : Ordinal) : a % 0 = a := by
-  simp [mod_def]
+theorem mod_zero (a : Ordinal) : a % 0 = a := by simp [mod_def]
 
 theorem mod_eq_of_lt {a b : Ordinal} (h : a < b) : a % b = a := by
   simp [mod_def, div_eq_zero_of_lt h]
 
 @[simp]
-theorem zero_mod (b : Ordinal) : 0 % b = 0 := by
-  simp [mod_def]
+theorem zero_mod (b : Ordinal) : 0 % b = 0 := by simp [mod_def]
 
 theorem div_add_mod (a b : Ordinal) : b * (a / b) + a % b = a :=
   Ordinal.add_sub_cancel_of_le <| mul_div_le _ _
@@ -976,8 +974,7 @@ theorem mod_self (a : Ordinal) : a % a = 0 := by
   · simp [mod_def, ha]
 
 @[simp]
-theorem mod_one (a : Ordinal) : a % 1 = 0 := by
-  simp [mod_def]
+theorem mod_one (a : Ordinal) : a % 1 = 0 := by simp [mod_def]
 
 theorem dvd_of_mod_eq_zero {a b : Ordinal} (H : a % b = 0) : b ∣ a :=
   ⟨a / b, by simpa [H] using (div_add_mod a b).symm⟩
