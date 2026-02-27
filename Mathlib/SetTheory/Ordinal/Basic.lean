@@ -1158,31 +1158,40 @@ theorem ord_strictMono : StrictMono ord :=
 theorem ord_mono : Monotone ord :=
   gc_ord_card.monotone_l
 
+theorem ord_injective : Injective ord :=
+  ord_strictMono.injective
+
 @[simp]
-theorem ord_le_ord {c₁ c₂} : ord c₁ ≤ ord c₂ ↔ c₁ ≤ c₂ :=
+theorem ord_le_ord {a b : Cardinal} : ord a ≤ ord b ↔ a ≤ b :=
   gciOrdCard.l_le_l_iff
 
 @[simp]
-theorem ord_lt_ord {c₁ c₂} : ord c₁ < ord c₂ ↔ c₁ < c₂ :=
+theorem ord_lt_ord {a b : Cardinal} : ord a < ord b ↔ a < b :=
   ord_strictMono.lt_iff_lt
+
+@[simp]
+theorem ord_inj {a b : Cardinal} : ord a = ord b ↔ a = b :=
+  ord_injective.eq_iff
 
 @[simp]
 theorem ord_zero : ord 0 = 0 :=
   gc_ord_card.l_bot
 
 @[simp]
-theorem ord_nat (n : ℕ) : ord n = n := by
+theorem ord_natCast (n : ℕ) : ord n = n := by
   apply (ord_le.2 (card_nat n).ge).antisymm
   induction n with
   | zero => exact _root_.zero_le _
   | succ n IH => exact (IH.trans_lt <| by simpa using Nat.cast_lt.2 n.lt_succ_self).succ_le
 
-@[simp]
-theorem ord_ofNat (n : ℕ) [n.AtLeastTwo] : ord ofNat(n) = OfNat.ofNat n :=
-  ord_nat n
+@[deprecated (since := "2026-02-27")] alias ord_nat := ord_natCast
 
 @[simp]
-theorem ord_one : ord 1 = 1 := by simpa using ord_nat 1
+theorem ord_ofNat (n : ℕ) [n.AtLeastTwo] : ord ofNat(n) = OfNat.ofNat n :=
+  ord_natCast n
+
+@[simp]
+theorem ord_one : ord 1 = 1 := by simpa using ord_natCast 1
 
 theorem isNormal_ord : Order.IsNormal ord where
   strictMono := ord_strictMono
@@ -1220,14 +1229,6 @@ theorem card_typein_toType_lt (c : Cardinal) (x : c.ord.ToType) :
 
 theorem mk_Iio_ord_toType {c : Cardinal} (i : c.ord.ToType) : #(Iio i) < c :=
   card_typein_toType_lt c i
-
-theorem ord_injective : Injective ord := by
-  intro c c' h
-  rw [← card_ord c, ← card_ord c', h]
-
-@[simp]
-theorem ord_inj {a b : Cardinal} : a.ord = b.ord ↔ a = b :=
-  ord_injective.eq_iff
 
 @[simp]
 theorem ord_eq_zero {a : Cardinal} : a.ord = 0 ↔ a = 0 :=
@@ -1360,7 +1361,7 @@ theorem card_univ : card univ.{u, v} = Cardinal.univ.{u, v} :=
 
 @[simp]
 theorem nat_le_card {o} {n : ℕ} : (n : Cardinal) ≤ card o ↔ (n : Ordinal) ≤ o := by
-  rw [← Cardinal.ord_le, Cardinal.ord_nat]
+  rw [← Cardinal.ord_le, Cardinal.ord_natCast]
 
 @[simp]
 theorem one_le_card {o} : 1 ≤ card o ↔ 1 ≤ o := by

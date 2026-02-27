@@ -602,7 +602,7 @@ theorem aleph0_le_cof {o} : ℵ₀ ≤ cof o ↔ IsSuccLimit o := by
     refine le_of_not_gt fun h => ?_
     obtain ⟨n, e⟩ := Cardinal.lt_aleph0.1 h
     have := cof_cof o
-    rw [e, ord_nat] at this
+    rw [e, ord_natCast] at this
     cases n
     · apply l.ne_bot
       simpa using e
