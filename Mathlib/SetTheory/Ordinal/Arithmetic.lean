@@ -46,11 +46,14 @@ Note that some basic functions and properties of ordinals have been generalized 
 Various other basic arithmetic results are given in `Principal.lean` instead.
 -/
 
-@[expose] public noncomputable section
+@[expose] public section
 
 assert_not_exists Field Module
 
+noncomputable section
+
 open Function Cardinal Set Equiv Order
+open scoped Ordinal
 
 universe u v w
 
