@@ -335,7 +335,7 @@ theorem _root_.PrincipalSeg.ordinal_type_lt {α β} {r : α → α → Prop} {s 
 
 instance : OrderBot Ordinal where
   bot := 0
-  bot_le o := inductionOn o fun _ r _ => (InitialSeg.ofIsEmpty _ r).ordinal_type_le
+  bot_le o := inductionOn o fun _ r _ ↦ (InitialSeg.ofIsEmpty _ r).ordinal_type_le
 
 @[simp]
 theorem bot_eq_zero : (⊥ : Ordinal) = 0 :=
