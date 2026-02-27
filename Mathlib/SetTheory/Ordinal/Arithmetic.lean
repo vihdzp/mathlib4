@@ -782,6 +782,7 @@ theorem add_mul_of_isSuccLimit {a b c : Ordinal} (ba : b + a = a) (l : IsSuccLim
 /-! ### Division on ordinals -/
 
 /-- `a / b` is the unique ordinal `q` satisfying `a = b * q + r` with `r < b`. -/
+@[no_expose]
 instance div : Div Ordinal where
   div a b := sSup ((b * ·) ⁻¹' Iic a)
 
