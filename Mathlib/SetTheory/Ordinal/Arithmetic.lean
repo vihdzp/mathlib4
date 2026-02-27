@@ -792,8 +792,7 @@ theorem div_zero (a : Ordinal) : a / 0 = 0 := by
 
 /-- Multiplication and division by a non-zero ordinal form a Galois connection. -/
 theorem mul_div_gc {a : Ordinal} (ha : a ≠ 0) : GaloisConnection (a * ·) (· / a) :=
-  fun b c ↦ (isNormal_mul_right ha.pos).le_iff_le_sSup ⟨0, by simp⟩
-    ⟨c, fun d hd ↦ (le_mul_right d ha.pos).trans hd⟩
+  fun b c ↦ (isNormal_mul_right ha.pos).le_iff_le_sSup' ⟨0, by simp⟩
 
 theorem mul_le_iff_le_div {a b c : Ordinal} (ha : a ≠ 0) : a * b ≤ c ↔ b ≤ c / a :=
   (mul_div_gc ha).le_iff_le

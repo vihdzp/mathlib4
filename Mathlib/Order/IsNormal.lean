@@ -182,6 +182,12 @@ theorem le_iff_le_sSup (hf : IsNormal f) {x : α} {y : β}
     f x ≤ y ↔ x ≤ sSup (f ⁻¹' Iic y) :=
   Set.ext_iff.1 (preimage_Iic hf h₁ h₂) x
 
+/-- If `f : α → α` in a well-order, we can infer one of the hypotheses in
+`Order.IsNormal.le_iff_le_sSup`. -/
+theorem le_iff_le_sSup' [WellFoundedLT α] {f : α → α} (hf : IsNormal f) {x y : α}
+    (h : (f ⁻¹' Iic y).Nonempty) : f x ≤ y ↔ x ≤ sSup (f ⁻¹' Iic y) :=
+  hf.le_iff_le_sSup h ⟨y, fun _ ↦ le_trans hf.strictMono.le_apply⟩
+
 end ConditionallyCompleteLinearOrder
 
 section ConditionallyCompleteLinearOrderBot
