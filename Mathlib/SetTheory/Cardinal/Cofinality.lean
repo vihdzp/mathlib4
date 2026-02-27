@@ -210,7 +210,7 @@ theorem cof_eq_one_iff {o} : cof o = 1 ↔ o ∈ range succ := by
 
 theorem cof_add_one (o) : cof (o + 1) = 1 :=
   cof_eq_one_iff.2 (mem_range_self o)
-  
+
 -- TODO: deprecate
 theorem cof_succ (o) : cof (succ o) = 1 :=
   cof_add_one o
