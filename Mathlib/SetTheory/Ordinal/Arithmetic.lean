@@ -17,6 +17,7 @@ Ordinals have an addition (corresponding to disjoint union) that turns them into
 monoid, and a multiplication (corresponding to the lexicographic order on the product) that turns
 them into a monoid. One can also define correspondingly a subtraction, a division, a successor
 function, a power function and a logarithm function.
+
 We also define limit ordinals and prove the basic induction principle on ordinals separating
 successor ordinals and limit ordinals, in `limitRecOn`.
 
