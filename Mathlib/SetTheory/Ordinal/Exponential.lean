@@ -261,7 +261,9 @@ theorem opow_mul_add_lt_opow_succ {b u v w : Ordinal} (hvb : v < b) (hw : w < b 
 /-! ### Ordinal logarithm -/
 
 /-- The ordinal logarithm is the solution `u` to the equation `x = b ^ u * v + w` where `v < b` and
-`w < b ^ u`. -/
+`w < b ^ u`.
+
+We special case `log 0 x = log 1 x = 0`. -/
 @[pp_nodot, no_expose]
 def log (b : Ordinal) (x : Ordinal) : Ordinal :=
   sSup ((b ^ ·) ⁻¹' Iic x)
@@ -281,8 +283,8 @@ theorem log_one_left (x : Ordinal) : log 1 x = 0 := by simp
 
 @[simp]
 theorem log_zero_right (b : Ordinal) : log b 0 = 0 := by
-  obtain hb | hb := le_or_gt b 1
-  · exact log_of_left_le_one hb 0
+  obtain rfl | hb := eq_or_ne b 0
+  · exact log_zero_left 0
   · rw [log]
     convert csSup_empty
     aesop
@@ -305,7 +307,7 @@ assumptions. -/
 theorem opow_le_iff_le_log' {b x c : Ordinal} (hb : 1 < b) (hc : c ≠ 0) :
     b ^ c ≤ x ↔ c ≤ log b x := by
   obtain rfl | hx := eq_or_ne x 0
-  · simp [hc, (zero_lt_one.trans hb).ne']
+  · simpa [hc] using hb.ne_bot
   · exact opow_le_iff_le_log hb hx
 
 theorem le_log_of_opow_le {b x c : Ordinal} (hb : 1 < b) (h : b ^ c ≤ x) : c ≤ log b x := by
