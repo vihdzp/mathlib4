@@ -23,7 +23,7 @@ See `Order.isNormal_iff_strictMono_and_continuous` for a proof that these notion
 
 public section
 
-open Order Set
+open Set
 
 variable {α β γ : Type*} {a b : α} {f : α → β} {g : β → γ}
 
