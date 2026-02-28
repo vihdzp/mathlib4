@@ -774,22 +774,10 @@ theorem add_mul_of_isSuccLimit {a b c : Ordinal} (ba : b + a = a) (l : IsSuccLim
 
 /-! ### Division on ordinals -/
 
-<<<<<<< docstrings
-/-- The set in the definition of division is nonempty. -/
-private theorem div_nonempty {a b : Ordinal} (h : b ≠ 0) : { o | a < b * succ o }.Nonempty :=
-  ⟨a, (succ_le_iff (a := a) (b := b * succ a)).1 <| by
-    simpa only [succ_zero, one_mul] using
-      mul_le_mul_left (succ_le_of_lt (pos_iff_ne_zero.2 h)) (succ a)⟩
-
-/-- `a / b` is the unique ordinal `q` satisfying `a = b * q + r` with `r < b`. -/
-instance div : Div Ordinal :=
-  ⟨fun a b => if b = 0 then 0 else sInf { o | a < b * succ o }⟩
-=======
 /-- `a / b` is the unique ordinal `q` satisfying `a = b * q + r` with `r < b`. -/
 @[no_expose]
 instance div : Div Ordinal where
   div a b := sSup ((b * ·) ⁻¹' Iic a)
->>>>>>> master
 
 @[simp]
 theorem div_zero (a : Ordinal) : a / 0 = 0 := by
