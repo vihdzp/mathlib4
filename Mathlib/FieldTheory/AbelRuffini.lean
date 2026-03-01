@@ -5,8 +5,9 @@ Authors: Thomas Browning, Patrick Lutz
 -/
 module
 
-public import Mathlib.GroupTheory.Solvable
+public import Mathlib.FieldTheory.AlgebraicClosure
 public import Mathlib.FieldTheory.PolynomialGaloisGroup
+public import Mathlib.GroupTheory.Solvable
 public import Mathlib.RingTheory.RootsOfUnity.Basic
 
 /-!
@@ -76,7 +77,6 @@ theorem gal_isSolvable_tower (p q : F[X]) (hpq : (p.map (algebraMap F q.Splittin
 
 section GalXPowSubC
 
-set_option backward.isDefEq.respectTransparency false in
 theorem gal_X_pow_sub_one_isSolvable (n : ℕ) : IsSolvable (X ^ n - 1 : F[X]).Gal := by
   by_cases hn : n = 0
   · rw [hn, pow_zero, sub_self]
@@ -95,7 +95,6 @@ theorem gal_X_pow_sub_one_isSolvable (n : ℕ) : IsSolvable (X ^ n - 1 : F[X]).G
   obtain ⟨d, hd⟩ := key τ
   rw [σ.mul_apply, τ.mul_apply, hc, map_pow, hd, map_pow, hc, ← pow_mul, pow_mul']
 
-set_option backward.isDefEq.respectTransparency false in
 theorem gal_X_pow_sub_C_isSolvable_aux (n : ℕ) (a : F)
     (h : ((X ^ n - 1 : F[X]).map (RingHom.id F)).Splits) : IsSolvable (X ^ n - C a).Gal := by
   by_cases ha : a = 0
@@ -214,44 +213,51 @@ theorem solvableByRad.rad_mem {x : E} {n : ℕ} (hn : n ≠ 0) (hx : x ^ n ∈ s
     x ∈ solvableByRad F E := by
   grind [solvableByRad]
 
+variable (F E) in
+theorem solvableByRad_le_algClosure : solvableByRad F E ≤ algebraicClosure F E := by
+  refine solvableByRad_le fun x n hn hx ↦ ?_
+  rw [mem_algebraicClosure_iff] at hx ⊢
+  obtain ⟨p, h1, h2⟩ := hx
+  refine ⟨p.comp (X ^ n), ⟨fun h ↦ h1 (leadingCoeff_eq_zero.mp ?_), ?_⟩⟩
+  · rwa [← leadingCoeff_eq_zero, leadingCoeff_comp, leadingCoeff_X_pow, one_pow, mul_one] at h
+    rwa [natDegree_X_pow]
+  · simpa [aeval_comp]
+
+theorem isAlgebraic_solvableByRad : (solvableByRad F E).IsAlgebraic :=
+  fun _ hx ↦ mem_algebraicClosure_iff.1 (solvableByRad_le_algClosure _ _ hx)
+
+theorem isIntegral_of_mem_solvableByRad {x : E} (hx : x ∈ solvableByRad F E) : IsIntegral F x :=
+  (isAlgebraic_solvableByRad _ hx).isIntegral
+
+@[deprecated isAlgebraic_solvableByRad (since := "2026-02-28")]
+alias solvableByRad.isIntegral := isIntegral_of_mem_solvableByRad
+
 /-- An induction principle for `solvableByRad`. -/
 @[elab_as_elim]
 protected theorem solvableByRad.induction (motive : ∀ x, x ∈ solvableByRad F E → Prop)
     (mem : ∀ x, motive (algebraMap F E x) (algebraMap_mem _ _))
     (add : ∀ x y (hx : x ∈ solvableByRad F E) (hy : y ∈ solvableByRad F E),
       motive x hx → motive y hy → motive (x + y) (add_mem hx hy))
-    (inv : ∀ x (hx : x ∈ solvableByRad F E), motive x hx → motive x⁻¹ (inv_mem hx))
     (mul : ∀ x y (hx : x ∈ solvableByRad F E) (hy : y ∈ solvableByRad F E),
       motive x hx → motive y hy → motive (x * y) (mul_mem hx hy))
     (rad : ∀ n x (hn : n ≠ 0) (hx : x ^ n ∈ solvableByRad F E),
       motive (x ^ n) hx → motive x (rad_mem hn hx))
     {x : E} (hx : x ∈ solvableByRad F E) : motive x hx := by
-  let s : IntermediateField F E := {
+  let s : Subalgebra F E := {
     carrier := {x | ∃ hx : x ∈ solvableByRad F E, motive x hx}
     algebraMap_mem' a := ⟨algebraMap_mem _ a, mem a⟩
     add_mem' := fun ⟨ha, ha'⟩ ⟨hb, hb'⟩ ↦ ⟨add_mem ha hb, add _ _ ha hb ha' hb'⟩
-    inv_mem' a := fun ⟨ha, ha'⟩ ↦ ⟨inv_mem ha, inv a ha ha'⟩
     mul_mem' := fun ⟨ha, ha'⟩ ⟨hb, hb'⟩ ↦ ⟨mul_mem ha hb, mul _ _ ha hb ha' hb'⟩
   }
-  have ⟨_, h⟩ := solvableByRad_le (s := s) ?_ hx
-  · exact h
-  · exact fun x n hn ⟨hx, hx'⟩ ↦ ⟨rad_mem hn hx, rad _ _ hn hx hx'⟩
-
-theorem isIntegral_of_mem_solvableByRad {x : E} (hx : x ∈ solvableByRad F E) : IsIntegral F x := by
-  induction hx using solvableByRad.induction with
-  | mem y => exact isIntegral_algebraMap
-  | add y z _ _ hy hz => exact hy.add hz
-  | inv y _ hy => exact hy.inv
-  | mul y z _ _ hy hz => exact hy.mul hz
-  | rad n y hn _ hy =>
-    obtain ⟨p, h1, h2⟩ := hy.isAlgebraic
-    refine IsAlgebraic.isIntegral ⟨p.comp (X ^ n),
-      ⟨fun h => h1 (leadingCoeff_eq_zero.mp ?_), by rw [aeval_comp, aeval_X_pow, h2]⟩⟩
-    rwa [← leadingCoeff_eq_zero, leadingCoeff_comp, leadingCoeff_X_pow, one_pow, mul_one] at h
-    rwa [natDegree_X_pow]
-
-@[deprecated (since := "2026-02-28")]
-alias solvableByRad.isIntegral := isIntegral_of_mem_solvableByRad
+  let t : IntermediateField F E := Subalgebra.IsAlgebraic.toIntermediateField (S := s) <| by
+    rintro x ⟨hx, hx'⟩
+    apply isAlgebraic_solvableByRad
+    exact hx
+  have ht (x n) (hn : n ≠ 0) : x ^ n ∈ t → x ∈ t := by
+    rintro ⟨hx, hx'⟩
+    exact ⟨rad_mem hn hx, rad _ _ hn hx hx'⟩
+  obtain ⟨_, h⟩ := solvableByRad_le (s := t) ht hx
+  exact h
 
 /-- An auxiliary induction lemma, which is generalized by `solvableByRad.isSolvable`. -/
 private theorem induction_rad {x : E} (hx : x ∈ solvableByRad F E) {n : ℕ} (hn : n ≠ 0)
@@ -317,8 +323,6 @@ theorem isSolvable_gal_minpoly {x : E} (hx : x ∈ solvableByRad F E) :
     apply induction_two hy hz (add_mem hy hz) hy' hz' (add_mem _ _) <;> apply subset_adjoin <;> simp
   | mul y z hy hz hy' hz' =>
     apply induction_two hy hz (mul_mem hy hz) hy' hz' (mul_mem _ _) <;> apply subset_adjoin <;> simp
-  | inv y hy hy' =>
-    apply induction_two hy hy (inv_mem hy) hy' hy' (inv_mem _); apply subset_adjoin; simp
   | rad n y hn hy hy' => exact induction_rad (solvableByRad.rad_mem hn hy) hn hy'
 
 @[deprecated (since := "2026-02-28")]
