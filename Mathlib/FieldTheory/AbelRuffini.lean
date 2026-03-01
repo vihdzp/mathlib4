@@ -253,10 +253,6 @@ theorem isIntegral_of_mem_solvableByRad {x : E} (hx : x ∈ solvableByRad F E) :
 @[deprecated (since := "2026-02-28")]
 alias solvableByRad.isIntegral := isIntegral_of_mem_solvableByRad
 
-/-- The statement to be proved inductively -/
-private def P (α : solvableByRad F E) : Prop :=
-  IsSolvable (minpoly F α).Gal
-
 /-- An auxiliary induction lemma, which is generalized by `solvableByRad.isSolvable`. -/
 private theorem induction_rad {x : E} (hx : x ∈ solvableByRad F E) {n : ℕ} (hn : n ≠ 0)
   (hα : IsSolvable (minpoly F (x ^ n)).Gal) : IsSolvable (minpoly F x).Gal := by
