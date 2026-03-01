@@ -259,9 +259,8 @@ protected theorem solvableByRad.induction (motive : ∀ x, x ∈ solvableByRad F
   obtain ⟨_, h⟩ := solvableByRad_le (s := t) ht hx
   exact h
 
-/-- An auxiliary induction lemma, which is generalized by `solvableByRad.isSolvable`. -/
 private theorem induction_rad {x : E} (hx : x ∈ solvableByRad F E) {n : ℕ} (hn : n ≠ 0)
-  (hα : IsSolvable (minpoly F (x ^ n)).Gal) : IsSolvable (minpoly F x).Gal := by
+    (hα : IsSolvable (minpoly F (x ^ n)).Gal) : IsSolvable (minpoly F x).Gal := by
   let p := minpoly F (x ^ n)
   have hp : p.comp (X ^ n) ≠ 0 := by
     intro h
@@ -288,7 +287,6 @@ private theorem induction_rad {x : E} (hx : x ∈ solvableByRad F E) {n : ℕ} (
 
 open IntermediateField
 
-/-- An auxiliary induction lemma, which is generalized by `solvableByRad.isSolvable`. -/
 private theorem induction_two {x y z : E}
     (hx : x ∈ solvableByRad F E) (hy : y ∈ solvableByRad F E) (hz : z ∈ solvableByRad F E)
     (hx' : IsSolvable (minpoly F x).Gal) (hy' : IsSolvable (minpoly F y).Gal) (hz' : z ∈ F⟮x, y⟯) :
@@ -320,9 +318,9 @@ theorem isSolvable_gal_minpoly {x : E} (hx : x ∈ solvableByRad F E) :
   induction hx using solvableByRad.induction with
   | mem y => rw [minpoly.eq_X_sub_C E]; infer_instance
   | add y z hy hz hy' hz' =>
-    apply induction_two hy hz (add_mem hy hz) hy' hz' (add_mem _ _) <;> apply subset_adjoin <;> simp
+    apply induction_two hy hz (add_mem hy hz) hy' hz' (add_mem ..) <;> apply subset_adjoin <;> simp
   | mul y z hy hz hy' hz' =>
-    apply induction_two hy hz (mul_mem hy hz) hy' hz' (mul_mem _ _) <;> apply subset_adjoin <;> simp
+    apply induction_two hy hz (mul_mem hy hz) hy' hz' (mul_mem ..) <;> apply subset_adjoin <;> simp
   | rad n y hn hy hy' => exact induction_rad (solvableByRad.rad_mem hn hy) hn hy'
 
 @[deprecated (since := "2026-02-28")]
