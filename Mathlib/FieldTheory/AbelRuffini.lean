@@ -334,8 +334,7 @@ theorem isSolvable_gal_of_irreducible {x : E} (hx : x ∈ solvableByRad F E) {q 
     rw [minpoly.eq_of_irreducible q_irred q_aeval]
     exact isSolvable_gal_minpoly hx
   refine solvable_of_surjective (Gal.restrictDvd_surjective ⟨C q.leadingCoeff⁻¹, rfl⟩ ?_)
-  rw [mul_ne_zero_iff, Ne, Ne, C_eq_zero, inv_eq_zero]
-  exact ⟨q_irred.ne_zero, leadingCoeff_ne_zero.mpr q_irred.ne_zero⟩
+  aesop
 
 @[deprecated (since := "2026-02-28")]
 alias solvableByRad.isSolvable' := isSolvable_gal_of_irreducible
