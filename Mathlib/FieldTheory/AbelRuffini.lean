@@ -229,7 +229,7 @@ theorem isAlgebraic_solvableByRad : (solvableByRad F E).IsAlgebraic :=
 theorem isIntegral_of_mem_solvableByRad {x : E} (hx : x ∈ solvableByRad F E) : IsIntegral F x :=
   (isAlgebraic_solvableByRad _ hx).isIntegral
 
-@[deprecated isAlgebraic_solvableByRad (since := "2026-02-28")]
+@[deprecated (since := "2026-02-28")]
 alias solvableByRad.isIntegral := isIntegral_of_mem_solvableByRad
 
 /-- An induction principle for `solvableByRad`. -/
