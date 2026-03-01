@@ -21,11 +21,11 @@ by radicals, then its minimal polynomial has solvable Galois group.
 
 ## Main results
 
-* the Abel-Ruffini Theorem `solvableByRad.isSolvable'` : An irreducible polynomial with a root
+* The Abel-Ruffini Theorem `isSolvable_gal_of_irreducible` : An irreducible polynomial with a root
   that is solvable by radicals has a solvable Galois group.
 -/
 
-@[expose] public section
+public section
 
 open Polynomial
 
