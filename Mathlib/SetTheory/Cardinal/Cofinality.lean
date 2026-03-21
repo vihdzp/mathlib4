@@ -398,6 +398,18 @@ theorem _root_.Cardinal.iSup_lt_of_lt_cof {f : α → Cardinal.{u}} {a : Cardina
   rw [← ord_lt_ord, iSup_ord]
   apply Ordinal.iSup_lt_of_lt_cof <;> simpa
 
+theorem cof_lift_sSup_add_one_le {s : Set Ordinal.{u}} :
+    cof (lift.{u + 1} <| sSup ((· + 1) '' s)) ≤ #s := by
+  by_contra!
+  refine lt_irrefl _ (sSup_add_one_lt_of_lt_cof this fun i hi ↦ ?_)
+  rw [← add_one_le_iff]
+  apply le_csSup (bddAbove_image ..)
+  · simpa
+  · rw [bddAbove_iff_small, small_iff_lift_mk_lt_univ, Cardinal.lift_id]
+    apply this.trans
+    rw [← lift_cof]
+    exact lift_lt_univ _
+
 /-! ### Cofinality of suprema and least strict upper bounds -/
 
 -- TODO: use `⨆ i, f i + 1` instead of `lsub`
