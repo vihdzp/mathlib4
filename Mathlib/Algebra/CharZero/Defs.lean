@@ -84,6 +84,10 @@ theorem cast_eq_one {n : ℕ} : (n : R) = 1 ↔ n = 1 := by rw [← cast_one, ca
 theorem cast_ne_one {n : ℕ} : (n : R) ≠ 1 ↔ n ≠ 1 :=
   cast_eq_one.not
 
+@[simp, norm_cast]
+theorem cast_add_one_eq_one {n : ℕ} : (n : R) + 1 = 1 ↔ n = 0 := by
+  rw [← Nat.cast_add_one, Nat.cast_eq_one, Nat.add_eq_right]
+
 end Nat
 
 namespace OfNat
