@@ -75,7 +75,7 @@ protected theorem id (ho : o ≤ o.cof.ord) : IsFundamentalSeq (o := o) id where
 protected theorem zero (f : Iio 0 → Iio 0) : IsFundamentalSeq f where
   strictMono _ := by simp
   le_ord_cof := by simp
-  isCofinal_range := by rw [range_eq_empty, isCofinal_empty_iff]; infer_instance
+  isCofinal_range := .of_isEmpty _
 
 /-- The length one sequence `(o)` is a fundamental sequence for `o + 1`. -/
 protected theorem add_one (o : Ordinal) :
@@ -83,6 +83,13 @@ protected theorem add_one (o : Ordinal) :
   strictMono _ := by simp
   le_ord_cof := by simp
   isCofinal_range := by simp [IsTop]
+
+theorem apply_of_add_one {o a : Ordinal} {f : Iio a → Iio (o + 1)} (hf : IsFundamentalSeq f)
+    (x : Iio a) : f x = ⟨o, lt_add_one o⟩ := by
+  cases x with | mk x hx
+  obtain rfl : 1 = a := by simpa using hf.ord_cof
+  obtain rfl : x = 0 := by simpa using hx
+  simpa [← Subtype.val_inj] using hf.iSup_add_one_eq
 
 protected theorem comp (hf : IsFundamentalSeq f) (hg : IsFundamentalSeq g) :
     IsFundamentalSeq (f ∘ g) where
@@ -118,6 +125,34 @@ theorem exists_isFundamentalSeq (ha : o.cof.ord = a) : ∃ f : Iio a → Iio o, 
   refine ⟨fun i ↦ g i, le_rfl, fun _ ↦ by simp, ?_⟩
   rw [range_comp', OrderIso.map_isCofinal_iff, range_comp', g.range_eq]
   simpa
+
+def FundamentalSystem (o : Ordinal) : Type _ :=
+  ∀ i : Iio o, ∀ a, i.1.cof.ord = a → {f : Iio a → Iio i.1 // IsFundamentalSeq f}
+
+namespace FundamentalSystem
+variable {o : Ordinal} (f : FundamentalSystem o)
+
+def get (i : Iio o) (a : Ordinal) (ha : i.1.cof.ord = a) : Iio a → Iio i.1 :=
+  (f i a ha).1
+
+theorem isFundamentalSeq_get {i : Iio o} {a : Ordinal} (ha : i.1.cof.ord = a) :
+    IsFundamentalSeq (f.get i a ha) :=
+  (f i a ha).2
+
+@[simp]
+theorem get_add_one {a : Ordinal} (ho : a + 1 < o) (x : Iio 1) :
+    f.get ⟨a + 1, ho⟩ 1 (by simp) x = ⟨a, lt_add_one a⟩ :=
+  (f.isFundamentalSeq_get _).apply_of_add_one _
+
+private noncomputable def fastGrowing' (ho : o < ω₁) (i : Iio o) : ℕ → ℕ :=
+  SuccOrder.limitRecOn i (fun _ _ n ↦ n + 1) (fun a _ IH n ↦ IH^[n] n) fun a ha IH n ↦
+    let b := f.get a ω ?_ ⟨n, natCast_lt_omega0 n⟩
+    IH ⟨b.1, lt_trans (b := a.1) b.2 a.2⟩ b.2 n
+where finally
+  
+
+end FundamentalSystem
+#exit
 
 /-! ### Deprecated material -/
 
