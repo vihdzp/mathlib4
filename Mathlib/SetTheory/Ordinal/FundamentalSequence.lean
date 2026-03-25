@@ -144,15 +144,21 @@ theorem get_add_one {a : Ordinal} (ho : a + 1 < o) (x : Iio 1) :
     f.get ⟨a + 1, ho⟩ 1 (by simp) x = ⟨a, lt_add_one a⟩ :=
   (f.isFundamentalSeq_get _).apply_of_add_one _
 
-private noncomputable def fastGrowing' (ho : o < ω₁) (i : Iio o) : ℕ → ℕ :=
+noncomputable def fastGrowing (ho : o < ω₁) (i : Iio o) : ℕ → ℕ :=
   SuccOrder.limitRecOn i (fun _ _ n ↦ n + 1) (fun a _ IH n ↦ IH^[n] n) fun a ha IH n ↦
     let b := f.get a ω ?_ ⟨n, natCast_lt_omega0 n⟩
     IH ⟨b.1, lt_trans (b := a.1) b.2 a.2⟩ b.2 n
 where finally
-  
+  rw [← ord_aleph0, ord_inj]
+  exact cof_eq_aleph0_of_isSuccLimit (ha.subtypeVal <| isLowerSet_Iio o) (a.2.trans ho)
+
+theorem fastGrowing_zero (ho : o < ω₁) (ho' : 0 < o) (n : ℕ) :
+    fastGrowing f ho ⟨0, ho'⟩ n = n + 1 := by
+  apply congrFun
+  apply SuccOrder.limitRecOn_isMin
+  simp [IsMin]
 
 end FundamentalSystem
-#exit
 
 /-! ### Deprecated material -/
 
