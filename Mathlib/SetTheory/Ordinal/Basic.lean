@@ -1317,16 +1317,13 @@ theorem lift_lt_univ' (c : Cardinal) : lift.{max (u + 1) v, u} c < univ.{u, v} :
   rw [lift_lift, lift_univ, univ_umax.{u, v}] at this
   exact this
 
-theorem aleph0_lt_univ : ℵ₀ < univ.{u, v} := by
-  simpa using lift_lt_univ' ℵ₀
+@[simp] theorem aleph0_lt_univ : ℵ₀ < univ := by simpa using lift_lt_univ' ℵ₀
+@[simp] theorem natCast_lt_univ (n : ℕ) : n < univ := natCast_lt_aleph0.trans aleph0_lt_univ
+@[simp] theorem univ_pos : 0 < univ := aleph0_lt_univ.pos
+@[simp] theorem univ_ne_zero : univ ≠ 0 := univ_pos.ne'
 
-theorem nat_lt_univ (n : ℕ) : n < univ.{u, v} := natCast_lt_aleph0.trans aleph0_lt_univ
-
-theorem univ_pos : 0 < univ.{u, v} :=
-  aleph0_pos.trans aleph0_lt_univ
-
-theorem univ_ne_zero : univ.{u, v} ≠ 0 :=
-  univ_pos.ne'
+@[deprecated (since := "2026-04-05")]
+alias nat_lt_univ := natCast_lt_univ
 
 @[simp]
 theorem ord_univ : ord univ.{u, v} = Ordinal.univ.{u, v} := by
