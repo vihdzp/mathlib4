@@ -5,7 +5,7 @@ Authors: Violeta Hernández Palacios
 -/
 module
 
-public import Mathlib.SetTheory.Cardinal.Cofinality
+public import Mathlib.SetTheory.Cardinal.Cofinality.Enum
 public import Mathlib.Order.DirSupClosed
 
 /-!
