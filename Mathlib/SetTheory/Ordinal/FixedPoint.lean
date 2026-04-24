@@ -6,6 +6,7 @@ Authors: Violeta Hernández Palacios, Mario Carneiro
 module
 
 public import Mathlib.Logic.Small.List
+public import Mathlib.SetTheory.Cardinal.Club
 public import Mathlib.SetTheory.Ordinal.Enum
 public import Mathlib.SetTheory.Ordinal.Exponential
 
@@ -27,14 +28,11 @@ Moreover, we prove some lemmas about the fixed points of specific normal functio
 * `deriv_mul_eq_opow_omega0_mul`: a characterization of the derivative of multiplication.
 -/
 
-@[expose] public section
-
-
-noncomputable section
+@[expose] public noncomputable section
 
 universe u v
 
-open Function Order
+open Cardinal Function Order
 
 namespace Ordinal
 

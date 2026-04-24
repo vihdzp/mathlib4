@@ -5,6 +5,7 @@ Authors: Violeta Hernández Palacios
 -/
 module
 
+public import Mathlib.SetTheory.Cardinal.Arithmetic
 public import Mathlib.SetTheory.Cardinal.Cofinality.Enum
 public import Mathlib.Order.DirSupClosed
 
@@ -22,11 +23,13 @@ For any type equipped with the Scott-Hausdorff topology (which includes well-ord
 topology), `DirSupClosed s` and `IsClosed s` are equivalent predicates.
 -/
 
-@[expose] public section
+@[expose] public noncomputable section
 
 universe u v
 
-open Cardinal Order
+open Cardinal Function Order
+
+/-! ### Club sets -/
 
 /-- A club set is closed under suprema and cofinal. -/
 structure IsClub {α : Type*} [LinearOrder α] (s : Set α) where
@@ -81,7 +84,6 @@ theorem IsClub.iInter_of_cof_le_one {ι : Type*} {f : ι → Set α} (hα : cof 
   exact .sInter_of_cof_le_one hα (by simpa)
 
 section WellFoundedLT
-
 variable [WellFoundedLT α]
 
 attribute [local instance]
