@@ -139,4 +139,9 @@ theorem Order.IsNormal.isClub_fixedPoints {f : α → α} (hα : cof α ≠ ℵ�
         ((aleph0_le_cof.lt_of_ne' hα).trans_le' ?_)
       simpa using mk_range_le_lift (f := fun n : ℕ ↦ f^[n] a)
 
+theorem Order.isNormal_enum_fixedPoints [IsRegularCardinalOrder α] {f : α → α}
+    (hα : cof α ≠ ℵ₀) (hf : IsNormal f) :
+    IsNormal (Subtype.val ∘ enum _ hf.isClub_fixedPoints.isCofinal) := by
+  sorry
+
 end WellFoundedLT
