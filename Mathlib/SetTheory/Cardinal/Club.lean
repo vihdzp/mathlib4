@@ -139,9 +139,34 @@ theorem Order.IsNormal.isClub_fixedPoints {f : α → α} (hα : cof α ≠ ℵ�
         ((aleph0_le_cof.lt_of_ne' hα).trans_le' ?_)
       simpa using mk_range_le_lift (f := fun n : ℕ ↦ f^[n] a)
 
-theorem Order.isNormal_enum_fixedPoints [IsRegularCardinalOrder α] {f : α → α}
-    (hα : cof α ≠ ℵ₀) (hf : IsNormal f) :
-    IsNormal (Subtype.val ∘ enum _ hf.isClub_fixedPoints.isCofinal) := by
-  sorry
+theorem Order.isNormal_enum_iff [IsRegularCardinalOrder α] {s : Set α} (hs : IsCofinal s) :
+    IsNormal (Subtype.val ∘ enum s hs) ↔ DirSupClosed s where
+  mp h t ht ht₀ _ a ha := by
+    have : Nonempty α := ⟨a⟩
+    suffices a = enum s hs (sSup (Subtype.val ∘ enum s hs ⁻¹' t)) from this ▸ Subtype.coe_prop _
+    rw [← Function.comp_apply (f := Subtype.val), h.map_sSup,
+      Set.image_preimage_eq_of_subset (by simpa), ha.csSup_eq ht₀]
+    · obtain ⟨b, hb⟩ := ht₀
+      use (enum s hs).symm ⟨b, ht hb⟩
+      simpa
+    · refine ⟨a, fun b hb ↦ (ha.1 hb).trans' ?_⟩
+      simpa using (enum s hs).strictMono.le_apply
+  mpr h := by
+    refine ⟨(enum s hs).strictMono, fun {a} ha b hb ↦ ?_⟩
+    have : Nonempty α := ⟨a⟩
+    have bdd : BddAbove (Subtype.val ∘ ⇑(enum s hs) '' Set.Iio a) := by
+      refine ⟨enum s hs a, fun b hb ↦ le_of_lt ?_⟩
+      aesop
+    refine (csSup_le' hb).trans' (enum_le_of_forall_lt ?_ fun b hb ↦ ?_)
+    · apply h _ _ (Std.Total.directedOn _) (isLUB_csSup' bdd)
+      · grind
+      · simpa using ha.ne_bot
+    · obtain ⟨c, hca, hbc⟩ := ha.lt_iff_exists_lt.1 hb
+      apply (Subtype.strictMono_coe _ ((enum s hs).strictMono hbc)).trans_le
+      exact le_csSup bdd (⟨c, by simpa⟩)
+
+theorem IsClub.isNormal_enum [IsRegularCardinalOrder α] {s : Set α} (hs : IsClub s) :
+    IsNormal (Subtype.val ∘ enum s hs.isCofinal) :=
+  (isNormal_enum_iff _).2 hs.dirSupClosed
 
 end WellFoundedLT
