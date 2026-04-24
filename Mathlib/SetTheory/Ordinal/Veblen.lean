@@ -39,7 +39,7 @@ The following notation is scoped to the `Ordinal` namespace.
 * [Larry W. Miller, Normal functions and constructive ordinal notations][Miller_1976]
 -/
 
-@[expose] public section
+public section
 
 noncomputable section
 
@@ -55,68 +55,74 @@ variable {f : Ordinal.{u} → Ordinal.{u}} {o o₁ o₂ a b x : Ordinal.{u}}
 
 section veblenWith
 
-/-- `veblenWith f o` is the `o`-th function in the Veblen hierarchy starting with `f`. This is
+private def veblenWithAux (f : Ordinal.{u} → Ordinal.{u}) (hf : IsNormal f) (o : Ordinal.{u}) :
+    {g : Ordinal.{u} → Ordinal.{u} // IsNormal g} :=
+  WellFoundedLT.fix (motive := fun _ ↦ Subtype _) (x := o) fun o IH ↦
+    if o = 0 then ⟨f, hf⟩ else
+      ⟨derivSet (.range fun x : Iio o ↦ IH x.1 x.2) (by grind), isNormal_derivSet (by grind)⟩
+
+/-- `veblenWith f hf o` is the `o`-th function in the Veblen hierarchy starting with `f`. This is
 defined so that
 
 - `veblenWith f 0 = f`.
-- `veblenWith f o` for `o ≠ 0` enumerates the common fixed points of `veblenWith f o'` over all
+- `veblenWith f hf o` for `o ≠ 0` enumerates the common fixed points of `veblenWith f hf o'` over all
   `o' < o`.
 -/
 @[pp_nodot]
-def veblenWith (f : Ordinal.{u} → Ordinal.{u}) (o : Ordinal.{u}) : Ordinal.{u} → Ordinal.{u} :=
-  if o = 0 then f else derivFamily fun (⟨x, _⟩ : Iio o) ↦ veblenWith f x
-termination_by o
-
-@[simp]
-theorem veblenWith_zero (f : Ordinal → Ordinal) : veblenWith f 0 = f := by
-  rw [veblenWith, if_pos rfl]
-
-theorem veblenWith_of_ne_zero (f : Ordinal → Ordinal) (h : o ≠ 0) :
-    veblenWith f o = derivFamily fun x : Iio o ↦ veblenWith f x.1 := by
-  rw [veblenWith, if_neg h]
-
-/-- `veblenWith f o` is always normal for `o ≠ 0`. See `isNormal_veblenWith` for a version which
-assumes `IsNormal f`. -/
-theorem isNormal_veblenWith' (f : Ordinal → Ordinal) (h : o ≠ 0) : IsNormal (veblenWith f o) := by
-  rw [veblenWith_of_ne_zero f h]
-  exact isNormal_derivFamily _
+def veblenWith (f : Ordinal → Ordinal) (hf : IsNormal f) (o x : Ordinal) : Ordinal :=
+  (veblenWithAux f hf o).1 x
 
 variable (hf : IsNormal f)
 include hf
 
-/-- `veblenWith f o` is always normal whenever `f` is. See `isNormal_veblenWith'` for a version
-which does not assume `IsNormal f`. -/
-theorem isNormal_veblenWith (o : Ordinal) : IsNormal (veblenWith f o) := by
-  obtain rfl | h := eq_or_ne o 0
-  · rwa [veblenWith_zero]
-  · exact isNormal_veblenWith' f h
+@[simp]
+theorem isNormal_veblenWith (o : Ordinal) : IsNormal (veblenWith f hf o) :=
+  (veblenWithAux f hf o).2
+
+@[deprecated (since := "2026-04-24")] alias isNormal_veblenWith' := isNormal_veblenWith
+
+@[simp]
+theorem veblenWith_zero : veblenWith f hf 0 = f := by
+  ext
+  rw [veblenWith, veblenWithAux, WellFoundedLT.fix_eq]
+  simp
+
+theorem veblenWith_of_ne_zero (h : o ≠ 0) :
+    veblenWith f hf o = derivSet (veblenWith f hf '' Iio o) (by simp) := by
+  ext
+  rw [veblenWith, veblenWithAux, WellFoundedLT.fix_eq]
+  simp only [h, ↓reduceIte]
+  congr
+  ext
+  simp only [mem_range, Subtype.exists, exists_prop]
+  rfl
 
 @[deprecated (since := "2025-12-25")]
 protected alias IsNormal.veblenWith := isNormal_veblenWith
 
 theorem mem_range_veblenWith (h : o ≠ 0) :
-    a ∈ range (veblenWith f o) ↔ ∀ b < o, veblenWith f b a = a := by
-  rw [veblenWith_of_ne_zero f h, mem_range_derivFamily (fun _ ↦ isNormal_veblenWith hf _)]
-  exact Subtype.forall
+    a ∈ range (veblenWith f hf o) ↔ ∀ b < o, veblenWith f hf b a = a := by
+  rw [veblenWith_of_ne_zero hf h, mem_range_derivSet]
+  simp [Function.IsFixedPt]
 
 theorem veblenWith_veblenWith_of_lt (h : o₁ < o₂) (a : Ordinal) :
-    veblenWith f o₁ (veblenWith f o₂ a) = veblenWith f o₂ a := by
+    veblenWith f hf o₁ (veblenWith f hf o₂ a) = veblenWith f hf o₂ a := by
   apply (mem_range_veblenWith hf h.ne_bot).1 _ _ h
   simp
 
-theorem veblenWith_eq_self_of_le (h : o₁ ≤ o₂) (h' : veblenWith f o₂ a = a) :
-    veblenWith f o₁ a = a := by
+theorem veblenWith_eq_self_of_le (h : o₁ ≤ o₂) (h' : veblenWith f hf o₂ a = a) :
+    veblenWith f hf o₁ a = a := by
   obtain rfl | h := h.eq_or_lt
   · assumption
   · rw [← h', veblenWith_veblenWith_of_lt hf h]
 
-theorem veblenWith_mem_range : veblenWith f o a ∈ range f := by
+theorem veblenWith_mem_range : veblenWith f hf o a ∈ range f := by
   obtain rfl | h := eq_zero_or_pos o
   · simp
   · rw [← veblenWith_veblenWith_of_lt hf h]
     simp
 
-theorem veblenWith_add_one (o : Ordinal) : veblenWith f (o + 1) = deriv (veblenWith f o) := by
+theorem veblenWith_add_one (o : Ordinal) : veblenWith f hf (o + 1) = deriv (veblenWith f hf o) := by
   rw [deriv_eq_enumOrd (isNormal_veblenWith hf o),
     veblenWith_of_ne_zero f (add_pos_of_right zero_lt_one _).ne', derivFamily_eq_enumOrd]
   · apply congr_arg
@@ -135,28 +141,28 @@ theorem veblenWith_one : veblenWith f 1 = deriv f := by
   simpa using veblenWith_add_one hf 0
 
 @[deprecated veblenWith_add_one (since := "2026-02-26")]
-theorem veblenWith_succ (o : Ordinal) : veblenWith f (succ o) = deriv (veblenWith f o) :=
+theorem veblenWith_succ (o : Ordinal) : veblenWith f (succ o) = deriv (veblenWith f hf o) :=
   veblenWith_add_one hf o
 
-theorem veblenWith_right_strictMono (o : Ordinal) : StrictMono (veblenWith f o) :=
+theorem veblenWith_right_strictMono (o : Ordinal) : StrictMono (veblenWith f hf o) :=
   (isNormal_veblenWith hf o).strictMono
 
 @[simp]
-theorem veblenWith_lt_veblenWith_iff_right : veblenWith f o a < veblenWith f o b ↔ a < b :=
+theorem veblenWith_lt_veblenWith_iff_right : veblenWith f hf o a < veblenWith f hf o b ↔ a < b :=
   (veblenWith_right_strictMono hf o).lt_iff_lt
 
 @[simp]
-theorem veblenWith_le_veblenWith_iff_right : veblenWith f o a ≤ veblenWith f o b ↔ a ≤ b :=
+theorem veblenWith_le_veblenWith_iff_right : veblenWith f hf o a ≤ veblenWith f hf o b ↔ a ≤ b :=
   (veblenWith_right_strictMono hf o).le_iff_le
 
-theorem veblenWith_injective (o : Ordinal) : Function.Injective (veblenWith f o) :=
+theorem veblenWith_injective (o : Ordinal) : Function.Injective (veblenWith f hf o) :=
   (veblenWith_right_strictMono hf o).injective
 
 @[simp]
-theorem veblenWith_inj : veblenWith f o a = veblenWith f o b ↔ a = b :=
+theorem veblenWith_inj : veblenWith f hf o a = veblenWith f hf o b ↔ a = b :=
   (veblenWith_injective hf o).eq_iff
 
-theorem right_le_veblenWith (o a : Ordinal) : a ≤ veblenWith f o a :=
+theorem right_le_veblenWith (o a : Ordinal) : a ≤ veblenWith f hf o a :=
   (veblenWith_right_strictMono hf o).le_apply
 
 theorem veblenWith_left_monotone (a : Ordinal) : Monotone (veblenWith f · a) := by
@@ -165,7 +171,7 @@ theorem veblenWith_left_monotone (a : Ordinal) : Monotone (veblenWith f · a) :=
   rw [← veblenWith_veblenWith_of_lt hf h]
   exact (veblenWith_right_strictMono hf o₁).monotone (right_le_veblenWith hf o₂ a)
 
-theorem veblenWith_pos (hp : 0 < f 0) : 0 < veblenWith f o a := by
+theorem veblenWith_pos (hp : 0 < f 0) : 0 < veblenWith f hf o a := by
   have H (b) : 0 < veblenWith f 0 b := by
     rw [veblenWith_zero]
     exact hp.trans_le (hf.monotone (zero_le _))
@@ -181,17 +187,17 @@ theorem veblenWith_zero_strictMono (hp : 0 < f 0) : StrictMono (veblenWith f · 
   exact veblenWith_pos hf hp
 
 theorem veblenWith_zero_lt_veblenWith_zero (hp : 0 < f 0) :
-    veblenWith f o₁ 0 < veblenWith f o₂ 0 ↔ o₁ < o₂ :=
+    veblenWith f hf o₁ 0 < veblenWith f hf o₂ 0 ↔ o₁ < o₂ :=
   (veblenWith_zero_strictMono hf hp).lt_iff_lt
 
 theorem veblenWith_zero_le_veblenWith_zero (hp : 0 < f 0) :
-    veblenWith f o₁ 0 ≤ veblenWith f o₂ 0 ↔ o₁ ≤ o₂ :=
+    veblenWith f hf o₁ 0 ≤ veblenWith f hf o₂ 0 ↔ o₁ ≤ o₂ :=
   (veblenWith_zero_strictMono hf hp).le_iff_le
 
-theorem veblenWith_zero_inj (hp : 0 < f 0) : veblenWith f o₁ 0 = veblenWith f o₂ 0 ↔ o₁ = o₂ :=
+theorem veblenWith_zero_inj (hp : 0 < f 0) : veblenWith f hf o₁ 0 = veblenWith f hf o₂ 0 ↔ o₁ = o₂ :=
   (veblenWith_zero_strictMono hf hp).injective.eq_iff
 
-theorem left_le_veblenWith (hp : 0 < f 0) (o a : Ordinal) : o ≤ veblenWith f o a :=
+theorem left_le_veblenWith (hp : 0 < f 0) (o a : Ordinal) : o ≤ veblenWith f hf o a :=
   (veblenWith_zero_strictMono hf hp).le_apply.trans <|
     (veblenWith_right_strictMono hf _).monotone (zero_le _)
 
@@ -218,59 +224,59 @@ theorem isNormal_veblenWith_zero (hp : 0 < f 0) : IsNormal (veblenWith f · 0) :
 alias IsNormal.veblenWith_zero := isNormal_veblenWith_zero
 
 theorem veblenWith_veblenWith_eq_veblenWith_iff (h : o₂ ≤ o₁) :
-    veblenWith f o₁ (veblenWith f o₂ a) = veblenWith f o₂ a ↔ veblenWith f o₁ a = a := by
+    veblenWith f hf o₁ (veblenWith f hf o₂ a) = veblenWith f hf o₂ a ↔ veblenWith f hf o₁ a = a := by
   grind [veblenWith_inj, → veblenWith_eq_self_of_le]
 
 theorem veblenWith_lt_veblenWith_veblenWith_iff (h : o₂ ≤ o₁) :
-    veblenWith f o₂ a < veblenWith f o₁ (veblenWith f o₂ a) ↔ a < veblenWith f o₁ a := by
+    veblenWith f hf o₂ a < veblenWith f hf o₁ (veblenWith f hf o₂ a) ↔ a < veblenWith f hf o₁ a := by
   simp_rw [(right_le_veblenWith hf ..).lt_iff_ne', ne_eq,
     veblenWith_veblenWith_eq_veblenWith_iff hf h]
 
-theorem veblenWith_apply_eq_apply_iff : veblenWith f o (f a) = f a ↔ veblenWith f o a = a := by
+theorem veblenWith_apply_eq_apply_iff : veblenWith f hf o (f a) = f a ↔ veblenWith f hf o a = a := by
   simpa using veblenWith_veblenWith_eq_veblenWith_iff hf (zero_le o)
 
-theorem apply_lt_veblenWith_apply_iff : f a < veblenWith f o (f a) ↔ a < veblenWith f o a := by
+theorem apply_lt_veblenWith_apply_iff : f a < veblenWith f hf o (f a) ↔ a < veblenWith f hf o a := by
   simpa using veblenWith_lt_veblenWith_veblenWith_iff hf (zero_le o)
 
 theorem cmp_veblenWith :
-    cmp (veblenWith f o₁ a) (veblenWith f o₂ b) =
+    cmp (veblenWith f hf o₁ a) (veblenWith f hf o₂ b) =
     match cmp o₁ o₂ with
     | .eq => cmp a b
-    | .lt => cmp a (veblenWith f o₂ b)
-    | .gt => cmp (veblenWith f o₁ a) b := by
+    | .lt => cmp a (veblenWith f hf o₂ b)
+    | .gt => cmp (veblenWith f hf o₁ a) b := by
   obtain h | rfl | h := lt_trichotomy o₁ o₂
   on_goal 2 => simp [(veblenWith_right_strictMono hf _).cmp_map_eq]
   all_goals
     conv_lhs => rw [← veblenWith_veblenWith_of_lt hf h]
     simp [h.cmp_eq_lt, h.cmp_eq_gt, (veblenWith_right_strictMono hf _).cmp_map_eq]
 
-/-- `veblenWith f o₁ a < veblenWith f o₂ b` iff one of the following holds:
+/-- `veblenWith f hf o₁ a < veblenWith f hf o₂ b` iff one of the following holds:
 * `o₁ = o₂` and `a < b`
-* `o₁ < o₂` and `a < veblenWith f o₂ b`
-* `o₁ > o₂` and `veblenWith f o₁ a < b` -/
+* `o₁ < o₂` and `a < veblenWith f hf o₂ b`
+* `o₁ > o₂` and `veblenWith f hf o₁ a < b` -/
 theorem veblenWith_lt_veblenWith_iff :
-    veblenWith f o₁ a < veblenWith f o₂ b ↔
-      o₁ = o₂ ∧ a < b ∨ o₁ < o₂ ∧ a < veblenWith f o₂ b ∨ o₂ < o₁ ∧ veblenWith f o₁ a < b := by
+    veblenWith f hf o₁ a < veblenWith f hf o₂ b ↔
+      o₁ = o₂ ∧ a < b ∨ o₁ < o₂ ∧ a < veblenWith f hf o₂ b ∨ o₂ < o₁ ∧ veblenWith f hf o₁ a < b := by
   rw [← cmp_eq_lt_iff, cmp_veblenWith hf]
   aesop (add simp lt_asymm)
 
-/-- `veblenWith f o₁ a ≤ veblenWith f o₂ b` iff one of the following holds:
+/-- `veblenWith f hf o₁ a ≤ veblenWith f hf o₂ b` iff one of the following holds:
 * `o₁ = o₂` and `a ≤ b`
-* `o₁ < o₂` and `a ≤ veblenWith f o₂ b`
-* `o₁ > o₂` and `veblenWith f o₁ a ≤ b` -/
+* `o₁ < o₂` and `a ≤ veblenWith f hf o₂ b`
+* `o₁ > o₂` and `veblenWith f hf o₁ a ≤ b` -/
 theorem veblenWith_le_veblenWith_iff :
-    veblenWith f o₁ a ≤ veblenWith f o₂ b ↔
-      o₁ = o₂ ∧ a ≤ b ∨ o₁ < o₂ ∧ a ≤ veblenWith f o₂ b ∨ o₂ < o₁ ∧ veblenWith f o₁ a ≤ b := by
+    veblenWith f hf o₁ a ≤ veblenWith f hf o₂ b ↔
+      o₁ = o₂ ∧ a ≤ b ∨ o₁ < o₂ ∧ a ≤ veblenWith f hf o₂ b ∨ o₂ < o₁ ∧ veblenWith f hf o₁ a ≤ b := by
   rw [← not_lt, ← cmp_eq_gt_iff, cmp_veblenWith hf]
   aesop (add simp [not_lt_of_ge, lt_asymm])
 
-/-- `veblenWith f o₁ a = veblenWith f o₂ b` iff one of the following holds:
+/-- `veblenWith f hf o₁ a = veblenWith f hf o₂ b` iff one of the following holds:
 * `o₁ = o₂` and `a = b`
-* `o₁ < o₂` and `a = veblenWith f o₂ b`
-* `o₁ > o₂` and `veblenWith f o₁ a = b` -/
+* `o₁ < o₂` and `a = veblenWith f hf o₂ b`
+* `o₁ > o₂` and `veblenWith f hf o₁ a = b` -/
 theorem veblenWith_eq_veblenWith_iff :
-    veblenWith f o₁ a = veblenWith f o₂ b ↔
-      o₁ = o₂ ∧ a = b ∨ o₁ < o₂ ∧ a = veblenWith f o₂ b ∨ o₂ < o₁ ∧ veblenWith f o₁ a = b := by
+    veblenWith f hf o₁ a = veblenWith f hf o₂ b ↔
+      o₁ = o₂ ∧ a = b ∨ o₁ < o₂ ∧ a = veblenWith f hf o₂ b ∨ o₂ < o₁ ∧ veblenWith f hf o₁ a = b := by
   rw [← cmp_eq_eq_iff, cmp_veblenWith hf]
   aesop (add simp lt_asymm)
 

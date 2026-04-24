@@ -422,6 +422,8 @@ theorem iSup_lt_lift {ι} {f : ι → Cardinal} {c : Cardinal}
 @[deprecated (since := "2026-03-22")]
 alias iSup_lt := Cardinal.iSup_lt_of_lt_cof_ord
 
+set_option linter.deprecated false in
+@[deprecated lift_iSup_lt_of_lt_cof (since := "2026-04-24")]
 theorem nfpFamily_lt_ord_lift {ι} {f : ι → Ordinal → Ordinal} {c} (hc : ℵ₀ < cof c)
     (hc' : Cardinal.lift.{v, u} #ι < cof c) (hf : ∀ (i), ∀ b < c, f i b < c) {a} (ha : a < c) :
     nfpFamily f a < c := by
@@ -434,13 +436,11 @@ theorem nfpFamily_lt_ord_lift {ι} {f : ι → Ordinal → Ordinal} {c} (hc : �
     | nil => exact ha
     | cons i l H => exact hf _ _ H
 
+set_option linter.deprecated false in
+@[deprecated lift_iSup_lt_of_lt_cof (since := "2026-04-24")]
 theorem nfpFamily_lt_ord {ι} {f : ι → Ordinal → Ordinal} {c} (hc : ℵ₀ < cof c) (hc' : #ι < cof c)
     (hf : ∀ (i), ∀ b < c, f i b < c) {a} : a < c → nfpFamily.{u, u} f a < c :=
   nfpFamily_lt_ord_lift hc (by rwa [(#ι).lift_id]) hf
-
-theorem nfp_lt_ord {f : Ordinal → Ordinal} {c} (hc : ℵ₀ < cof c) (hf : ∀ i < c, f i < c) {a} :
-    a < c → nfp f a < c :=
-  nfpFamily_lt_ord_lift hc (by simpa using Cardinal.one_lt_aleph0.trans hc) fun _ => hf
 
 set_option linter.deprecated false in
 @[deprecated exists_lsub_cof (since := "2026-03-21")]
