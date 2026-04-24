@@ -136,6 +136,10 @@ theorem lift_lt_univ' (c : Cardinal) : lift.{max (u + 1) v, u} c < univ.{u, v} :
 theorem aleph0_lt_univ : ℵ₀ < univ.{u, v} := by
   simpa using lift_lt_univ' ℵ₀
 
+@[simp]
+theorem aleph0_ne_univ : ℵ₀ ≠ univ.{u, v} :=
+  aleph0_lt_univ.ne
+
 theorem nat_lt_univ (n : ℕ) : n < univ.{u, v} := natCast_lt_aleph0.trans aleph0_lt_univ
 
 theorem univ_pos : 0 < univ.{u, v} :=
