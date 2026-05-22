@@ -32,6 +32,9 @@ universe u v
 
 open Cardinal Order Ordinal
 
+attribute [local instance]
+  WellFoundedLT.toOrderBot WellFoundedLT.conditionallyCompleteLinearOrderBot
+
 /-! ### Club sets -/
 
 /-- A club set is closed under suprema and cofinal. -/
@@ -54,6 +57,9 @@ theorem of_isEmpty [IsEmpty α] {s : Set α} : IsClub s :=
 @[simp]
 protected theorem univ : IsClub (α := α) .univ :=
   ⟨.univ, .univ⟩
+
+protected theorem nonempty [Nonempty α] (hs : IsClub s) : s.Nonempty :=
+  hs.isCofinal.nonempty
 
 theorem _root_.isClub_empty_iff : IsClub (α := α) ∅ ↔ IsEmpty α :=
   ⟨fun h ↦ isCofinal_empty_iff.1 h.isCofinal, fun _ ↦ .of_isEmpty⟩
@@ -96,11 +102,7 @@ theorem iInter_of_cof_le_one {ι : Type*} {f : ι → Set α} (hα : cof α ≤ 
   exact .sInter_of_cof_le_one hα (by simpa)
 
 section WellFoundedLT
-
 variable [WellFoundedLT α]
-
-attribute [local instance]
-  WellFoundedLT.toOrderBot WellFoundedLT.conditionallyCompleteLinearOrderBot
 
 protected theorem sInter {s : Set (Set α)} (hα : cof α ≠ ℵ₀) (hsα : #s < cof α)
     (hs : ∀ x ∈ s, IsClub x) : IsClub (⋂₀ s) := by
@@ -235,6 +237,34 @@ theorem IsStationary.of_not_isCofinal_compl (hs : ¬ IsCofinal (sᶜ)) : IsStati
 
 proof_wanted isStationary_iff_not_isCofinal_compl (hα : cof α ≤ ℵ₀) :
     IsStationary s ↔ ¬ IsCofinal (sᶜ)
+
+theorem IsClub.isStationary [WellFoundedLT α] (hα : ℵ₀ < cof α) (hs : IsClub s) :
+    IsStationary s := by
+  have := hα.ne_zero
+  rw [cof_ne_zero_iff] at this
+  exact fun t ht ↦ (hs.inter hα.ne' ht).nonempty
+
+theorem isStationary_setOf_le_cofWithin [WellFoundedLT α] {c : Cardinal} (hc : c < cof α) :
+    IsStationary {x : α | c ≤ cofWithin x} := by
+  have : Nonempty α := by rw [← cof_ne_zero_iff]; exact hc.ne_zero
+  intro s hs
+  have hcs := hc.trans_le <| cof_le hs.isCofinal
+  obtain ⟨t, ht, rfl⟩ := le_mk_iff_exists_subset.1 hcs.le
+  obtain rfl | ht₀ := t.eq_empty_or_nonempty
+  · simpa [mk_set_ne_zero_iff] using hcs.ne_zero
+  · refine ⟨sSup t, ?_, hs.dirSupClosed ht ht₀ (.of_linearOrder t) <|
+      isLUB_csSup ht₀ (.of_not_isCofinal (mt cof_le hc.not_ge))⟩
+    simp
+    sorry
+
+theorem isStationary_setOf_isSuccLimit [WellFoundedLT α] (hc : ℵ₀ < cof α) :
+    IsStationary {x : α | IsSuccLimit x} := by
+  simp_rw [← one_lt_cofWithin_iff, ← aleph0_le_cofWithin_iff]
+  apply isStationary_setOf_le_cofWithin hc
+
+theorem isStationary_setOf_isSuccPrelimit [WellFoundedLT α] (hc : ℵ₀ < cof α) :
+    IsStationary {x : α | IsSuccPrelimit x} :=
+  (isStationary_setOf_isSuccLimit hc).mono fun _ ↦ IsSuccLimit.isSuccPrelimit
 
 /-- **Fodor's lemma**, or the **pressing down lemma**: if `α` has the order type of a regular
 cardinal, `s` is a stationary set, and `f : α → α` is a regressive function on `s`, there exists

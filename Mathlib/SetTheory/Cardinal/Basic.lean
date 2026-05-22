@@ -965,7 +965,7 @@ theorem mk_subset_ge_of_subset_image (f : α → β) {s : Set α} {t : Set β} (
   rfl
 
 theorem le_mk_iff_exists_subset {c : Cardinal} {α : Type u} {s : Set α} :
-    c ≤ #s ↔ ∃ p : Set α, p ⊆ s ∧ #p = c := by
+    c ≤ #s ↔ ∃ p ⊆ s, #p = c := by
   rw [le_mk_iff_exists_set, ← Subtype.exists_set_subtype]
   apply exists_congr; intro t; rw [mk_image_eq]; apply Subtype.val_injective
 
