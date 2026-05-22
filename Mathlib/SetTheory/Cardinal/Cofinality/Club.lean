@@ -7,14 +7,17 @@ module
 
 public import Mathlib.Order.DirSupClosed
 public import Mathlib.Order.IsNormal
-public import Mathlib.SetTheory.Cardinal.Cofinality.Basic
+public import Mathlib.SetTheory.Cardinal.Cofinality.Enum
+public import Mathlib.SetTheory.Ordinal.Arithmetic
 
 /-!
-# Club sets
+# Club sets and stationary sets
 
-A subset of a well-ordered type `α` is called a club set when it is closed in the order topology and
-cofinal. If `α` has no maximum, then an equivalent condition is that `α` is closed and unbounded;
-hence the name.
+A subset of a well-ordered type `α` is called a **club set** when it is closed in the order topology
+and cofinal. If `α` has no maximum, then an equivalent condition is that `α` is closed and
+unbounded; hence the name.
+
+A set is called **stationary** when it intersects all club sets.
 
 ## Implementation notes
 
@@ -27,7 +30,9 @@ public section
 
 universe u v
 
-open Cardinal Order
+open Cardinal Order Ordinal
+
+/-! ### Club sets -/
 
 /-- A club set is closed under suprema and cofinal. -/
 structure IsClub {α : Type*} [LinearOrder α] (s : Set α) where
@@ -40,44 +45,53 @@ structure IsClub {α : Type*} [LinearOrder α] (s : Set α) where
 
 variable {α : Type v} {s t : Set α} {x : α} [LinearOrder α]
 
+namespace IsClub
+
 @[simp]
-theorem IsClub.of_isEmpty [IsEmpty α] {s : Set α} : IsClub s :=
+theorem of_isEmpty [IsEmpty α] {s : Set α} : IsClub s :=
   ⟨.of_isEmpty, .of_isEmpty⟩
 
 @[simp]
-theorem IsClub.univ : IsClub (α := α) .univ :=
+protected theorem univ : IsClub (α := α) .univ :=
   ⟨.univ, .univ⟩
 
-theorem IsClub.union (hs : IsClub s) (ht : IsClub t) : IsClub (s ∪ t) :=
+theorem _root_.isClub_empty_iff : IsClub (α := α) ∅ ↔ IsEmpty α :=
+  ⟨fun h ↦ isCofinal_empty_iff.1 h.isCofinal, fun _ ↦ .of_isEmpty⟩
+
+protected theorem union (hs : IsClub s) (ht : IsClub t) : IsClub (s ∪ t) :=
   ⟨hs.dirSupClosed.union ht.dirSupClosed, hs.isCofinal.mono Set.subset_union_left⟩
 
-theorem IsClub.isLUB_mem (hs : IsClub s) (ht : t ⊆ s) (ht₀ : t.Nonempty) (hx : IsLUB t x) : x ∈ s :=
+theorem isLUB_mem (hs : IsClub s) (ht : t ⊆ s) (ht₀ : t.Nonempty) (hx : IsLUB t x) : x ∈ s :=
   hs.dirSupClosed ht ht₀ (.of_linearOrder _) hx
 
-theorem IsClub.csSup_mem {α} [ConditionallyCompleteLinearOrder α] {s t : Set α}
+theorem csSup_mem {α} [ConditionallyCompleteLinearOrder α] {s t : Set α}
     (hs : IsClub s) (ht : t ⊆ s) (ht₀ : t.Nonempty) (ht₁ : BddAbove t) : sSup t ∈ s :=
   hs.isLUB_mem ht ht₀ (isLUB_csSup ht₀ ht₁)
 
-theorem IsClub.sInter_of_orderTop {s : Set (Set α)} [OrderTop α]
-    (hs : ∀ x ∈ s, IsClub x) : IsClub (⋂₀ s) := by
+theorem ciSup_mem {α} [ConditionallyCompleteLinearOrder α] {ι} {f : ι → α} [Nonempty ι]
+    {s : Set α} (hs : IsClub s) (ht : .range f ⊆ s) (ht' : BddAbove (.range f)) : ⨆ i, f i ∈ s :=
+  hs.csSup_mem ht (Set.range_nonempty _) ht'
+
+theorem sInter_of_orderTop {s : Set (Set α)} [OrderTop α] (hs : ∀ x ∈ s, IsClub x) :
+    IsClub (⋂₀ s) := by
   refine ⟨.sInter fun x hx ↦ (hs x hx).dirSupClosed, ?_⟩
   rw [isCofinal_iff_top_mem, Set.mem_sInter]
   exact fun x hx ↦ (hs x hx).isCofinal.top_mem
 
-theorem IsClub.iInter_of_orderTop {ι : Type*} {f : ι → Set α} [OrderTop α]
-    (hs : ∀ i, IsClub (f i)) : IsClub (⋂ i, f i) := by
+theorem iInter_of_orderTop {ι : Type*} {f : ι → Set α} [OrderTop α] (hs : ∀ i, IsClub (f i)) :
+    IsClub (⋂ i, f i) := by
   rw [← Set.sInter_range]
   exact .sInter_of_orderTop (by simpa)
 
-theorem IsClub.sInter_of_cof_le_one {s : Set (Set α)} (hα : cof α ≤ 1)
-    (hs : ∀ x ∈ s, IsClub x) : IsClub (⋂₀ s) := by
+theorem sInter_of_cof_le_one {s : Set (Set α)} (hα : cof α ≤ 1) (hs : ∀ x ∈ s, IsClub x) :
+    IsClub (⋂₀ s) := by
   cases isEmpty_or_nonempty α; · simp
   cases topOrderOrNoTopOrder α
   · exact .sInter_of_orderTop hs
   · cases one_lt_cof.not_ge hα
 
-theorem IsClub.iInter_of_cof_le_one {ι : Type*} {f : ι → Set α} (hα : cof α ≤ 1)
-    (hs : ∀ i, IsClub (f i)) : IsClub (⋂ i, f i) := by
+theorem iInter_of_cof_le_one {ι : Type*} {f : ι → Set α} (hα : cof α ≤ 1) (hs : ∀ i, IsClub (f i)) :
+    IsClub (⋂ i, f i) := by
   rw [← Set.sInter_range]
   exact .sInter_of_cof_le_one hα (by simpa)
 
@@ -88,7 +102,7 @@ variable [WellFoundedLT α]
 attribute [local instance]
   WellFoundedLT.toOrderBot WellFoundedLT.conditionallyCompleteLinearOrderBot
 
-theorem IsClub.sInter {s : Set (Set α)} (hα : cof α ≠ ℵ₀) (hsα : #s < cof α)
+protected theorem sInter {s : Set (Set α)} (hα : cof α ≠ ℵ₀) (hsα : #s < cof α)
     (hs : ∀ x ∈ s, IsClub x) : IsClub (⋂₀ s) := by
   cases isEmpty_or_nonempty α; · simp
   obtain hα | hα := hα.lt_or_gt
@@ -108,7 +122,7 @@ theorem IsClub.sInter {s : Set (Set α)} (hα : cof α ≠ ℵ₀) (hsα : #s < 
     · exact (hf ⟨t, ht⟩ _).2.trans <| hb ⟨_, rfl⟩
   · grind
 
-theorem IsClub.iInter {ι : Type u} {f : ι → Set α} (hα : cof α ≠ ℵ₀)
+protected theorem iInter {ι : Type u} {f : ι → Set α} (hα : cof α ≠ ℵ₀)
     (hι : Cardinal.lift.{v} #ι < Cardinal.lift.{u} (cof α)) (hf : ∀ i, IsClub (f i)) :
     IsClub (⋂ i, f i) := by
   rw [← Set.sInter_range]
@@ -116,7 +130,7 @@ theorem IsClub.iInter {ι : Type u} {f : ι → Set α} (hα : cof α ≠ ℵ₀
   rw [← Cardinal.lift_lt]
   exact mk_range_le_lift.trans_lt hι
 
-theorem IsClub.inter {s t : Set α} (hα : cof α ≠ ℵ₀) (hs : IsClub s) (ht : IsClub t) :
+protected theorem inter {s t : Set α} (hα : cof α ≠ ℵ₀) (hs : IsClub s) (ht : IsClub t) :
     IsClub (s ∩ t) := by
   rw [← Set.sInter_pair]
   have H : ∀ x ∈ ({s, t} : Set _), IsClub x := by simpa [hs]
@@ -125,10 +139,53 @@ theorem IsClub.inter {s t : Set α} (hα : cof α ≠ ℵ₀) (hs : IsClub s) (h
     exact .sInter_of_cof_le_one hα H
   · exact .sInter hα (hα'.trans_le' <| by simp) H
 
-theorem Order.IsNormal.isClub_range {f : α → α} (hf : IsNormal f) : IsClub (.range f) :=
+/-- Club sets are closed under diagonal intersections. -/
+protected theorem diag [IsRegularCardinalOrder α] {f : α → Set α} (hα : cof α ≠ ℵ₀)
+    (hf : ∀ a, IsClub (f a)) : IsClub {a | ∀ b < a, a ∈ f b} where
+  dirSupClosed t ht ht₀ _ a ha b hb := by
+    obtain ⟨c, hc, hbc, -⟩ := ha.exists_between hb
+    apply (hf b).isLUB_mem _ ⟨c, _⟩ (ha.inter_Ici_of_mem hc) <;> grind
+  isCofinal a := by
+    obtain hα | hα := hα.lt_or_gt
+    · rw [cof_lt_aleph0_iff, cof_eq_cardinalMk, le_one_iff_subsingleton] at hα
+      use a
+      simp
+    have : Nonempty α := ⟨a⟩
+    have := (noTopOrder_iff_noMaxOrder α).1 <| one_lt_cof_iff.1 (one_lt_aleph0.trans hα)
+    have (b : α) : ∃ c ∈ ⋂₀ (f '' Set.Iio b), b < c := by
+      obtain ⟨b', hb'⟩ := exists_gt b
+      have ⟨c, hc, hbc⟩ :=
+        (IsClub.sInter (s := f '' Set.Iio b) hα.ne' (mk_image_le.trans_lt ?_) ?_).isCofinal b'
+      · exact ⟨c, hc, hb'.trans_le hbc⟩
+      · simp
+      · simp [hf]
+    choose g hg using this
+    have hgm : StrictMono fun n ↦ g^[n] a := by
+      apply strictMono_of_lt_add_one fun n _ ↦ ?_
+      rw [← n.succ_eq_add_one, g.iterate_succ_apply']
+      exact (hg _).2
+    have hg' : IsLUB (.range fun n ↦ g^[n] a) (⨆ n, g^[n] a) := by
+      refine isLUB_ciSup (.of_not_isCofinal fun h ↦ ?_)
+      apply (Order.cof_le h).not_gt (hα.trans_le' _)
+      simpa using mk_range_le_lift (f := fun n ↦ g^[n] a)
+    refine ⟨⨆ n, g^[n] a, fun b hb ↦ ?_, hg'.1 ⟨0, rfl⟩⟩
+    obtain ⟨_, ⟨n, rfl⟩, hb, hn⟩ := hg'.exists_between hb
+    apply (hf b).isLUB_mem _ _ (hg'.inter_Ici_of_mem ⟨n + 1, rfl⟩)
+    · rintro _ ⟨⟨m, rfl⟩, hm⟩
+      rw [Set.mem_Ici, hgm.le_iff_le, Nat.add_one_le_iff] at hm
+      cases m with
+      | zero => contradiction
+      | succ m =>
+        simp_rw [g.iterate_succ_apply']
+        rw [Nat.lt_add_one_iff] at hm
+        simp_rw [Set.sInter_image, Set.mem_iInter] at hg
+        exact (hg _).1 _ (hb.trans_le <| hgm.monotone hm)
+    · use g^[n + 1] a; simp [- Function.iterate_succ]
+
+theorem _root_.Order.IsNormal.isClub_range {f : α → α} (hf : IsNormal f) : IsClub (.range f) :=
   ⟨hf.dirSupClosed_range, fun x ↦ ⟨_, ⟨x, rfl⟩, hf.strictMono.le_apply⟩⟩
 
-theorem Order.IsNormal.isClub_fixedPoints {f : α → α} (hα : cof α ≠ ℵ₀) (hf : IsNormal f) :
+theorem _root_.Order.IsNormal.isClub_fixedPoints {f : α → α} (hα : cof α ≠ ℵ₀) (hf : IsNormal f) :
     IsClub f.fixedPoints := by
   cases isEmpty_or_nonempty α; · simp
   refine ⟨fun s hs hs₀ _ a ha ↦ (hf.map_isLUB ha hs₀).unique ?_, fun a ↦ ?_⟩
@@ -144,3 +201,51 @@ theorem Order.IsNormal.isClub_fixedPoints {f : α → α} (hα : cof α ≠ ℵ�
       simpa using mk_range_le_lift (f := fun n : ℕ ↦ f^[n] a)
 
 end WellFoundedLT
+end IsClub
+
+/-! ### Stationary sets -/
+
+/-- A set is called stationary when it intersects all club sets. -/
+@[expose]
+def IsStationary (s : Set α) : Prop :=
+  ∀ ⦃t⦄, IsClub t → (s ∩ t).Nonempty
+
+@[gcongr]
+theorem IsStationary.mono (hs : IsStationary s) (h : s ⊆ t) : IsStationary t :=
+  fun _u hu ↦ (hs hu).mono (Set.inter_subset_inter_left _ h)
+
+theorem IsStationary.nonempty (hs : IsStationary s) : s.Nonempty := by
+  simpa using hs .univ
+
+theorem isStationary_univ_iff : IsStationary (.univ (α := α)) ↔ Nonempty α := by
+  simp [IsStationary, ← not_imp_not (b := IsClub _), Set.not_nonempty_iff_eq_empty,
+    isClub_empty_iff]
+
+@[simp]
+theorem IsStationary.univ [Nonempty α] : IsStationary (.univ (α := α)) :=
+  isStationary_univ_iff.2 ‹_›
+
+theorem IsStationary.of_not_isCofinal_compl (hs : ¬ IsCofinal (sᶜ)) : IsStationary s := by
+  intro t ht
+  obtain ⟨a, ha⟩ := not_isCofinal_iff.1 hs
+  obtain ⟨b, hb, hb'⟩ := ht.isCofinal a
+  refine ⟨b, ?_, hb⟩
+  contrapose! ha
+  exact ⟨b, ha, hb'⟩
+
+proof_wanted isStationary_iff_not_isCofinal_compl (hα : cof α ≤ ℵ₀) :
+    IsStationary s ↔ ¬ IsCofinal (sᶜ)
+
+/-- **Fodor's lemma**, or the **pressing down lemma**: if `α` has the order type of a regular
+cardinal, `s` is a stationary set, and `f : α → α` is a regressive function on `s`, there exists
+some stationary subset of `s` which is constant on `f`. -/
+theorem exists_isStationary_preimage_singleton
+    [WellFoundedLT α] [IsRegularCardinalOrder α] {f : α → α} (hα : cof α ≠ ℵ₀)
+    (hs : IsStationary s) (hf : ∀ x ∈ s, f x < x) : ∃ a, IsStationary (s ∩ f ⁻¹' {a}) := by
+  unfold IsStationary
+  by_contra!
+  choose g hg using this
+  simp_rw [Set.eq_empty_iff_forall_notMem] at hg
+  obtain ⟨a, hs, ha⟩ := hs <| .diag hα fun a ↦ (hg a).1
+  apply (hg (f a)).2 a
+  grind
