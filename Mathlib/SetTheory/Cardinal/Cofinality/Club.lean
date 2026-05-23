@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Order.DirSupClosed
 public import Mathlib.Order.IsNormal
+public import Mathlib.Order.Partition.Basic
 public import Mathlib.SetTheory.Cardinal.Cofinality.Basic
 
 /-!
@@ -314,8 +315,11 @@ theorem isStationary_union_iff (hα : cof α ≠ ℵ₀) :
     IsStationary (s ∪ t) ↔ IsStationary s ∨ IsStationary t := by
   simpa using isStationary_sUnion_countable_iff (s := {s, t}) hα
 
-/-! ### Solovay's splitting lemma -/
+/-! ### Solovay's splitting theorem -/
 
+/-- Given a matrix `f : s → β → α`, where the row `f x` corresponding to `x : s` converges to `x`,
+we can select a column `y : β` such that the subsets `{x : s | z < f x y}` of `s` remain
+stationary. -/
 private theorem exists_isStationary_column [NoMaxOrder α] {β} (f : α → β → α) (hα : cof α ≠ ℵ₀)
     (hβ : #β < cof α) (hs : IsStationary s) (hfs : ∀ x ∈ s, IsLUB (range (f x)) x) :
     ∃ y, ∀ z, IsStationary {x ∈ s | z < f x y} := by
@@ -331,5 +335,11 @@ private theorem exists_isStationary_column [NoMaxOrder α] {β} (f : α → β �
   rw [mem_iInter] at hxc
   apply ((hg y).2 ▸ notMem_empty) x ⟨⟨hxs, (le_ciSup ..).trans_lt hgy⟩, hxc y⟩
   exact .of_not_isCofinal <| mt cof_le (mk_range_le.trans_lt hβ).not_ge
+
+set_option linter.unusedSectionVars false in
+/-- **Solovay's splitting theorem**: every stationary set can be partitioned into `cof α`
+stationary sets. -/
+proof_wanted exists_partition_of_isStationary (hα : cof α ≠ ℵ₀) (hs : IsStationary s) :
+    ∃ p : Partition s, #p = cof α ∧ ∀ x ∈ p, IsStationary x
 
 end WellFoundedLT
