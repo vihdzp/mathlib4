@@ -42,6 +42,9 @@ structure IsClub {α : Type*} [LinearOrder α] (s : Set α) where
 
 variable {α : Type v} {s t : Set α} {x : α} [LinearOrder α]
 
+attribute [local instance]
+  WellFoundedLT.toOrderBot WellFoundedLT.conditionallyCompleteLinearOrderBot
+
 namespace IsClub
 
 @[simp]
@@ -122,9 +125,6 @@ theorem iInter_of_cof_le_one {ι : Type*} {f : ι → Set α} (hα : cof α ≤ 
 
 section WellFoundedLT
 variable [WellFoundedLT α]
-
-attribute [local instance]
-  WellFoundedLT.toOrderBot WellFoundedLT.conditionallyCompleteLinearOrderBot
 
 protected theorem sInter {s : Set (Set α)} (hα : cof α ≠ ℵ₀) (hsα : #s < cof α)
     (hs : ∀ x ∈ s, IsClub x) : IsClub (⋂₀ s) := by
@@ -313,5 +313,30 @@ theorem isStationary_iUnion_countable_iff {ι : Type*} {f : ι → Set α} [Coun
 theorem isStationary_union_iff (hα : cof α ≠ ℵ₀) :
     IsStationary (s ∪ t) ↔ IsStationary s ∨ IsStationary t := by
   simpa using isStationary_sUnion_countable_iff (s := {s, t}) hα
+
+/-! ### Solovay's splitting lemma -/
+
+theorem matrix [NoMaxOrder α] {β : Type v} (f : α → β → α) (hα : cof α ≠ ℵ₀) (hβ : #β < cof α)
+    (hs : IsStationary s) (hfs : ∀ x ∈ s, IsLUB (range (f x)) x) :
+    ∃ y, ∀ z, IsStationary {x ∈ s | z ≤ f x y} := by
+  have : Nonempty α := by
+    by_contra!
+    simp at hβ
+  unfold IsStationary
+  by_contra! H
+  choose g c hg using H
+  have hc := IsClub.iInter hα (by simpa) fun x ↦ (hg x).1
+  obtain ⟨x, hxs, hxc, hxg⟩ := hs (hc.inter_Ioi (iSup g))
+  have hx := hfs x hxs
+  rw [mem_iInter] at hxc
+  obtain ⟨-, ⟨y, rfl⟩, hgy, hyx⟩ := hx.exists_between hxg
+  have H := ((hg y).2 ▸ notMem_empty) x
+  simp_rw [mem_inter_iff, mem_setOf_eq, not_and] at H
+  apply H ⟨hxs, (le_ciSup ..).trans hgy.le⟩ (hxc y)
+  exact .of_not_isCofinal <| mt cof_le (mk_range_le.trans_lt hβ).not_ge
+
+
+
+
 
 end WellFoundedLT
