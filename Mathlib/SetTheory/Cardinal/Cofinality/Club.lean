@@ -316,9 +316,9 @@ theorem isStationary_union_iff (hα : cof α ≠ ℵ₀) :
 
 /-! ### Solovay's splitting lemma -/
 
-theorem matrix [NoMaxOrder α] {β : Type v} (f : α → β → α) (hα : cof α ≠ ℵ₀) (hβ : #β < cof α)
-    (hs : IsStationary s) (hfs : ∀ x ∈ s, IsLUB (range (f x)) x) :
-    ∃ y, ∀ z, IsStationary {x ∈ s | z ≤ f x y} := by
+private theorem exists_isStationary_column [NoMaxOrder α] {β} (f : α → β → α) (hα : cof α ≠ ℵ₀)
+    (hβ : #β < cof α) (hs : IsStationary s) (hfs : ∀ x ∈ s, IsLUB (range (f x)) x) :
+    ∃ y, ∀ z, IsStationary {x ∈ s | z < f x y} := by
   have : Nonempty α := by
     by_contra!
     simp at hβ
@@ -327,16 +327,9 @@ theorem matrix [NoMaxOrder α] {β : Type v} (f : α → β → α) (hα : cof �
   choose g c hg using H
   have hc := IsClub.iInter hα (by simpa) fun x ↦ (hg x).1
   obtain ⟨x, hxs, hxc, hxg⟩ := hs (hc.inter_Ioi (iSup g))
-  have hx := hfs x hxs
+  obtain ⟨-, ⟨y, rfl⟩, hgy, hyx⟩ := (hfs x hxs).exists_between hxg
   rw [mem_iInter] at hxc
-  obtain ⟨-, ⟨y, rfl⟩, hgy, hyx⟩ := hx.exists_between hxg
-  have H := ((hg y).2 ▸ notMem_empty) x
-  simp_rw [mem_inter_iff, mem_setOf_eq, not_and] at H
-  apply H ⟨hxs, (le_ciSup ..).trans hgy.le⟩ (hxc y)
+  apply ((hg y).2 ▸ notMem_empty) x ⟨⟨hxs, (le_ciSup ..).trans_lt hgy⟩, hxc y⟩
   exact .of_not_isCofinal <| mt cof_le (mk_range_le.trans_lt hβ).not_ge
-
-
-
-
 
 end WellFoundedLT
