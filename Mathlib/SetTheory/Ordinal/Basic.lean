@@ -165,6 +165,11 @@ theorem type_eq {α β} {r : α → α → Prop} {s : β → β → Prop} [IsWel
     type r = type s ↔ Nonempty (r ≃r s) :=
   Quotient.eq'
 
+theorem type_lt_eq {α β} [LinearOrder α] [LinearOrder β] [WellFoundedLT α] [WellFoundedLT β] :
+    typeLT α = typeLT β ↔ Nonempty (α ≃o β) := by
+  rw [type_eq]
+  exact ⟨fun ⟨h⟩ ↦ ⟨OrderIso.ofRelIsoLT h⟩, fun ⟨h⟩ ↦ ⟨h.toRelIsoLT⟩⟩
+
 theorem _root_.RelIso.ordinal_type_eq {α β} {r : α → α → Prop} {s : β → β → Prop} [IsWellOrder α r]
     [IsWellOrder β s] (h : r ≃r s) : type r = type s :=
   type_eq.2 ⟨h⟩

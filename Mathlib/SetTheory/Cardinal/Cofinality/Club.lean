@@ -6,8 +6,7 @@ Authors: Violeta Hernández Palacios
 module
 
 public import Mathlib.Order.DirSupClosed
-public import Mathlib.Order.IsNormal
-public import Mathlib.SetTheory.Cardinal.Cofinality.Basic
+public import Mathlib.SetTheory.Cardinal.Cofinality.Ordinal
 
 /-!
 # Club sets
@@ -27,7 +26,7 @@ public section
 
 universe u v
 
-open Cardinal Order
+open Cardinal Order Ordinal Set
 
 /-- A club set is closed under suprema and cofinal. -/
 structure IsClub {α : Type*} [LinearOrder α] (s : Set α) where
@@ -51,7 +50,7 @@ protected theorem univ : IsClub (α := α) .univ :=
   ⟨.univ, .univ⟩
 
 protected theorem union (hs : IsClub s) (ht : IsClub t) : IsClub (s ∪ t) :=
-  ⟨hs.dirSupClosed.union ht.dirSupClosed, hs.isCofinal.mono Set.subset_union_left⟩
+  ⟨hs.dirSupClosed.union ht.dirSupClosed, hs.isCofinal.mono subset_union_left⟩
 
 theorem isLUB_mem (hs : IsClub s) (ht : t ⊆ s) (ht₀ : t.Nonempty) (hx : IsLUB t x) : x ∈ s :=
   hs.dirSupClosed ht ht₀ (.of_linearOrder _) hx
@@ -63,12 +62,12 @@ theorem csSup_mem {α} [ConditionallyCompleteLinearOrder α] {s t : Set α}
 theorem sInter_of_orderTop {s : Set (Set α)} [OrderTop α] (hs : ∀ x ∈ s, IsClub x) :
     IsClub (⋂₀ s) := by
   refine ⟨.sInter fun x hx ↦ (hs x hx).dirSupClosed, ?_⟩
-  rw [isCofinal_iff_top_mem, Set.mem_sInter]
+  rw [isCofinal_iff_top_mem, mem_sInter]
   exact fun x hx ↦ (hs x hx).isCofinal.top_mem
 
 theorem iInter_of_orderTop {ι : Type*} {f : ι → Set α} [OrderTop α] (hs : ∀ i, IsClub (f i)) :
     IsClub (⋂ i, f i) := by
-  rw [← Set.sInter_range]
+  rw [← sInter_range]
   exact .sInter_of_orderTop (by simpa)
 
 theorem sInter_of_cof_le_one {s : Set (Set α)} (hα : cof α ≤ 1) (hs : ∀ x ∈ s, IsClub x) :
@@ -80,7 +79,7 @@ theorem sInter_of_cof_le_one {s : Set (Set α)} (hα : cof α ≤ 1) (hs : ∀ x
 
 theorem iInter_of_cof_le_one {ι : Type*} {f : ι → Set α} (hα : cof α ≤ 1) (hs : ∀ i, IsClub (f i)) :
     IsClub (⋂ i, f i) := by
-  rw [← Set.sInter_range]
+  rw [← sInter_range]
   exact .sInter_of_cof_le_one hα (by simpa)
 
 section WellFoundedLT
@@ -102,7 +101,7 @@ protected theorem sInter {s : Set (Set α)} (hα : cof α ≠ ℵ₀) (hsα : #s
     refine .of_not_isCofinal fun hg ↦ (cof_le hg).not_gt (hα.trans_le' ?_)
     simpa using mk_range_le_lift (f := g)
   refine ⟨_, fun t ht ↦ ?_, le_csSup hg ⟨0, rfl⟩⟩
-  apply (hs t ht).isLUB_mem (t := .range fun n ↦ f ⟨t, ht⟩ (g n)) _ (Set.range_nonempty _)
+  apply (hs t ht).isLUB_mem (t := .range fun n ↦ f ⟨t, ht⟩ (g n)) _ (range_nonempty _)
   · refine ⟨?_, fun b hb ↦ csSup_le' ?_⟩ <;> rintro _ ⟨n, rfl⟩
     · apply (le_csSup (.of_not_isCofinal _) _).trans (le_csSup hg ⟨n + 1, rfl⟩)
       · exact fun hg' ↦ (cof_le hg').not_gt (mk_range_le.trans_lt hsα)
@@ -113,14 +112,14 @@ protected theorem sInter {s : Set (Set α)} (hα : cof α ≠ ℵ₀) (hsα : #s
 protected theorem iInter {ι : Type u} {f : ι → Set α} (hα : cof α ≠ ℵ₀)
     (hι : Cardinal.lift.{v} #ι < Cardinal.lift.{u} (cof α)) (hf : ∀ i, IsClub (f i)) :
     IsClub (⋂ i, f i) := by
-  rw [← Set.sInter_range]
+  rw [← sInter_range]
   refine IsClub.sInter hα ?_ (by simpa)
   rw [← Cardinal.lift_lt]
   exact mk_range_le_lift.trans_lt hι
 
 protected theorem inter {s t : Set α} (hα : cof α ≠ ℵ₀) (hs : IsClub s) (ht : IsClub t) :
     IsClub (s ∩ t) := by
-  rw [← Set.sInter_pair]
+  rw [← sInter_pair]
   have H : ∀ x ∈ ({s, t} : Set _), IsClub x := by simpa [hs]
   obtain hα | hα' := hα.lt_or_gt
   · rw [cof_lt_aleph0_iff] at hα
@@ -134,7 +133,7 @@ theorem _root_.Order.IsNormal.isClub_fixedPoints {f : α → α} (hα : cof α �
     IsClub f.fixedPoints := by
   cases isEmpty_or_nonempty α; · simp
   refine ⟨fun s hs hs₀ _ a ha ↦ (hf.map_isLUB ha hs₀).unique ?_, fun a ↦ ?_⟩
-  · rwa [Set.image_congr hs, Set.image_id']
+  · rwa [image_congr hs, image_id']
   · cases topOrderOrNoTopOrder α with
     | inl => use ⊤; simpa using hf.strictMono.id_le ⊤
     | inr h =>
@@ -144,6 +143,21 @@ theorem _root_.Order.IsNormal.isClub_fixedPoints {f : α → α} (hα : cof α �
       refine .of_not_isCofinal fun h ↦ (cof_le h).not_gt
         ((aleph0_le_cof.lt_of_ne' hα).trans_le' ?_)
       simpa using mk_range_le_lift (f := fun n : ℕ ↦ f^[n] a)
+
+/-- Every cofinal set of order type `(cof α).ord` has a club superset of the same order type. -/
+theorem ord_cof_eq_isClub_of_isCofinal (hs : IsCofinal s) (hsα : typeLT s = (cof α).ord) :
+    ∃ t, s ⊆ t ∧ IsClub t ∧ typeLT t = (cof α).ord := by
+  obtain hα | hα := le_or_gt (cof α) ℵ₀
+  · refine ⟨s, subset_rfl, ⟨?_, hs⟩, hsα⟩
+    apply dirSupClosed_of
+  sorry
+
+variable (α) in
+/-- Every well-order has a club subset of order type `(cof α).ord`. -/
+theorem ord_cof_eq_isClub : ∃ t : Set α, IsClub t ∧ typeLT t = (cof α).ord := by
+  obtain ⟨s, hs, hs'⟩ := ord_cof_eq α
+  obtain ⟨t, -, ht, ht'⟩ := ord_cof_eq_isClub_of_isCofinal hs hs'
+  exact ⟨t, ht, ht'⟩
 
 end WellFoundedLT
 end IsClub
