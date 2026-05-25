@@ -146,7 +146,7 @@ def type (r : α → α → Prop) [wo : IsWellOrder α r] : Ordinal :=
   ⟦⟨α, r, wo⟩⟧
 
 /-- `typeLT α` is an abbreviation for the order type of the `<` relation of `α`. -/
-scoped notation "typeLT " α:70 => @Ordinal.type α (· < ·) inferInstance
+scoped notation3 "typeLT " α:70 => @Ordinal.type α (· < ·) inferInstance
 
 instance zero : Zero Ordinal :=
   ⟨type <| @emptyRelation PEmpty⟩
@@ -379,6 +379,27 @@ theorem type_lt_iff {α β} {r : α → α → Prop} {s : β → β → Prop} [I
     [IsWellOrder β s] : type r < type s ↔ Nonempty (r ≺i s) :=
   Iff.rfl
 
+theorem type_set_le [LinearOrder α] [WellFoundedLT α] (s : Set α) :
+    typeLT s ≤ typeLT α := by
+  rw [type_le_iff']
+  refine ⟨⟨Embedding.subtype _, ?_⟩⟩
+  simp
+
+theorem type_mono [LinearOrder α] [WellFoundedLT α] {s t : Set α} (h : s ⊆ t) :
+    typeLT s ≤ typeLT t := by
+  rw [type_le_iff']
+  refine ⟨⟨embeddingOfSubset _ _ h, ?_⟩⟩
+  aesop
+
+theorem type_range_eq {α β} [LinearOrder α] [WellFoundedLT α] [LinearOrder β] [WellFoundedLT β]
+    {f : α → β} (hf : StrictMono f) : typeLT (range f) = typeLT α :=
+  hf.orderIso.ordinal_type_eq.symm
+
+theorem type_range_le {α β} [LinearOrder α] [WellFoundedLT α] [LinearOrder β] [WellFoundedLT β]
+    {f : α → β} (hf : Monotone f) : typeLT (range f) ≤ typeLT α := by
+  rw [← type_range_eq <| rangeSplitting_strictMono hf]
+  exact type_set_le _
+
 /-- Given two ordinals `α ≤ β`, then `initialSegToType α β` is the initial segment embedding of
 `α.ToType` into `β.ToType`. -/
 @[deprecated type_le_iff (since := "2026-04-12")]
@@ -539,6 +560,8 @@ def ToType.mk {o : Ordinal} : Set.Iio o ≃o o.ToType where
 
 /-- Convert an element of `α.toType` to the corresponding `Ordinal` -/
 abbrev ToType.toOrd {o : Ordinal} (α : o.ToType) : Set.Iio o := ToType.mk.symm α
+
+theorem ToType.toOrd_lt {o : Ordinal} (α : o.ToType) : α.toOrd < o := α.toOrd.2
 
 instance (o : Ordinal) : Coe o.ToType (Set.Iio o) where
   coe := ToType.toOrd
