@@ -5,6 +5,7 @@ Authors: Johannes Hölzl, Mario Carneiro, Yury Kudryashov
 -/
 module
 
+public import Mathlib.Topology.InductiveDimension.Classes
 public import Mathlib.Topology.Order.LeftRight
 public import Mathlib.Topology.Separation.Hausdorff
 
