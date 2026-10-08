@@ -38,17 +38,21 @@ theorem isCyclic_iff_exists_zpowers_eq_top [Group α] : IsCyclic α ↔ ∃ g : 
   exact ⟨fun ⟨h⟩ ↦ h, fun h ↦ ⟨h⟩⟩
 
 @[to_additive]
-protected theorem Subgroup.isCyclic_iff_exists_zpowers_eq_top [Group α] (H : Subgroup α) :
+theorem Subgroup.isCyclic_iff_exists_zpowers_eq [Group α] (H : Subgroup α) :
     IsCyclic H ↔ ∃ g : α, Subgroup.zpowers g = H := by
   rw [isCyclic_iff_exists_zpowers_eq_top]
   simp_rw [← map_subtype_inj, Subgroup.map_top,
     H.range_subtype, MonoidHom.map_zpowers, Subtype.exists, coe_subtype, exists_prop]
   exact exists_congr fun g ↦ and_iff_right_of_imp fun h ↦ h ▸ mem_zpowers g
 
+@[deprecated (since := "2026-10-08")]
+protected alias Subgroup.isCyclic_iff_exists_zpowers_eq_top :=
+  Subgroup.isCyclic_iff_exists_zpowers_eq
+
 @[to_additive]
 instance Subgroup.isCyclic_zpowers [Group G] (g : G) :
     IsCyclic (Subgroup.zpowers g) :=
-  (Subgroup.isCyclic_iff_exists_zpowers_eq_top _).mpr ⟨g, rfl⟩
+  (Subgroup.isCyclic_iff_exists_zpowers_eq _).mpr ⟨g, rfl⟩
 
 @[to_additive]
 instance (priority := 100) isCyclic_of_subsingleton [Group α] [Subsingleton α] : IsCyclic α :=
@@ -296,7 +300,7 @@ lemma Subgroup.isCyclic_of_le {H H' : Subgroup G} (h : H ≤ H') [IsCyclic H'] :
 theorem Subgroup.le_zpowers_iff (g : G) (H : Subgroup G) :
     H ≤ Subgroup.zpowers g ↔ ∃ n : ℕ, H = Subgroup.zpowers (g ^ n) := by
   refine ⟨fun h ↦ ?_, ?_⟩
-  · obtain ⟨x, rfl⟩ := (H.isCyclic_iff_exists_zpowers_eq_top).mp (isCyclic_of_le h)
+  · obtain ⟨x, rfl⟩ := H.isCyclic_iff_exists_zpowers_eq.mp (isCyclic_of_le h)
     obtain ⟨k, rfl⟩ := mem_zpowers_iff.mp <| h (mem_zpowers x)
     obtain ⟨n, rfl | rfl⟩ := Int.eq_nat_or_neg k
     · exact ⟨n, by rw [zpow_natCast]⟩
@@ -304,9 +308,14 @@ theorem Subgroup.le_zpowers_iff (g : G) (H : Subgroup G) :
   · rintro ⟨k, rfl⟩
     exact zpowers_le_of_mem <| npow_mem_zpowers g k
 
-open Finset Nat
+@[to_additive]
+theorem IsCyclic.zpowers_surjective [IsCyclic G] :
+    Function.Surjective (Subgroup.zpowers (G := G)) := by
+  intro H
+  rw [← H.isCyclic_iff_exists_zpowers_eq]
+  infer_instance
 
-section Classical
+open Finset Nat
 
 open scoped Classical in
 @[to_additive IsAddCyclic.card_nsmul_eq_zero_le]
@@ -340,8 +349,6 @@ theorem IsCyclic.card_pow_eq_one_le [DecidableEq α] [Fintype α] [IsCyclic α] 
       rw [Nat.mul_div_cancel_left _ (gcd_pos_of_pos_left _ hn0), gcd_mul_left_left, hm,
         Nat.mul_div_cancel _ hm0]
       exact le_of_dvd hn0 (Nat.gcd_dvd_left _ _)
-
-end Classical
 
 @[to_additive]
 theorem IsCyclic.exists_monoid_generator [Finite α] [IsCyclic α] :

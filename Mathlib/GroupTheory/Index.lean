@@ -789,6 +789,10 @@ instance : FiniteIndex (⊤ : Subgroup G) :=
 instance [FiniteIndex H] [FiniteIndex K] : FiniteIndex (H ⊓ K) :=
   ⟨index_inf_ne_zero FiniteIndex.index_ne_zero FiniteIndex.index_ne_zero⟩
 
+@[to_additive (attr := simp)]
+theorem finiteIndex_bot_iff : FiniteIndex (⊥ : Subgroup G) ↔ Finite G := by
+  simp [finiteIndex_iff, Nat.card_eq_zero]
+
 @[to_additive]
 theorem finiteIndex_iInf {ι : Type*} [Finite ι] {f : ι → Subgroup G}
     (hf : ∀ i, (f i).FiniteIndex) : (⨅ i, f i).FiniteIndex :=

@@ -118,6 +118,12 @@ theorem toSubgroup_ofSubgroup (H : Subgroup G) [H.Normal] [H.FiniteIndex] :
     ((ofSubgroup H : FiniteIndexNormalSubgroup G) : Subgroup G) = H :=
   rfl
 
+@[to_additive (attr := simp)]
+protected theorem ne_bot [Infinite G] (H : FiniteIndexNormalSubgroup G) : (H : Subgroup G) ≠ ⊥ := by
+  cases H
+  rintro rfl
+  simp_all [← not_finite_iff_infinite]
+
 section Comap
 
 variable {H : Type*} {N : Type*} [Group H] [Group N]

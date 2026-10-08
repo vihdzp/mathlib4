@@ -131,6 +131,13 @@ theorem zpowers_ne_bot : zpowers g ≠ ⊥ ↔ g ≠ 1 :=
   zpowers_eq_bot.not
 
 @[to_additive (attr := simp)]
+theorem bot_eq_zpowers {g : G} : ⊥ = zpowers g ↔ 1 = g := by rw [eq_comm, zpowers_eq_bot, eq_comm]
+
+@[to_additive]
+theorem bot_ne_zpowers : ⊥ ≠ zpowers g ↔ 1 ≠ g :=
+  bot_eq_zpowers.not
+
+@[to_additive (attr := simp)]
 theorem zpowers_one_eq_bot : Subgroup.zpowers (1 : G) = ⊥ :=
   Subgroup.zpowers_eq_bot.mpr rfl
 
