@@ -34,6 +34,11 @@ noncomputable def Shrink.continuousMulEquiv {M : Type*} [Mul M] [TopologicalSpac
   __ := Shrink.mulEquiv
   __ := (Shrink.homeomorph _).symm
 
+@[expose, to_additive (attr := simps!)]
+def ContinuousMonoidHom.subtype {M : Type*} [Group M] [TopologicalSpace M] [IsTopologicalGroup M]
+    (G : Subgroup M) : G →ₜ* M where
+  __ := G.subtype
+
 theorem small_closure {X : Type*} [TopologicalSpace X] [T2Space X] (s : Set X) [Small.{u} s] :
     Small.{u} (closure s) := by
   sorry
@@ -111,28 +116,10 @@ abbrev ZHat : Type :=
 
 namespace ZHat
 
--- We build a version with more general universes below.
-private noncomputable def lift' {G : Type} [AddGroup G] [TopologicalSpace G]
-    [IsTopologicalAddGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] (f : ℤ →+ G) :
-    ZHat →ₜ+ G :=
-  (ProfiniteAddGrp.ProfiniteCompletion.lift (P := .of G) (AddGrpCat.ofHom f)).hom
-
-noncomputable def lift {G : Type*} [AddGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [CompactSpace G] [TotallyDisconnectedSpace G] (f : ℤ →+ G) : ZHat →ₜ+ G :=
-  have : Small.{0} f.range := small_range f
-  have : Small.{0} f.range.topologicalClosure := small_closure _
-  have : CompactSpace f.range.topologicalClosure :=
-    isCompact_iff_compactSpace.1 (AddSubgroup.isClosed_topologicalClosure _).isCompact
-  ContinuousAddMonoidHom.comp
-    ⟨f.range.topologicalClosure.subtype, continuous_iff_le_induced.mpr fun _ ↦ id⟩ <|
-  (ContinuousAddMonoidHom.toContinuousAddMonoidHom Shrink.continuousAddEquiv).comp <| lift' <|
-    Shrink.addEquiv.symm.toAddMonoidHom.comp <|
-      (AddSubgroup.inclusion <| AddSubgroup.le_topologicalClosure _).comp f.rangeRestrict
-
 instance : IntCast ZHat where
   intCast := etaFn (.mk ℤ)
 
-instance : AddMonoidWithOne ZHat where
+instance : AddGroupWithOne ZHat where
   natCast n := (n : ℤ)
   one := (1 : ℤ)
 
@@ -141,6 +128,76 @@ instance : CharZero ZHat where
     rw [← Nat.cast_inj (R := ℤ)]
     apply (etaFn_injective_iff_residuallyFinite _).2 _ h
     infer_instance
+
+theorem denseRange_intCast : DenseRange (Int.cast (R := ZHat)) :=
+  denseRange _
+
+-- We build a version with more general universes below.
+private noncomputable def lift' {G : Type} [AddGroup G] [TopologicalSpace G]
+    [IsTopologicalAddGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] (f : ℤ →+ G) :
+    ZHat →ₜ+ G :=
+  (ProfiniteAddGrp.ProfiniteCompletion.lift (P := .of G) (AddGrpCat.ofHom f)).hom
+
+private theorem lift'_intCast {G : Type} [AddGroup G] [TopologicalSpace G]
+    [IsTopologicalAddGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] (f : ℤ →+ G) (n : ℤ) :
+    lift' f n = f n :=
+  congrArg (fun x ↦ x n) <| lift_eta (P := .of G) (AddGrpCat.ofHom f)
+
+noncomputable def lift {G : Type*} [AddGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
+    [CompactSpace G] [TotallyDisconnectedSpace G] (f : ℤ →+ G) : ZHat →ₜ+ G :=
+  have : Small.{0} f.range := small_range f
+  have : Small.{0} f.range.topologicalClosure := small_closure _
+  have : CompactSpace f.range.topologicalClosure :=
+    isCompact_iff_compactSpace.1 (AddSubgroup.isClosed_topologicalClosure _).isCompact
+  (ContinuousAddMonoidHom.subtype f.range.topologicalClosure).comp <|
+    (ContinuousAddMonoidHom.toContinuousAddMonoidHom Shrink.continuousAddEquiv).comp <| lift' <|
+  Shrink.addEquiv.symm.toAddMonoidHom.comp <|
+    (AddSubgroup.inclusion <| AddSubgroup.le_topologicalClosure _).comp f.rangeRestrict
+
+@[simp]
+theorem lift_intCast {G : Type*} [AddGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
+    [CompactSpace G] [TotallyDisconnectedSpace G] (f : ℤ →+ G) (n : ℤ) : lift f n = f n := by
+  simp [lift, lift'_intCast, AddSubgroup.inclusion, Shrink.addEquiv, Shrink.continuousAddEquiv]
+
+@[simp]
+theorem lift_natCast {G : Type*} [AddGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
+    [CompactSpace G] [TotallyDisconnectedSpace G] (f : ℤ →+ G) (n : ℕ) : lift f n = f n :=
+  lift_intCast f n
+
+@[simp]
+theorem lift_one {G : Type*} [AddGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
+    [CompactSpace G] [TotallyDisconnectedSpace G] (f : ℤ →+ G) : lift f 1 = f 1 :=
+  lift_intCast f 1
+
+theorem lift_unique {G : Type*} [AddGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
+    [CompactSpace G] [TotallyDisconnectedSpace G] (f g : ZHat →ₜ+ G) (h : f 1 = g 1) : f = g := by
+  rw [← DFunLike.coe_fn_eq]
+  apply denseRange_intCast.equalizer f.continuous g.continuous
+  ext n
+  apply_fun (n • ·) at h
+  simpa [← map_zsmul] using h
+
+noncomputable instance : Mul ZHat where
+  mul x := lift (zmultiplesHom _ x)
+
+theorem lift_zmultiplesHom (x y : ZHat) : lift (zmultiplesHom _ x) y = x * y :=
+  rfl
+
+instance : Ring ZHat where
+  zero_mul x := by
+    suffices lift (zmultiplesHom ZHat 0) = 0 by
+      rw [← lift_zmultiplesHom, this]; rfl
+    apply lift_unique
+    simp
+  one_mul x := by
+    suffices lift (zmultiplesHom _ 1) = .id _ by
+      rw [← lift_zmultiplesHom, this]; rfl
+    apply lift_unique
+    simp
+
+
+
+-- lift_intCast
 
 /-- The subring of sequences `f (n : ℕ+) : ZMod n` satisfying the following compatibility condition:
 if `m ∣ n`, then `f m` equals `f n` mod `m`.
@@ -172,6 +229,6 @@ private def piIso :
   (AddEquiv.piCongrRight (fun n : ℕ+ ↦ Int.quotientZMultiplesNatEquivZMod n)).symm.trans sorry
 
 private def compatibleSeqIso' : ZHat ≃+ compatibleSeq :=
-  (AddEquiv.addSubgroupCongr sorry).comp <| AddEquiv.addSubgroupMap
+  sorry
 
 end ZHat
