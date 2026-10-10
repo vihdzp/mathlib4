@@ -304,6 +304,13 @@ theorem Subgroup.le_zpowers_iff (g : G) (H : Subgroup G) :
   · rintro ⟨k, rfl⟩
     exact zpowers_le_of_mem <| npow_mem_zpowers g k
 
+@[to_additive]
+theorem IsCyclic.zpowers_surjective [IsCyclic G] :
+    Function.Surjective (Subgroup.zpowers (G := G)) := by
+  intro H
+  rw [← H.isCyclic_iff_exists_zpowers_eq]
+  infer_instance
+
 open Finset Nat
 
 section Classical
