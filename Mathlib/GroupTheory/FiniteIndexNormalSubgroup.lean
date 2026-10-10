@@ -7,6 +7,8 @@ module
 
 public import Mathlib.GroupTheory.Index
 
+import Mathlib.GroupTheory.SpecificGroups.Cyclic.Basic
+
 /-!
 # Finite-index normal subgroups
 
@@ -157,6 +159,7 @@ end Comap
 end FiniteIndexNormalSubgroup
 
 /-- The finite index (normal) subgroups of ℤ are exactly `AddSubgroup.zmultiples n` for `n : ℕ+`. -/
+@[no_expose]
 noncomputable def Int.finiteIndexNormalSubgroupEquiv : FiniteIndexNormalAddSubgroup ℤ ≃ ℕ+ where
   toFun G := ⟨(Classical.choose (IsAddCyclic.zmultiples_surjective G.toAddSubgroup)).natAbs, by
     generalize_proofs H

@@ -35,7 +35,7 @@ variable (H : Subgroup G) [Nontrivial H] [hH : IsCyclic H]
 
 @[to_additive exists_neg_generator]
 lemma exists_generator_lt_one : ∃ (a : G), a < 1 ∧ Subgroup.zpowers a = H := by
-  obtain ⟨a, ha⟩ := H.isCyclic_iff_exists_zpowers_eq_top.mp hH
+  obtain ⟨a, ha⟩ := H.isCyclic_iff_exists_zpowers_eq.mp hH
   obtain ha1 | rfl | ha1 := lt_trichotomy a 1
   · exact ⟨a, ha1, ha⟩
   · rw [Subgroup.zpowers_one_eq_bot] at ha
@@ -75,7 +75,7 @@ lemma genLTOne_unique_of_zpowers_eq {g1 g2 : G} (hg1 : g1 < 1) (hg2 : g2 < 1)
   · rw [h'] at h
     simp_all only [Subgroup.zpowers_eq_bot]
   · have h1 : IsCyclic ↥(Subgroup.zpowers g2) := by
-      rw [Subgroup.isCyclic_iff_exists_zpowers_eq_top]; use g2
+      rw [Subgroup.isCyclic_iff_exists_zpowers_eq]; use g2
     have h2 : Nontrivial ↥(Subgroup.zpowers g1) := by rw [h]; exact h'
     have h3 : IsCyclic ↥(Subgroup.zpowers g1) := by rw [h]; exact h1
     simp only [(Subgroup.zpowers g2).genLTOne_unique hg1 h]
