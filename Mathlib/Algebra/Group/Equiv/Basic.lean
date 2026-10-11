@@ -187,37 +187,69 @@ lemma monoidHomCongrRight_trans (e₁₂ : N₁ ≃* N₂) (e₂₃ : N₂ ≃* 
 
 end monoidHomCongr
 
+section piCongrLeft
+variable (M : β → Type*) [∀ i, Mul (M i)] (e : α ≃ β)
+
+/-- Transporting dependent functions through an equivalence of the base.
+
+This is the `MulEquiv` version of `Equiv.piCongrLeft`. -/
+@[to_additive (attr := simps! symm_apply)
+/-- Transporting dependent functions through an equivalence of the base.
+
+This is the `AddEquiv` version of `Equiv.piCongrLeft`. -/]
+def piCongrLeft : (∀ a, M (e a)) ≃* ∀ b, M b where
+  map_mul' := by
+    refine fun x y ↦ funext ?_
+    rw [← e.forall_congr_right]
+    simp
+  __ := Equiv.piCongrLeft M e
+
+/-- See also `piCongrLeft_apply_apply`, which avoids the cast. -/
+@[to_additive /-- See also `piCongrLeft_apply_apply`, which avoids the cast. -/]
+lemma piCongrLeft_apply (f : ∀ a, M (e a)) (b : β) :
+    piCongrLeft M e f b = e.apply_symm_apply b ▸ f (e.symm b) :=
+  rfl
+
+@[to_additive (attr := simp)]
+lemma piCongrLeft_refl : piCongrLeft M (.refl β) = .refl (∀ a, M a) :=
+  rfl
+
+@[to_additive (attr := simp)]
+lemma piCongrLeft_apply_apply (f : ∀ a, M (e a)) (a : α) : piCongrLeft M e f (e a) = f a :=
+  Equiv.piCongrLeft_apply_apply ..
+
+end piCongrLeft
+
+section piCongrRight
+variable {η : Type*} {Ms Ns : η → Type*} [∀ j, Mul (Ms j)] [∀ j, Mul (Ns j)]
+  (es : ∀ j, Ms j ≃* Ns j)
+
 /-- A family of multiplicative equivalences `Π j, (Ms j ≃* Ns j)` generates a
 multiplicative equivalence between `Π j, Ms j` and `Π j, Ns j`.
 
 This is the `MulEquiv` version of `Equiv.piCongrRight`, and the dependent version of
-`MulEquiv.arrowCongr`.
--/
-@[to_additive (attr := simps apply)
-  /-- A family of additive equivalences `Π j, (Ms j ≃+ Ns j)`
-  generates an additive equivalence between `Π j, Ms j` and `Π j, Ns j`.
+`MulEquiv.arrowCongr`. -/
+@[to_additive (attr := simps! apply)
+/-- A family of additive equivalences `Π j, (Ms j ≃+ Ns j)`
+generates an additive equivalence between `Π j, Ms j` and `Π j, Ns j`.
 
-  This is the `AddEquiv` version of `Equiv.piCongrRight`, and the dependent version of
-  `AddEquiv.arrowCongr`. -/]
-def piCongrRight {η : Type*} {Ms Ns : η → Type*} [∀ j, Mul (Ms j)] [∀ j, Mul (Ns j)]
-    (es : ∀ j, Ms j ≃* Ns j) : (∀ j, Ms j) ≃* ∀ j, Ns j :=
-  { Equiv.piCongrRight fun j => (es j).toEquiv with
-    toFun := fun x j => es j (x j),
-    invFun := fun x j => (es j).symm (x j),
-    map_mul' := fun x y => funext fun j => map_mul (es j) (x j) (y j) }
+This is the `AddEquiv` version of `Equiv.piCongrRight`, and the dependent version of
+`AddEquiv.arrowCongr`. -/]
+def piCongrRight : (∀ j, Ms j) ≃* ∀ j, Ns j where
+  map_mul' := fun x y => funext fun j => map_mul (es j) (x j) (y j)
+  __ := Equiv.piCongrRight fun j => (es j).toEquiv
 
 @[to_additive (attr := simp)]
-theorem piCongrRight_refl {η : Type*} {Ms : η → Type*} [∀ j, Mul (Ms j)] :
-    (piCongrRight fun j => MulEquiv.refl (Ms j)) = MulEquiv.refl _ := rfl
+theorem piCongrRight_refl : (piCongrRight fun j => MulEquiv.refl (Ms j)) = MulEquiv.refl _ := rfl
 
 @[to_additive (attr := simp)]
-theorem piCongrRight_symm {η : Type*} {Ms Ns : η → Type*} [∀ j, Mul (Ms j)] [∀ j, Mul (Ns j)]
-    (es : ∀ j, Ms j ≃* Ns j) : (piCongrRight es).symm = piCongrRight fun i => (es i).symm := rfl
+theorem piCongrRight_symm : (piCongrRight es).symm = piCongrRight fun i => (es i).symm := rfl
 
 @[to_additive (attr := simp)]
-theorem piCongrRight_trans {η : Type*} {Ms Ns Ps : η → Type*} [∀ j, Mul (Ms j)]
-    [∀ j, Mul (Ns j)] [∀ j, Mul (Ps j)] (es : ∀ j, Ms j ≃* Ns j) (fs : ∀ j, Ns j ≃* Ps j) :
+theorem piCongrRight_trans {Ps : η → Type*} [∀ j, Mul (Ps j)] (fs : ∀ j, Ns j ≃* Ps j) :
     (piCongrRight es).trans (piCongrRight fs) = piCongrRight fun i => (es i).trans (fs i) := rfl
+
+end piCongrRight
 
 /-- A family indexed by a type with a unique element
 is `MulEquiv` to the element at the single index. -/

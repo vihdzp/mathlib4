@@ -6,7 +6,8 @@ Authors: Violeta Hernández Palacios
 module
 
 public import Mathlib.Topology.Algebra.Category.ProfiniteGrp.Completion
-public import Mathlib.Topology.Instances.Shrink
+public import Mathlib.Topology.Instances.ZMod
+public import Mathlib.Topology.Compactness.Compact
 
 import Mathlib.Data.ZMod.QuotientGroup
 import Mathlib.GroupTheory.SpecificGroups.Cyclic
@@ -55,58 +56,6 @@ instance {X : Type*} [TopologicalSpace X] [CompactSpace X] [Small.{u} X] :
 instance {X : Type*} [TopologicalSpace X] [TotallyDisconnectedSpace X] [Small.{u} X] :
     TotallyDisconnectedSpace (Shrink.{u} X) :=
   sorry
-
-/-! ### Lemmas about integers -/
-
-instance : AddGroup.ResiduallyFinite ℤ := by
-  rw [AddGroup.residuallyFinite_iff_exists_finiteIndex]
-  intro g hg
-  refine ⟨AddSubgroup.zmultiples (|g| + 1), ?_, ?_⟩
-  · rw [AddSubgroup.finiteIndex_iff, Int.index_zmultiples]
-    positivity
-  · rw [Int.mem_zmultiples_iff]
-    intro hg'
-    simpa using Int.le_abs_of_dvd hg hg'
-
-/-- The finite index (normal) subgroups of ℤ are exactly `AddSubgroup.zmultiples n` for `n : ℕ+`. -/
-noncomputable def Int.finiteIndexNormalSubgroupEquiv : FiniteIndexNormalAddSubgroup ℤ ≃ ℕ+ where
-  toFun G := ⟨(Classical.choose (IsAddCyclic.zmultiples_surjective G.toAddSubgroup)).natAbs, by
-    generalize_proofs H
-    have ⟨n, hn⟩ := H
-    rw [Nat.pos_iff_ne_zero, natAbs_ne_zero]
-    intro h0
-    have := (h0 ▸ Classical.choose_spec H).symm
-    simp at this
-  ⟩
-  invFun n := ⟨AddSubgroup.zmultiples n, inferInstance, ⟨by simp⟩⟩
-  left_inv G := by
-    ext x
-    dsimp
-    generalize_proofs H
-    rw [zmultiples_natAbs, Classical.choose_spec H]
-  right_inv n := by
-    apply PNat.coe_injective
-    dsimp
-    generalize_proofs H H'
-    have := Classical.choose_spec H
-    rw [AddSubgroup.zmultiples_eq_zmultiples_iff_of_isAddTorsionFree] at this
-    rwa [natAbs_eq_iff, ← neg_eq_iff_eq_neg]
-
-set_option backward.isDefEq.respectTransparency.types false in
-@[simp]
-theorem Int.finiteIndexNormalSubgroupEquiv_apply (G : FiniteIndexNormalAddSubgroup ℤ) :
-    finiteIndexNormalSubgroupEquiv G = ⟨G.index, G.isFiniteIndex'.index_ne_zero.pos⟩ := by
-  rw [finiteIndexNormalSubgroupEquiv]
-  apply PNat.coe_injective
-  dsimp
-  generalize_proofs H
-  conv_rhs => rw [← Classical.choose_spec H, index_zmultiples]
-
-@[simp]
-theorem Int.finiteIndexNormalSubgroupEquiv_symm_apply (n : ℕ+) :
-    finiteIndexNormalSubgroupEquiv.symm n =
-      ⟨AddSubgroup.zmultiples n, inferInstance, ⟨by simp⟩⟩ :=
-  (rfl)
 
 /-! ### The profinite completion of integers -/
 
@@ -177,33 +126,12 @@ theorem lift_unique {G : Type*} [AddGroup G] [TopologicalSpace G] [IsTopological
   apply_fun (n • ·) at h
   simpa [← map_zsmul] using h
 
-noncomputable instance : Mul ZHat where
-  mul x := lift (zmultiplesHom _ x)
-
-theorem lift_zmultiplesHom (x y : ZHat) : lift (zmultiplesHom _ x) y = x * y :=
-  rfl
-
-instance : Ring ZHat where
-  zero_mul x := by
-    suffices lift (zmultiplesHom ZHat 0) = 0 by
-      rw [← lift_zmultiplesHom, this]; rfl
-    apply lift_unique
-    simp
-  one_mul x := by
-    suffices lift (zmultiplesHom _ 1) = .id _ by
-      rw [← lift_zmultiplesHom, this]; rfl
-    apply lift_unique
-    simp
-
-
-
--- lift_intCast
+/-! ### Compatible sequences -/
 
 /-- The subring of sequences `f (n : ℕ+) : ZMod n` satisfying the following compatibility condition:
 if `m ∣ n`, then `f m` equals `f n` mod `m`.
 
-As an additive group, this is isomorphic to `ZHat`, and we use this isomorphism to give it its ring
-structure. -/
+As an additive group, this is isomorphic to `ZHat`. -/
 def compatibleSeq : Subring (Π n : ℕ+, ZMod n) where
   carrier := {f | ∀ (m n : ℕ+) (h : (m : ℕ) ∣ n), ZMod.castHom h (ZMod m) (f n) = f m }
   zero_mem' := by simp
@@ -223,6 +151,14 @@ def compatibleSeq : Subring (Π n : ℕ+, ZMod n) where
     simp only [ZMod.castHom_apply, Set.mem_ofPred_eq, Pi.mul_apply] at *
     intro m n h
     rw [ZMod.cast_mul h, ha _ _ h, hb _ _ h]
+
+instance : CompactSpace compatibleSeq := by
+  constructor
+  rw [Subtype.isCompact_iff, Set.image_univ, Subtype.range_coe_subtype, SetLike.setOfPred_mem_eq]
+  apply IsClosed.isCompact
+  sorry
+
+instance : TotallyDisconnectedSpace compatibleSeq := inferInstance
 
 private def piIso :
     (Π n : ℕ+, ZMod n) ≃+ Π H : FiniteIndexNormalAddSubgroup ℤ, ℤ ⧸ H.toAddSubgroup :=

@@ -847,12 +847,11 @@ def piCongrLeft : (∀ a, P (e a)) ≃ ∀ b, P b :=
 LHS would have type `P b` while the RHS would have type `P (e (e.symm b))`. For that reason,
 we have to explicitly substitute along `e (e.symm b) = b` in the statement of this lemma. -/
 lemma piCongrLeft_apply (f : ∀ a, P (e a)) (b : β) :
-    (piCongrLeft P e) f b = e.apply_symm_apply b ▸ f (e.symm b) :=
+    piCongrLeft P e f b = e.apply_symm_apply b ▸ f (e.symm b) :=
   rfl
 
 @[simp, grind =]
-lemma piCongrLeft_symm_apply (g : ∀ b, P b) (a : α) :
-    (piCongrLeft P e).symm g a = g (e a) :=
+lemma piCongrLeft_symm_apply (g : ∀ b, P b) (a : α) : (piCongrLeft P e).symm g a = g (e a) :=
   piCongrLeft'_apply P e.symm g a
 
 @[simp]
@@ -864,8 +863,7 @@ LHS would have type `P b` while the RHS would have type `P (e (e.symm b))`. This
 around it in the case where `b` is of the form `e a`, so we can use `f a` instead of
 `f (e.symm (e a))`. -/
 @[simp, grind =]
-lemma piCongrLeft_apply_apply (f : ∀ a, P (e a)) (a : α) :
-    (piCongrLeft P e) f (e a) = f a :=
+lemma piCongrLeft_apply_apply (f : ∀ a, P (e a)) (a : α) : piCongrLeft P e f (e a) = f a :=
   piCongrLeft'_symm_apply_apply P e.symm f a
 
 open Sum
