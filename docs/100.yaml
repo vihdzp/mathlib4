@@ -49,7 +49,7 @@
 9:
   title  : The Area of a Circle
   decl   : EuclideanSpace.volume_ball_fin_two
-  authors: James Arthur and Benjamin Davidson and Andrew Souther
+  authors: Xavier Roblot
 10:
   title  : Euler’s Generalization of Fermat’s Little Theorem
   decl   : Nat.ModEq.pow_totient
