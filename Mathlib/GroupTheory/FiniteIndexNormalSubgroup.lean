@@ -7,6 +7,7 @@ module
 
 public import Mathlib.GroupTheory.Index
 
+import Mathlib.GroupTheory.OrderOfElement
 import Mathlib.GroupTheory.SpecificGroups.Cyclic.Subgroup
 
 /-!
