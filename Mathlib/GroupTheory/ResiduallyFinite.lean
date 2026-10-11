@@ -121,3 +121,13 @@ instance [ResiduallyFinite G] [ResiduallyFinite G'] : ResiduallyFinite (G × G')
   · exact eq_one_of_forall_finiteIndexNormalSubgroup g.2 fun K ↦ hg (K.comap (MonoidHom.snd G G'))
 
 end Group
+
+instance : AddGroup.ResiduallyFinite ℤ := by
+  rw [AddGroup.residuallyFinite_iff_exists_finiteIndex]
+  intro g hg
+  refine ⟨AddSubgroup.zmultiples (|g| + 1), ?_, ?_⟩
+  · rw [AddSubgroup.finiteIndex_iff, Int.index_zmultiples]
+    grind
+  · rw [Int.mem_zmultiples_iff]
+    intro hg'
+    simpa using Int.le_abs_of_dvd hg hg'

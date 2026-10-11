@@ -7,14 +7,13 @@ module
 
 public import Mathlib.GroupTheory.Index
 
-import Mathlib.GroupTheory.OrderOfElement
 import Mathlib.GroupTheory.SpecificGroups.Cyclic.Subgroup
 
 /-!
 # Finite-index normal subgroups
 
 This file builds the lattice `FiniteIndexNormalSubgroup G` of finite-index normal subgroups of a
-group `G`, and its additive version `FiniteIndexNormalAddSubgroup`.
+group `G`, and its additive version `FiniteIndexNormalAddSubgroup G`.
 
 This is used primarily in the definition of the profinite completion of a group.
 -/
@@ -36,6 +35,8 @@ structure FiniteIndexNormalAddSubgroup (G : Type*) [AddGroup G] extends AddSubgr
   isFiniteIndex' : toAddSubgroup.FiniteIndex := by infer_instance
 
 attribute [to_additive] FiniteIndexNormalSubgroup
+attribute [instance]
+  FiniteIndexNormalSubgroup.isFiniteIndex' FiniteIndexNormalAddSubgroup.isFiniteIndex'
 
 namespace FiniteIndexNormalSubgroup
 
@@ -166,44 +167,21 @@ end Comap
 end FiniteIndexNormalSubgroup
 
 /-- The finite index (normal) subgroups of ℤ are exactly `AddSubgroup.zmultiples n` for `n : ℕ+`. -/
-@[no_expose]
 noncomputable def Int.finiteIndexNormalSubgroupEquiv : FiniteIndexNormalAddSubgroup ℤ ≃ ℕ+ where
-  toFun G := ⟨(Classical.choose (IsAddCyclic.zmultiples_surjective G.toAddSubgroup)).natAbs, by
-    generalize_proofs H
-    have ⟨n, hn⟩ := H
-    rw [Nat.pos_iff_ne_zero, natAbs_ne_zero]
-    intro h0
-    have := (h0 ▸ Classical.choose_spec H).symm
-    simp at this
-  ⟩
+  toFun G := ⟨G.index, AddSubgroup.index_pos⟩
   invFun n := ⟨AddSubgroup.zmultiples n, inferInstance, ⟨by simp⟩⟩
-  left_inv G := by
-    ext x
-    dsimp
-    generalize_proofs H
-    rw [zmultiples_natAbs, Classical.choose_spec H]
-  right_inv n := by
-    apply PNat.coe_injective
-    dsimp
-    generalize_proofs H H'
-    have := Classical.choose_spec H
-    rw [AddSubgroup.zmultiples_eq_zmultiples_iff_of_isAddTorsionFree] at this
-    rwa [natAbs_eq_iff, ← neg_eq_iff_eq_neg]
+  left_inv G := by simp
+  right_inv n := PNat.coe_injective <| by simp
 
-set_option backward.isDefEq.respectTransparency.types false in
 @[simp]
 theorem Int.finiteIndexNormalSubgroupEquiv_apply (G : FiniteIndexNormalAddSubgroup ℤ) :
-    finiteIndexNormalSubgroupEquiv G = ⟨G.index, G.isFiniteIndex'.index_ne_zero.pos⟩ := by
-  rw [finiteIndexNormalSubgroupEquiv]
-  apply PNat.coe_injective
-  dsimp
-  generalize_proofs H
-  conv_rhs => rw [← Classical.choose_spec H, index_zmultiples]
+    finiteIndexNormalSubgroupEquiv G = ⟨G.index, G.isFiniteIndex'.index_ne_zero.pos⟩ :=
+  rfl
 
 @[simp]
 theorem Int.finiteIndexNormalSubgroupEquiv_symm_apply (n : ℕ+) :
     finiteIndexNormalSubgroupEquiv.symm n =
       ⟨AddSubgroup.zmultiples n, inferInstance, ⟨by simp⟩⟩ :=
-  (rfl)
+  rfl
 
 end

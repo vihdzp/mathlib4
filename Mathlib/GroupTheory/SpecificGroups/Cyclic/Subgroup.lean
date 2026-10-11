@@ -248,6 +248,11 @@ theorem IsCyclic.zpowers_surjective [IsCyclic G] :
   rw [← H.isCyclic_iff_exists_zpowers_eq]
   infer_instance
 
+@[simp]
+theorem Int.zmultiples_index (G : AddSubgroup ℤ) : AddSubgroup.zmultiples (G.index : ℤ) = G := by
+  obtain ⟨x, rfl⟩ := IsAddCyclic.zmultiples_surjective G
+  simp
+
 open Finset Nat
 
 section Classical
