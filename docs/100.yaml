@@ -48,7 +48,7 @@
     result: https://github.com/wwylele/Compass/blob/master/Solution.lean
 9:
   title  : The Area of a Circle
-  decl   : Theorems100.area_disc
+  decl   : EuclideanSpace.volume_ball_fin_two
   authors: James Arthur and Benjamin Davidson and Andrew Souther
 10:
   title  : Euler’s Generalization of Fermat’s Little Theorem
