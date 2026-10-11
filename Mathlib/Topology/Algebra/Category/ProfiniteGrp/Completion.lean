@@ -236,29 +236,48 @@ finite index normal subgroups. -/
 finite index normal subgroups. -/]
 noncomputable def proj (G : GrpCat.{u}) (H : FiniteIndexNormalSubgroup G) :
     completion G ⟶ ofFiniteGrp <| .of (G ⧸ H.toSubgroup) :=
-  limitProj _ _
+  limitProj ..
 
-@[to_additive]
-theorem lift_eq_proj (G : GrpCat.{u}) (H : FiniteIndexNormalSubgroup G) :
-    lift (GrpCat.ofHom <| QuotientGroup.mk' H.toSubgroup) = proj G H := by
+@[to_additive (attr := reassoc (attr := simp))]
+lemma proj_eta (G : GrpCat.{u}) (H : FiniteIndexNormalSubgroup G) :
+    eta G ≫ (forget₂ _ _).map (proj G H) = GrpCat.ofHom (QuotientGroup.mk' H.toSubgroup) := by
+  suffices lift (GrpCat.ofHom <| QuotientGroup.mk' H.toSubgroup) = proj G H by
+    rw [← this]
+    exact lift_eta ..
   apply lift_unique
   ext x
   simp [proj]
   rfl
 
-@[to_additive (attr := reassoc (attr := simp))]
-lemma proj_eta (G : GrpCat.{u}) (H : FiniteIndexNormalSubgroup G) :
-    eta G ≫ (forget₂ _ _).map (proj G H) = (GrpCat.ofHom <| QuotientGroup.mk' H.toSubgroup) := by
-  rw [← lift_eq_proj]
-  exact lift_eta ..
+@[to_additive (attr := simp)]
+theorem proj_etaFn (G : GrpCat.{u}) (H : FiniteIndexNormalSubgroup G) (x : G) :
+    proj G H (etaFn G x) = QuotientGroup.mk x := by
+  change _ = GrpCat.ofHom (QuotientGroup.mk' H.toSubgroup) x
+  rw [← proj_eta]
+  rfl
 
 /-- Two elements of the profinite completion are equal iff all their projections onto quotients of
 finite index are equal. -/
-@[to_additive
+@[to_additive (attr := ext)
 /-- Two elements of the profinite completion are equal iff all their projections onto quotients of
 finite index are equal. -/]
-theorem proj_ext (G : GrpCat.{u}) (x y : completion G) (H : ∀ H, proj G H x = proj G H y) : x = y :=
+theorem proj_ext {G : GrpCat.{u}} {x y : completion G} (H : ∀ H, proj G H x = proj G H y) : x = y :=
   limit_ext H
+
+/-- For any "compatible" set of values onto the quotients of finite index, there exists an element
+of the profinite completion that projects onto them. -/
+@[to_additive
+/-- For any "compatible" set of values onto the quotients of finite index, there exists an element
+of the profinite completion that projects onto them. -/]
+theorem proj_surj {G : GrpCat.{u}} (f : Π H : FiniteIndexNormalSubgroup G, G ⧸ H.toSubgroup)
+    (H : ∀ i j (π : i ⟶ j), (diagram G).map π (f i) = f j) :
+    ∃ x : completion G, ∀ H, proj G H x = f H :=
+  limit_surj _ _ H
+
+@[to_additive]
+theorem proj_map {G : GrpCat.{u}} {H J : FiniteIndexNormalSubgroup G} (f : H ⟶ J) :
+    proj G H ≫ (diagram G).map f = proj G J :=
+  lift_unique _ _ rfl
 
 @[to_additive]
 noncomputable instance (G : Type u) [CommGroup G] : CommGroup (completion (.mk G)) :=

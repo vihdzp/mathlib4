@@ -393,6 +393,11 @@ variable {F} in
 lemma limit_ext {x y : limit F} (hxy : ∀ j, limitProj F j x = limitProj F j y) : x = y :=
   Subtype.ext (funext hxy)
 
+@[to_additive]
+lemma limit_surj (f : Π j : J, F.obj j) (H : ∀ (i j : J) (π : i ⟶ j), F.map π (f i) = f j) :
+    ∃ x : limit F, ∀ i, limitProj F i x = f i :=
+  ⟨⟨_, H⟩, fun _ ↦ rfl⟩
+
 @[to_additive (attr := deprecated "use the bundled morphism limitProj" (since := "2026-10-11"))]
 lemma limit_one_val (j : J) : (1 : limit F).val j = 1 :=
   rfl

@@ -135,11 +135,14 @@ theorem lift_unique' {G : Type*} [AddGroup G] [TopologicalSpace G] [IsTopologica
 
 /-- The canonical mod $n$ map. -/
 noncomputable def toZMod (n : ℕ) [NeZero n] : ZHat →ₜ+ ZMod n :=
-  lift (Int.castAddHom (ZMod n))
+  ContinuousAddMonoidHom.comp { map_zero' := by simp, __ := Int.quotientZMultiplesNatEquivZMod n }
+    (proj (.mk ℤ) (Int.finiteIndexNormalSubgroupEquiv.symm ⟨n, NeZero.pos n⟩)).hom
 
-@[simp] theorem toZMod_intCast (n : ℕ) (m : ℤ) [NeZero n] : toZMod n m = m := by simp [toZMod]
-@[simp] theorem toZMod_natCast (n m : ℕ) [NeZero n] : toZMod n m = m := by simp [toZMod]
-@[simp] theorem toZMod_one (n : ℕ) [NeZero n] : toZMod n 1 = 1 := by simp [toZMod]
+@[simp] theorem toZMod_intCast (n : ℕ) (m : ℤ) [NeZero n] : toZMod n m = m := (rfl)
+@[simp] theorem toZMod_natCast (n m : ℕ) [NeZero n] : toZMod n m = m := by
+  simpa using toZMod_intCast n m
+@[simp] theorem toZMod_one (n : ℕ) [NeZero n] : toZMod n 1 = 1 := by
+  simpa using toZMod_natCast n 1
 
 theorem cast_toZMod (x : ZHat) {m n : ℕ} (h : m ∣ n) [NeZero n] :
     haveI : NeZero m := ⟨by rintro rfl; exact NeZero.ne _ <| zero_dvd_iff.1 h⟩
@@ -150,6 +153,54 @@ theorem cast_toZMod (x : ZHat) {m n : ℕ} (h : m ∣ n) [NeZero n] :
   change ZMod.castHom h (ZMod m) (toZMod n 1) = _
   rw [toZMod_one, toZMod_one, map_one]
 
+/-- Two profinite integers are equal iff they're equal mod `n` for every positive `n`. -/
+@[ext]
+theorem toZMod_ext {x y : ZHat} (H : ∀ n : ℕ+, toZMod n x = toZMod n y) : x = y := by
+  apply proj_ext
+  rw [Int.finiteIndexNormalSubgroupEquiv.forall_congr_left]
+  exact fun n ↦ (Int.quotientZMultiplesNatEquivZMod n).injective <| H n
+
+/-- The canonical mod $n$ map. -/
+private noncomputable def toZMod' (H : FiniteIndexNormalAddSubgroup ℤ) :
+    ZHat →ₜ+ ℤ ⧸ H.toAddSubgroup :=
+  (proj (.mk ℤ) H).hom
+
+private noncomputable def piIso :
+    (Π n : ℕ+, ZMod n) ≃+ Π H : FiniteIndexNormalAddSubgroup ℤ, ℤ ⧸ H.toAddSubgroup :=
+  (AddEquiv.piCongrRight (fun n : ℕ+ ↦ Int.quotientZMultiplesNatEquivZMod n)).symm.trans <|
+    AddEquiv.piCongrLeft (fun H ↦ ℤ ⧸ H.toAddSubgroup) Int.finiteIndexNormalSubgroupEquiv.symm
+
+private theorem piIso_symm_apply (f n) : piIso.symm f n =
+    Int.quotientZMultiplesNatEquivZMod _ (f (Int.finiteIndexNormalSubgroupEquiv.symm n)) :=
+  rfl
+
+private theorem toZMod_surj' (f : Π H : FiniteIndexNormalAddSubgroup ℤ, ℤ ⧸ H.toAddSubgroup)
+    (Hf : ∀ (H J : FiniteIndexNormalAddSubgroup ℤ)
+      (h : H ≤ J), QuotientAddGroup.map _ _ (AddMonoidHom.id _) (by simpa) (f H) = f J) :
+    ∃ x : ZHat, ∀ H, toZMod' H x = f H := by
+  apply proj_surj
+  intro H J h
+  apply Hf _ _ h.le
+
+theorem toZMod_surj (f : Π n : ℕ+, ZMod n) (Hf : ∀ (m n : ℕ+) (h : (m : ℕ) ∣ n), (f n).cast = f m) :
+    ∃ x : ZHat, ∀ n : ℕ+, toZMod n x = f n := by
+  revert f
+  rw [piIso.forall_congr_left]
+  intro f Hf
+  simp_rw [← Int.finiteIndexNormalSubgroupEquiv.forall_congr_right]
+  --apply toZMod_surj'
+
+  suffices ∃ x : ZHat, ∀ H, toZMod' H x = piIso f H by
+    sorry
+  apply toZMod_surj'
+  intro H J h
+  sorry
+
+
+
+
+
+#exit
 /-! ### Compatible sequences -/
 
 /-- The subgroup of sequences `f (n : ℕ+) : ZMod n` satisfying the following compatibility
