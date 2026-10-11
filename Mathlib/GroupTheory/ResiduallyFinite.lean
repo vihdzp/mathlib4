@@ -122,7 +122,8 @@ instance [ResiduallyFinite G] [ResiduallyFinite G'] : ResiduallyFinite (G × G')
 
 end Group
 
--- TODO: by the structure theorem, any abelian FG group is residually finite.
+-- TODO: by the fundamental theorem of finitely generated groups, any abelian FG group is
+-- isomorphic to ℤ^n × G for finite G, and thus residually finite.
 set_option backward.isDefEq.respectTransparency.types false in
 instance : AddGroup.ResiduallyFinite ℤ := by
   rw [AddGroup.residuallyFinite_iff_exists_finiteIndex]
