@@ -7,7 +7,7 @@ module
 
 public import Mathlib.GroupTheory.Index
 
-import Mathlib.GroupTheory.SpecificGroups.Cyclic.Basic
+import Mathlib.GroupTheory.SpecificGroups.Cyclic.Subgroup
 
 /-!
 # Finite-index normal subgroups
