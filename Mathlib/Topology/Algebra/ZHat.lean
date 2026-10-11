@@ -5,7 +5,9 @@ Authors: Violeta Hernández Palacios
 -/
 module
 
+public import Mathlib.Data.ZMod.Basic
 public import Mathlib.Topology.Algebra.Category.ProfiniteGrp.Completion
+public import Mathlib.Topology.Instances.Shrink
 public import Mathlib.Topology.Instances.ZMod
 public import Mathlib.Topology.Compactness.Compact
 
@@ -126,31 +128,45 @@ theorem lift_unique {G : Type*} [AddGroup G] [TopologicalSpace G] [IsTopological
   apply_fun (n • ·) at h
   simpa [← map_zsmul] using h
 
+theorem lift_unique' {G : Type*} [AddGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
+    [CompactSpace G] [TotallyDisconnectedSpace G] (f g : ZHat →ₜ+ G) (h : f 1 = g 1) (x) :
+    f x = g x := by
+  rw [lift_unique f g h]
+
+/-- The canonical mod $n$ map. -/
+noncomputable def toZMod (n : ℕ) [NeZero n] : ZHat →ₜ+ ZMod n :=
+  lift (Int.castAddHom (ZMod n))
+
+@[simp] theorem toZMod_intCast (n : ℕ) (m : ℤ) [NeZero n] : toZMod n m = m := by simp [toZMod]
+@[simp] theorem toZMod_natCast (n m : ℕ) [NeZero n] : toZMod n m = m := by simp [toZMod]
+@[simp] theorem toZMod_one (n : ℕ) [NeZero n] : toZMod n 1 = 1 := by simp [toZMod]
+
+theorem cast_toZMod (x : ZHat) {m n : ℕ} (h : m ∣ n) [NeZero n] :
+    haveI : NeZero m := ⟨by rintro rfl; exact NeZero.ne _ <| zero_dvd_iff.1 h⟩
+    (x.toZMod n).cast = x.toZMod m := by
+  generalize_proofs
+  let f : ZMod n →ₜ+ ZMod m := { __ := ZMod.castHom h _ }
+  apply lift_unique' (f.comp (toZMod n)) (toZMod m)
+  change ZMod.castHom h (ZMod m) (toZMod n 1) = _
+  rw [toZMod_one, toZMod_one, map_one]
+
 /-! ### Compatible sequences -/
 
-/-- The subring of sequences `f (n : ℕ+) : ZMod n` satisfying the following compatibility condition:
-if `m ∣ n`, then `f m` equals `f n` mod `m`.
+/-- The subgroup of sequences `f (n : ℕ+) : ZMod n` satisfying the following compatibility
+condition: if `m ∣ n`, then `f m` equals `f n` mod `m`.
 
-As an additive group, this is isomorphic to `ZHat`. -/
-def compatibleSeq : Subring (Π n : ℕ+, ZMod n) where
-  carrier := {f | ∀ (m n : ℕ+) (h : (m : ℕ) ∣ n), ZMod.castHom h (ZMod m) (f n) = f m }
+We prove that this is isomorphic to `ZHat`. -/
+def compatibleSeq : AddSubgroup (Π n : ℕ+, ZMod n) where
+  carrier := {f | ∀ (m n : ℕ+) (h : (m : ℕ) ∣ n), (f n).cast = f m }
   zero_mem' := by simp
   neg_mem' := fun {x} hx => by
-    simp only [ZMod.castHom_apply, Set.mem_ofPred_eq, Pi.neg_apply] at *
+    simp only [Set.mem_ofPred_eq, Pi.neg_apply] at *
     intro m n h
     rw [ZMod.cast_neg h, hx _ _ h, neg_inj]
   add_mem' := fun {a b} ha hb => by
-    simp only [ZMod.castHom_apply, Set.mem_ofPred_eq, Pi.add_apply] at *
+    simp only [Set.mem_ofPred_eq, Pi.add_apply] at *
     intro m n h
     rw [ZMod.cast_add h, ha _ _ h, hb _ _ h]
-  one_mem' := by
-    simp only [ZMod.castHom_apply, Set.mem_ofPred_eq, Pi.one_apply]
-    intro m n h
-    rw [ZMod.cast_one h]
-  mul_mem' := fun {a b} ha hb => by
-    simp only [ZMod.castHom_apply, Set.mem_ofPred_eq, Pi.mul_apply] at *
-    intro m n h
-    rw [ZMod.cast_mul h, ha _ _ h, hb _ _ h]
 
 instance : CompactSpace compatibleSeq := by
   constructor
@@ -160,11 +176,17 @@ instance : CompactSpace compatibleSeq := by
 
 instance : TotallyDisconnectedSpace compatibleSeq := inferInstance
 
-private def piIso :
+private noncomputable def piIso :
     (Π n : ℕ+, ZMod n) ≃+ Π H : FiniteIndexNormalAddSubgroup ℤ, ℤ ⧸ H.toAddSubgroup :=
-  (AddEquiv.piCongrRight (fun n : ℕ+ ↦ Int.quotientZMultiplesNatEquivZMod n)).symm.trans sorry
+  (AddEquiv.piCongrRight (fun n : ℕ+ ↦ Int.quotientZMultiplesNatEquivZMod n)).symm.trans <|
+    AddEquiv.piCongrLeft (fun H ↦ ℤ ⧸ H.toAddSubgroup) Int.finiteIndexNormalSubgroupEquiv.symm
 
-private def compatibleSeqIso' : ZHat ≃+ compatibleSeq :=
-  sorry
+private noncomputable def compatibleSeqIso' : ZHat ≃+ compatibleSeq :=
+  let S : AddSubgroup (Π H : FiniteIndexNormalAddSubgroup ℤ, ℤ ⧸ H.toAddSubgroup) :=
+    ProfiniteAddGrp.limitConePtAux (diagram (.mk ℤ))
+  (AddEquiv.addSubgroupMap piIso.symm S).trans <| AddEquiv.addSubgroupCongr <| by
+    ext
+    simp [piIso]
+    sorry
 
 end ZHat
