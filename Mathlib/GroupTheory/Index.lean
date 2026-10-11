@@ -6,8 +6,8 @@ Authors: Thomas Browning
 module
 
 public import Mathlib.Algebra.BigOperators.GroupWithZero.Finset
-public import Mathlib.Algebra.GroupWithZero.Subgroup
 public import Mathlib.Algebra.Group.Subgroup.Finite
+public import Mathlib.Algebra.GroupWithZero.Subgroup
 public import Mathlib.GroupTheory.Coset.Card
 public import Mathlib.GroupTheory.GroupAction.Quotient
 public import Mathlib.GroupTheory.QuotientGroup.Basic
@@ -691,8 +691,14 @@ variable (H K) in
 @[to_additive] class IsFiniteRelIndex : Prop where
   protected relIndex_ne_zero : H.relIndex K ≠ 0
 
+@[to_additive] theorem index_pos [H.FiniteIndex] : 0 < H.index :=
+  FiniteIndex.index_ne_zero.pos
+
 @[to_additive] lemma relIndex_ne_zero [H.IsFiniteRelIndex K] : H.relIndex K ≠ 0 :=
   IsFiniteRelIndex.relIndex_ne_zero
+
+@[to_additive] lemma relIndex_pos [H.IsFiniteRelIndex K] : 0 < H.relIndex K :=
+  relIndex_ne_zero.pos
 
 @[to_additive]
 instance IsFiniteRelIndex.to_finiteIndex_subgroupOf [H.IsFiniteRelIndex K] :

@@ -5,8 +5,8 @@ Authors: Chris Hughes
 -/
 module
 
-public import Mathlib.Algebra.Group.Subgroup.Map
 public import Mathlib.Algebra.Group.Int.Defs
+public import Mathlib.Algebra.Group.Subgroup.Map
 
 import Mathlib.Algebra.Divisibility.Basic
 
@@ -127,8 +127,13 @@ alias ⟨_, zpowers_le_of_mem⟩ := zpowers_le
 theorem zpowers_eq_bot {g : G} : zpowers g = ⊥ ↔ g = 1 := by rw [eq_bot_iff, zpowers_le, mem_bot]
 
 @[to_additive]
-theorem zpowers_ne_bot : zpowers g ≠ ⊥ ↔ g ≠ 1 :=
-  zpowers_eq_bot.not
+theorem zpowers_ne_bot : zpowers g ≠ ⊥ ↔ g ≠ 1 := zpowers_eq_bot.not
+
+@[to_additive (attr := simp)]
+theorem bot_eq_zpowers {g : G} : ⊥ = zpowers g ↔ 1 = g := by rw [eq_comm, zpowers_eq_bot, eq_comm]
+
+@[to_additive]
+theorem bot_ne_zpowers : ⊥ ≠ zpowers g ↔ 1 ≠ g := bot_eq_zpowers.not
 
 @[to_additive (attr := simp)]
 theorem bot_eq_zpowers {g : G} : ⊥ = zpowers g ↔ 1 = g := by rw [eq_comm, zpowers_eq_bot, eq_comm]
