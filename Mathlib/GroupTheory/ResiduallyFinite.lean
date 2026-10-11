@@ -122,12 +122,15 @@ instance [ResiduallyFinite G] [ResiduallyFinite G'] : ResiduallyFinite (G × G')
 
 end Group
 
+-- TODO: by the structure theorem, any abelian FG group is residually finite.
+set_option backward.isDefEq.respectTransparency.types false in
 instance : AddGroup.ResiduallyFinite ℤ := by
   rw [AddGroup.residuallyFinite_iff_exists_finiteIndex]
   intro g hg
-  refine ⟨AddSubgroup.zmultiples (|g| + 1), ?_, ?_⟩
-  · rw [AddSubgroup.finiteIndex_iff, Int.index_zmultiples]
-    grind
-  · rw [Int.mem_zmultiples_iff]
-    intro hg'
-    simpa using Int.le_abs_of_dvd hg hg'
+  refine ⟨Int.finiteIndexNormalSubgroupEquiv.symm ⟨g.natAbs + 1, ?_⟩, ?_, ?_⟩
+  · exact Nat.add_one_pos _
+  · infer_instance
+  · simp_rw [Int.finiteIndexNormalSubgroupEquiv_symm_apply]
+    rw [PNat.mk_coe, Nat.cast_add_one, Int.mem_zmultiples_iff, ← Int.dvd_natAbs]
+    refine fun h ↦ (Int.le_of_dvd ?_ h).not_gt (lt_add_one _)
+    simpa
