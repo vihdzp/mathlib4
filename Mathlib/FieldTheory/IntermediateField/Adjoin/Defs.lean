@@ -35,7 +35,6 @@ def adjoin : IntermediateField F E :=
   { Subfield.closure (Set.range (algebraMap F E) ∪ S) with
     algebraMap_mem' := fun x => Subfield.subset_closure (Or.inl (Set.mem_range_self x)) }
 
-@[simp]
 theorem adjoin_toSubfield :
     (adjoin F S).toSubfield = Subfield.closure (Set.range (algebraMap F E) ∪ S) := rfl
 
@@ -56,6 +55,10 @@ theorem adjoin_le_iff {S : Set E} {T : IntermediateField F E} : adjoin F S ≤ T
   ⟨fun H => le_trans (le_trans Set.subset_union_right Subfield.subset_closure) H, fun H =>
     (@Subfield.closure_le E _ (Set.range (algebraMap F E) ∪ S) T.toSubfield).mpr
       (Set.union_subset (IntermediateField.set_range_subset T) H)⟩
+
+theorem adjoin_toSubfield_le_iff {S : Set E} {T : Subfield E} :
+    (adjoin F S).toSubfield ≤ T ↔ (∀ x : F, algebraMap F E x ∈ T) ∧ S ⊆ T := by
+  simp [adjoin_toSubfield, Set.range_subset_iff]
 
 theorem gc : GaloisConnection (adjoin F : Set E → IntermediateField F E)
     (fun (x : IntermediateField F E) => (x : Set E)) := fun _ _ =>
@@ -366,7 +369,7 @@ theorem adjoin_union {S T : Set E} : adjoin F (S ∪ T) = adjoin F S ⊔ adjoin 
 /-- If `K` is a field with `F ⊆ K` and `S ⊆ K` then `adjoin F S ≤ K`. -/
 theorem adjoin_le_subfield {K : Subfield E} (HF : Set.range (algebraMap F E) ⊆ K) (HS : S ⊆ K) :
     (adjoin F S).toSubfield ≤ K := by
-  simpa using ⟨HF, HS⟩
+  simpa [adjoin_toSubfield] using ⟨HF, HS⟩
 
 theorem adjoin_subset_adjoin_iff {F' : Type*} [Field F'] [Algebra F' E] {S S' : Set E} :
     (adjoin F S : Set E) ⊆ adjoin F' S' ↔
@@ -475,7 +478,7 @@ theorem restrictScalars_adjoin_of_algEquiv
     (adjoin L S).restrictScalars F = (adjoin L' S).restrictScalars F := by
   apply_fun toSubfield using (fun K K' h ↦ by
     ext x; change x ∈ K.toSubfield ↔ x ∈ K'.toSubfield; rw [h])
-  simp [hi]
+  simp [hi, adjoin_toSubfield]
 
 @[elab_as_elim]
 theorem adjoin_induction {s : Set E} {motive : ∀ x ∈ adjoin F s, Prop}
@@ -680,7 +683,7 @@ theorem fg_iSup {ι : Sort*} [Finite ι] {S : ι → IntermediateField F E} (h :
 subfield. -/
 theorem _root_.Field.fg_iff_fg_top_bot :
     Field.FG F ↔ (⊤ : IntermediateField (⊥ : Subfield F) F).FG := by
-  simp [Field.fg_iff, fg_def, Set.exists_finite_iff_finset,
+  simp [Field.fg_iff, fg_def, Set.exists_finite_iff_finset, adjoin_toSubfield,
     ← toSubfield_inj, Subfield.algebraMap_ofSubfield, Subfield.closure_union]
 
 theorem induction_on_adjoin_finset (S : Finset E)
