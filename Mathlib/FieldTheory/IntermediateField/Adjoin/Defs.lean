@@ -56,9 +56,10 @@ theorem adjoin_le_iff {S : Set E} {T : IntermediateField F E} : adjoin F S ≤ T
     (@Subfield.closure_le E _ (Set.range (algebraMap F E) ∪ S) T.toSubfield).mpr
       (Set.union_subset (IntermediateField.set_range_subset T) H)⟩
 
+@[simp]
 theorem adjoin_toSubfield_le_iff {S : Set E} {T : Subfield E} :
-    (adjoin F S).toSubfield ≤ T ↔ (∀ x : F, algebraMap F E x ∈ T) ∧ S ⊆ T := by
-  simp [adjoin_toSubfield, Set.range_subset_iff]
+    (adjoin F S).toSubfield ≤ T ↔ (Set.range (algebraMap F E) ⊆ T) ∧ S ⊆ T := by
+  simp [adjoin_toSubfield]
 
 theorem gc : GaloisConnection (adjoin F : Set E → IntermediateField F E)
     (fun (x : IntermediateField F E) => (x : Set E)) := fun _ _ =>
@@ -369,7 +370,7 @@ theorem adjoin_union {S T : Set E} : adjoin F (S ∪ T) = adjoin F S ⊔ adjoin 
 /-- If `K` is a field with `F ⊆ K` and `S ⊆ K` then `adjoin F S ≤ K`. -/
 theorem adjoin_le_subfield {K : Subfield E} (HF : Set.range (algebraMap F E) ⊆ K) (HS : S ⊆ K) :
     (adjoin F S).toSubfield ≤ K := by
-  simpa [adjoin_toSubfield] using ⟨HF, HS⟩
+  simpa using ⟨HF, HS⟩ 
 
 theorem adjoin_subset_adjoin_iff {F' : Type*} [Field F'] [Algebra F' E] {S S' : Set E} :
     (adjoin F S : Set E) ⊆ adjoin F' S' ↔
